@@ -6,6 +6,10 @@
 
 #include "gtest/gtest.h"
 
+extern "C" {
+    #include "fileraw.c"
+}
+
 class TestFileRaw: public ::testing::Test{
 protected:
     virtual void SetUp(){
