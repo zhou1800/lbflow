@@ -4,4 +4,5 @@ enable_testing()
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/googletest/)
 
 # All tests
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/parallel/)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/io/)
