@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 2.8)
 project(LBFlow C CXX)
 SET(CMAKE_CXX_FLAGS "-std=c++11")
 
+# Parallel computing libraries
+find_package(MPI REQUIRED)
+include_directories(${MPI_CXX_INCLUDE_PATH})
+
 # Headers
 include_directories(${PROJECT_SOURCE_DIR}/include/)
 
