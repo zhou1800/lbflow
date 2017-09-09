@@ -1,7 +1,7 @@
 /*! \file mpifunc.c
  * \author Yu Zhou
  */
- #include "parallel/mpifunc.h"
+ #include "mpifunc.h"
 
 int ID;         /*!< Local rank. */
 int MPI_SIZE;   /*!< Communication size. */

@@ -5,9 +5,10 @@
 #define TESTFILERAW_H
 
 #include "gtest/gtest.h"
+#include "../testcfg.h"
 
 extern "C" {
-    #include "fileraw.c"
+    #include "fileraw.h"
 }
 
 class TestFileRaw: public ::testing::Test{

@@ -2,6 +2,7 @@
  * \author Yu Zhou
  */
 #include "testfileraw.h"
+#include "testfilepar.h"
 
 int main(int argc, char *argv[])
 {

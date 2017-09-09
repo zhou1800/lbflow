@@ -8,7 +8,7 @@
 #include "gtest/gtest.h"
 
 extern "C" {
-    #include "mpifunc.c"
+    #include "mpifunc.h"
     extern int ID;
     extern int MPI_SIZE;
 }
