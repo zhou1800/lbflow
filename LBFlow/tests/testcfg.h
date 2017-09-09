@@ -3,4 +3,4 @@
  * \author Yu Zhou
  */
 
-#define SOURCE_DIR "C:/Users/zhouy/OneDrive/Develop/lbflow/LBFlow"
+#define SOURCE_DIR "C:/Users/zhouy/OneDrive/Develop/lbflow/LBFlow/../"

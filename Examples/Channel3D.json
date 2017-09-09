@@ -1,0 +1,8 @@
+{
+    "grid" : {
+        "gridFile":     "Channel3D-24x24y100z.raw";
+        "dimension":    ["24", "24", "100"];
+        "directions":   "19";
+        "latticeLen":   "1e-6";
+    }
+}
