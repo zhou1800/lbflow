@@ -3,4 +3,4 @@
  * \author Yu Zhou (zhouyu@live.com)
  */
 
-#define SOURCE_DIR "C:/Users/zhouy/OneDrive/Develop/lbflow/LBFlow"
+#define SOURCE_DIR "C:/Users/zhouy/OneDrive/Develop/lbflow/LBFlow/../"

@@ -64,6 +64,10 @@
 
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define DECIMAL float       /*!< Precision of the decimal value. */
 
 /*!
@@ -87,5 +91,9 @@ enum PROGRAM_STATUS{
  */
 #define VALIDATE(expr, ...)\
     if (!(expr)) { fprintf(stderr, __VA_ARGS__); return ERROR; }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // CONFIG_H
