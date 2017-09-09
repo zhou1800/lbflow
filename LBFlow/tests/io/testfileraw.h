@@ -6,9 +6,9 @@
 
 #include "gtest/gtest.h"
 #include "../testcfg.h"
+#include "fileraw.h"
 
 extern "C" {
-    #include "fileraw.h"
 }
 
 class TestFileRaw: public ::testing::Test{

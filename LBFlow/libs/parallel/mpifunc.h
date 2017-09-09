@@ -13,6 +13,10 @@
 #include <stdint.h>
 #include "mpi.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*!
  * \brief MPIInit initailize the MPI execution envoriment.
  * \param argc - number of arguments passed to the program.
@@ -20,5 +24,9 @@
  * \return MPI error value.
  */
 int MPIInit(int *argc, char ***argv);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // MPIFUNC_H
