@@ -7,9 +7,9 @@
 
 #include "gtest/gtest.h"
 #include "../testcfg.h"
+#include "filepar.h"
 
 extern "C" {
-    #include "filepar.h"
 }
 
 #endif // TESTFILEPAR_H

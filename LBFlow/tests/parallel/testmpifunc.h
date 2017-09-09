@@ -6,9 +6,9 @@
 #define TESTMPIFUNC_H
 
 #include "gtest/gtest.h"
+#include "mpifunc.h"
 
 extern "C" {
-    #include "mpifunc.h"
     extern int ID;
     extern int MPI_SIZE;
 }
