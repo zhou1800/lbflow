@@ -8,16 +8,18 @@
 #include "gtest/gtest.h"
 #include "../testcfg.h"
 #include "filepar.h"
+#include "mpifunc.h"
 
 extern "C" {
+    extern int ID;
     int LoadFile(const char* filePathName, char* content, int maxFileLength);
+    int SyncString(char str[], int mId);
+    int ParseParameterString(const char str[], PARAMETER* par);
 }
 
 struct PARAMETER_FILE{
     const char* parameterFile;
     const char* content;
-    int nLines;
-    const char* lines[MAX_LINE_LEN];
     PARAMETER par;
 };
 
@@ -32,37 +34,75 @@ protected:
 
 PARAMETER_FILE Grid2D{
     SOURCE_DIR"Examples/Grid2D.json",     // parameter file
-    "",
-    26,                                 // nlines
-    // lines
-    {
-        "gridFile     \"Grid20x12y.raw\";",
-        "dimension    20 12;",
-        "directions   9;",
-        "latticeLen   1e-6;",
-        "startTime       0;",
-        "endTime         1000;",
-        "writeInterval   100;",
-        "reportInterval  10;",
-        "restartInterval 500;",
-        "stopError       0.000001;",
-        "outPath         \"../../../../../../../DRLab-R/Grid20x12y\";",
-        "reportDir       1;",
-        "reportSlice     1 98;",
-        "fluidModel          \"scsp\";",
-        "equilModel          \"SRT\";",
-        "rexlationTime       1;",
-        "latticeSpeed        1;",
-        "density             1;",
-        "0           \"VD\"    \"N/A\"       \"N/A\"   \"0\"",
-        "50          \"VB\"    \"0.00001\"   \"1\"     \"0\"",
-        "75          \"GV\"    \"0.001\"     \"1\"     \"N/A\"",
-        "100         \"VD\"    \"N/A\"       \"N/A\"   \"1\"",
-        "150         \"VB\"    \"0.00001\"   \"1\"     \"1\"",
-        "200         \"PB\"    \"1\"         \"2\"     \"0\"",
-        "250         \"SD\"    \"90\"        \"N/A\"   \"N/A\"",
-        "255         \"SD\"    \"160\"       \"N/A\"   \"N/A\"",
-    },
+    "{\n"
+    "    \"grid\" : {\n"
+    "        \"gridFile\":     \"Grid20x12y.raw\",\n"
+    "        \"gridSize\":     [\"20\", \"12\"],\n"
+    "        \"nDirection\":   \"9\",\n"
+    "        \"latticeLen\":   \"1e-6\"\n"
+    "    },\n"
+    "    \"control\" : {\n"
+    "        \"startTime\":        \"0\",\n"
+    "        \"endTime\":          \"1000\",\n"
+    "        \"writeInterval\":    \"100\",\n"
+    "        \"reportInterval\":   \"10\",\n"
+    "        \"restartInterval\":  \"500\",\n"
+    "        \"maxError\":         \"0.000001\"\n"
+    "    },\n"
+    "    \"output\" : {\n"
+    "        \"outPath\":      \"./LBFlow-Result/Grid20x12y\",\n"
+    "        \"reportDir\":    \"1\",\n"
+    "        \"reportSlice\":  [\"1\", \"98\"]\n"
+    "    },\n"
+    "    \"model\" : {\n"
+    "        \"fluidModel\":       \"SCSP\",\n"
+    "        \"equilModel\":       \"SRT\",\n"
+    "        \"rexlationTime\":    \"1\",\n"
+    "        \"latticeSpeed\":     \"1\",\n"
+    "        \"density\":          \"1\"\n"
+    "    },\n"
+    "    \"index\" : {\n"
+    "        \"0\" : {\n"
+    "            \"type\" :  \"VD\",\n"
+    "            \"phase\" : \"0\"\n"
+    "        },\n"
+    "        \"50\" : {\n"
+    "            \"type\" :  \"VB\",\n"
+    "            \"value\" : \"0.00001\",\n"
+    "            \"dir\" :   \"1\",\n"
+    "            \"phase\" : \"0\"\n"
+    "        },\n"
+    "        \"75\" : {\n"
+    "            \"type\" :  \"GV\",\n"
+    "            \"value\" : \"0.001\",\n"
+    "            \"dir\" :   \"1\",\n"
+    "        },\n"
+    "        \"100\" : {\n"
+    "            \"type\" :  \"VD\",\n"
+    "            \"phase\" : \"1\"\n"
+    "        },\n"
+    "        \"150\" : {\n"
+    "            \"type\" :  \"VB\",\n"
+    "            \"value\" : \"0.00001\",\n"
+    "            \"dir\" :   \"1\",\n"
+    "            \"phase\" : \"1\"\n"
+    "        },\n"
+    "        \"200\" : {\n"
+    "            \"type\" :  \"PB\",\n"
+    "            \"value\" : \"1\",\n"
+    "            \"dir\" :   \"2\",\n"
+    "            \"phase\" : \"0\"\n"
+    "        },\n"
+    "        \"250\" : {\n"
+    "            \"type\" :  \"SD\",\n"
+    "            \"value\" : \"90\",\n"
+    "        },\n"
+    "        \"255\" : {\n"
+    "            \"type\" :  \"SD\",\n"
+    "            \"value\" : \"160\",\n"
+    "        }\n"
+    "    }\n"
+    "}\n",
     // parameters
     {
         "Grid20x12y.raw",
@@ -121,51 +161,77 @@ PARAMETER_FILE Channel3D{
     SOURCE_DIR"Examples/Channel3D.json",  // parameter file
     "{\n"
     "    \"grid\" : {\n"
-    "        \"gridFile\":     \"Channel3D-24x24y100z.raw\";\n"
-    "        \"dimension\":    [\"24\", \"24\", \"100\"];\n"
-    "        \"directions\":   \"19\";\n"
-    "        \"latticeLen\":   \"1e-6\";\n"
+    "        \"gridFile\":     \"Channel3D-24x24y100z.raw\",\n"
+    "        \"dimension\":    [\"24\", \"24\", \"100\"],\n"
+    "        \"directions\":   \"19\",\n"
+    "        \"latticeLen\":   \"1e-6\"\n"
+    "    },\n"
+    "    \"control\" : {\n"
+    "        \"startTime\":        \"0\",\n"
+    "        \"endTime\":          \"1000\",\n"
+    "        \"writeInterval\":    \"100\",\n"
+    "        \"reportInterval\":   \"10\",\n"
+    "        \"restartInterval\":  \"500\",\n"
+    "        \"maxError\":         \"0.000001\"\n"
+    "    },\n"
+    "    \"output\" : {\n"
+    "        \"outPath\":      \"./LBFlow-Result/Channel3D-24x24y100z\",\n"
+    "        \"reportDir\":    \"1\",\n"
+    "        \"reportSlice\":  [\"1\", \"98\"]\n"
+    "    },\n"
+    "    \"model\" : {\n"
+    "        \"fluidModel\":           \"COLOR\",\n"
+    "        \"equilModel\":           \"MRT\",\n"
+    "        \"rexlationTime\":        [\"0.57\", \"1.215416667\"],\n"
+    "        \"latticeSpeed\":         \"1\",\n"
+    "        \"density\":              \"1\",\n"
+    "        \"alpha0\":               \"0.33333333333333333333\",\n"
+    "        \"density\":              [\"1\", \"0.831683168\"],\n"
+    "        \"interfacialTension\":   \"0.085920139\",\n"
+    "        \"interfaceThickness\":   \"0.7\"\n"
+    "    },\n"
+    "    \"index\" : {\n"
+    "        \"0\" : {\n"
+    "            \"type\":  \"VD\",\n"
+    "            \"phase\": \"0\"\n"
+    "        },\n"
+    "        \"50\" : {\n"
+    "            \"type\":  \"VB\",\n"
+    "            \"value\": \"0.00001\",\n"
+    "            \"dir\":   \"1\",\n"
+    "            \"phase\": \"0\"\n"
+    "        },\n"
+    "        \"75\" : {\n"
+    "            \"type\":  \"GV\",\n"
+    "            \"value\": \"0.001\",\n"
+    "            \"dir\":   \"1\",\n"
+    "        },\n"
+    "        \"100\" : {\n"
+    "            \"type\":  \"VD\",\n"
+    "            \"phase\": \"1\"\n"
+    "        },\n"
+    "        \"150\" : {\n"
+    "            \"type\":  \"VB\",\n"
+    "            \"value\": \"0.00001\",\n"
+    "            \"dir\":   \"1\",\n"
+    "            \"phase\": \"1\"\n"
+    "        },\n"
+    "        \"200\" : {\n"
+    "            \"type\":  \"PB\",\n"
+    "            \"value\": \"1\",\n"
+    "            \"dir\":   \"2\",\n"
+    "            \"phase\": \"0\"\n"
+    "        },\n"
+    "        \"250\" : {\n"
+    "            \"type\":  \"SD\",\n"
+    "            \"value\": \"90\",\n"
+    "        },\n"
+    "        \"255\" : {\n"
+    "            \"type\":  \"SD\",\n"
+    "            \"value\": \"160\",\n"
+    "        }\n"
     "    }\n"
-    "}",
-    34,                                 // nlines
-    // lines
-    {
-        "gridFile     \"Channel3D-24x24y100z.raw\";",
-        "dimension    24 24 100;",
-        "directions   19;",
-        "latticeLen   1e-6;",
-        "startTime       0;",
-        "endTime         1000;",
-        "writeInterval   100;",
-        "reportInterval  10;",
-        "restartInterval 500;",
-        "stopError       0.000001;",
-        "outPath         \"../../../../../../../DRLab-R/Bera-122x102y102z\";",
-        "reportDir       1;",
-        "reportSlice     1 98;",
-        "fluidModel          \"scsp\";",
-        "equilModel          \"SRT\";",
-        "rexlationTime       1;",
-        "latticeSpeed        1;",
-        "density             1;",
-        "fluidModel          \"COLOR\";",
-        "equilModel          \"MRT\";",
-        "rexlationTime       0.57    1.215416667;",
-        "latticeSpeed        1;",
-        "alpha0              0.33333333333333333333;",
-        "density             1       0.831683168;",
-        "surfaceTension      0.085920139;",
-        "interfaceThickness  0.7;",
-        "0           \"VD\"    \"N/A\"       \"N/A\"   \"0\"",
-        "50          \"VB\"    \"0.00001\"   \"1\"     \"0\"",
-        "75          \"GV\"    \"0.001\"     \"1\"     \"N/A\"",
-        "100         \"VD\"    \"N/A\"       \"N/A\"   \"1\"",
-        "150         \"VB\"    \"0.00001\"   \"1\"     \"1\"",
-        "200         \"PB\"    \"1\"         \"2\"     \"0\"",
-        "250         \"SD\"    \"90\"        \"N/A\"   \"N/A\"",
-        "255         \"SD\"    \"160\"       \"N/A\"   \"N/A\"",
-    },
-    // parameters
+    "}\n",
     {
         "Channel3D-24x24y100z.raw",
         {24, 24, 100},
@@ -226,21 +292,39 @@ INSTANTIATE_TEST_CASE_P(2Dand3D, TestFilePar,
 
 TEST_P(TestFilePar, load_file){
     char fileContent[MAX_FILE_LEN];
-    ASSERT_NE(LoadFile(GetParam().parameterFile, fileContent, MAX_FILE_LEN), ERROR);
+    ASSERT_NE(LoadFile(GetParam().parameterFile, fileContent, MAX_FILE_LEN),
+              ERROR);
     EXPECT_STREQ(fileContent, GetParam().content);
 }
 
-TEST(DeathTestFilePar, load_file){
+TEST_P(TestFilePar, sync_file_content){
     char fileContent[MAX_FILE_LEN];
-    EXPECT_DEATH({LoadFile("non existing file", fileContent, MAX_FILE_LEN); exit(-1);},
-                 "Can not open parameter file");
-    EXPECT_DEATH({LoadFile(Channel3D.parameterFile, fileContent, 1); exit(-1);},
-                 "File size exceeds maximum allowed size");
+    const char * randomText = "Here are some contents in the file";
+    if (ID == 0)
+        strcpy(fileContent, randomText);
+    ASSERT_NE(SyncString(fileContent, 0), ERROR);
+    EXPECT_STREQ(fileContent, randomText);
+}
+
+TEST_P(TestFilePar, parse_parameter_string_content){
+    PARAMETER par;
+    ASSERT_NE(ParseParameterString(GetParam().content, &par), ERROR);
 }
 
 TEST_P(TestFilePar, load_parameter){
     PARAMETER par;
-    ASSERT_EQ(LoadParameter(GetParam().parameterFile, &par), NOERR);
+    ASSERT_NE(LoadParameter(GetParam().parameterFile, &par), ERROR);
+}
+
+TEST(DeathTestFilePar, load_parameter){
+    PARAMETER par;
+    char* veryLongFile = SOURCE_DIR"Examples/Channel3D-24x24y100z.raw";
+    if (ID == 0) {
+        EXPECT_DEATH(LoadParameter("non existing file", &par),
+                     "Can not open parameter file");
+        EXPECT_DEATH(LoadParameter(veryLongFile, &par),
+                     "File size exceeds maximum allowed size");
+    }
 }
 
 #endif // TESTFILEPAR_H

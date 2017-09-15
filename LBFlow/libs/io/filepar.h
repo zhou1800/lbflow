@@ -50,7 +50,7 @@ typedef enum {
 } GRID_TYPE;
 
 /*!
- * \brief The GRID_DEF struct is the defination of grid.
+ * \brief The GRID_IDX struct is the index of grid.
  *
  * This struct stores the attributes corresponding to each grayscale value,
  *  which is defined in the parameter file.
@@ -62,7 +62,7 @@ typedef struct {
     DECIMAL value;          /*!< Value of the force. */
     int dir;                /*!< Force direction. */
     int phase;              /*!< Phase index. */
-} GRID_DEF;
+} GRID_IDX;
 
 /*!
  * \brief The PARAMETER struct is an image of the parameter file.
@@ -93,7 +93,7 @@ typedef struct{
     DECIMAL density[BIN_PHASE];      /*!< Fluid density. */
     DECIMAL interfacialTension;      /*!< Interfacial tension \f $\sigma \f$. */
     DECIMAL interfaceThickness;      /*!< Interface thickness. */
-    GRID_DEF gridDef[MAX_GRAY];      /*!< Grid defination (grayscale indexed).*/
+    GRID_IDX gridIdx[MAX_GRAY];      /*!< Grid indexed.*/
 } PARAMETER;
 
 /*!
