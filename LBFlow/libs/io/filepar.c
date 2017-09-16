@@ -37,6 +37,14 @@ PARAMETER DEFAULT_PARAMETER = {
     {{0,0,0,0}}
 };
 
+/*!
+ * \brief LoadFile load a file on disk into string.
+ * \param filePathName[in] - full pathe name of the file.
+ * \param content[out] - file content.
+ * \param maxFileLength[in] - file length must not exceed this number.
+ * \return the number of characters read.
+ * \return ERROR on fail to open file or incomplete file reading.
+ */
 int LoadFile(const char* filePathName, char* content, int maxFileLength)
 {
     FILE *fp = fopen(filePathName, "r");
@@ -51,6 +59,12 @@ int LoadFile(const char* filePathName, char* content, int maxFileLength)
     return fileLen;
 }
 
+/*!
+ * \brief SyncString syncorize a string between all processors.
+ * \param str[in,out] - the string to be syncorized.
+ * \param mId[in] - master(source) processor id.
+ * \return ERROR / NOERR
+ */
 int SyncString(char str[], int mId)
 {
     int len;
@@ -62,11 +76,13 @@ int SyncString(char str[], int mId)
     return NOERR;
 }
 
-void InitParameter(PARAMETER* par)
-{
-
-}
-int ParseParameterGrid(cJSON* grid, PARAMETER* par)
+/*!
+ * \brief ParseParameter* parse paramter in the '*' section.
+ * \param grid[in] - the '*' section in JSON format.
+ * \param par[out] - parse to the parameter file.
+ * \return ERROR / NOERR
+ */
+int ParseParameterGrid(const cJSON* grid, PARAMETER* par)
 {
     VALIDATE(grid, "Parameter error (grid).\n");
 
@@ -95,7 +111,10 @@ int ParseParameterGrid(cJSON* grid, PARAMETER* par)
     return NOERR;
 }
 
-int ParseParameterControl(cJSON* control, PARAMETER* par)
+/*!
+ * \see ParseParameterGrid()
+ */
+int ParseParameterControl(const cJSON* control, PARAMETER* par)
 {
     VALIDATE(control, "Parameter error (control)\n");
 
@@ -126,7 +145,10 @@ int ParseParameterControl(cJSON* control, PARAMETER* par)
     return NOERR;
 }
 
-int ParseParameterOutput(cJSON* output, PARAMETER* par)
+/*!
+ * \see ParseParameterGrid()
+ */
+int ParseParameterOutput(const cJSON* output, PARAMETER* par)
 {
     VALIDATE(output, "Parameter error (output)\n");
 
@@ -153,6 +175,9 @@ int ParseParameterOutput(cJSON* output, PARAMETER* par)
     return NOERR;
 }
 
+/*!
+ * \see ParseParameterGrid()
+ */
 int ParseParameterModel(cJSON* model, PARAMETER* par)
 {
     VALIDATE(model, "Parameter error (model)\n");
@@ -224,6 +249,9 @@ int ParseParameterModel(cJSON* model, PARAMETER* par)
     return NOERR;
 }
 
+/*!
+ * \see ParseParameterGrid()
+ */
 int ParseParameterIndex(cJSON* index, PARAMETER* par)
 {
     VALIDATE(index, "Parameter error (index)\n");
@@ -291,6 +319,12 @@ int ParseParameterIndex(cJSON* index, PARAMETER* par)
     return NOERR;
 }
 
+/*!
+ * \brief ParseParameter parse all the parameters in given string.
+ * \param str[in] - parameter source string in JSON format.
+ * \param par[out] - parse to the parameter file.
+ * \return ERROR / NOERR
+ */
 int ParseParameter(const char str[], PARAMETER* par)
 {
     cJSON* root = cJSON_Parse(str);

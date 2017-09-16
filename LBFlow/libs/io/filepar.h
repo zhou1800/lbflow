@@ -100,8 +100,7 @@ typedef struct{
  * Store the parsed values in global variables.
  * \param[in] filePathName - parameter file path name.
  * \param[out] par - The loaded parameter structure.
- * \return NOERR on success.
- * \return ERROR on failure.
+ * \return NOERR on success. exit(ERROR) on failure.
  */
 int LoadParameter(const char *filePathName, PARAMETER* par);
 
