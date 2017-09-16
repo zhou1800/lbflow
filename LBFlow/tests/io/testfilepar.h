@@ -15,7 +15,7 @@ extern "C" {
     extern PARAMETER DEFAULT_PARAMETER;
     int LoadFile(const char* filePathName, char* content, int maxFileLength);
     int SyncString(char str[], int mId);
-    int ParseParameterString(const char str[], PARAMETER* par);
+    int ParseParameter(const char str[], PARAMETER* par);
 }
 
 struct PARAMETER_FILE{
@@ -358,22 +358,22 @@ TEST_P(TestFilePar, load_file){
 
 TEST_P(TestFilePar, sync_file_content){
     char fileContent[MAX_FILE_LEN];
-    const char * randomText = "Here are some contents in the file";
     if (ID == 0)
-        strcpy(fileContent, randomText);
+        strcpy(fileContent, GetParam().content);
     ASSERT_NE(SyncString(fileContent, 0), ERROR);
-    EXPECT_STREQ(fileContent, randomText);
+    EXPECT_STREQ(fileContent, GetParam().content);
 }
 
 TEST_P(TestFilePar, parse_parameter_string_content){
     PARAMETER par = DEFAULT_PARAMETER;
-    ASSERT_NE(ParseParameterString(GetParam().content, &par), ERROR);
+    ASSERT_NE(ParseParameter(GetParam().content, &par), ERROR);
     CompareParameter(par, GetParam().par);
 }
 
 TEST_P(TestFilePar, load_parameter){
-    PARAMETER par;
+    PARAMETER par = DEFAULT_PARAMETER;
     ASSERT_NE(LoadParameter(GetParam().parameterFile, &par), ERROR);
+    CompareParameter(par, GetParam().par);
 }
 
 TEST(DeathTestFilePar, load_parameter){

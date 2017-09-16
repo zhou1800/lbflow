@@ -66,6 +66,7 @@ typedef struct {
  *
  * \note (32bit, MinGW) DECIMAL = double, size = 6552; DECIMAL = float, size =
  *  4452.
+ * \note Always initialize with DEFAULT_PARAMETER.
  */
 typedef struct{
     char gridFile[MAX_STRING_LEN];  /*!< The gridFile. */
