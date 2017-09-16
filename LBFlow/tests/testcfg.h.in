@@ -3,4 +3,4 @@
  * \author Yu Zhou
  */
 
-#define SOURCE_DIR "@PROJECT_SOURCE_DIR@"
+#define SOURCE_DIR "@PROJECT_SOURCE_DIR@/../"

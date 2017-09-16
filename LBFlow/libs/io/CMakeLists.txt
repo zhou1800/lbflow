@@ -5,4 +5,5 @@ target_include_directories(libIO PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(libIO
     cJSON
+    libParallel
 )
