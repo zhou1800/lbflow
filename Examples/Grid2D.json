@@ -1,69 +1,84 @@
 {
-    "grid" : {
-        "gridFile":     "Grid20x12y.raw",
-        "gridSize":     ["20", "12"],
-        "nDirection":   "9",
-        "latticeLen":   "1e-6"
+  "grid": {
+    "gridFile": "Grid20x12y.raw",
+    "gridSize": [
+      20,
+      12
+    ],
+    "nDirection": 9,
+    "latticeLen": 1e-06
+  },
+  "control": {
+    "startTime": 0,
+    "endTime": 1000,
+    "writeIntvl": 100,
+    "rptIntvl": 10,
+    "rstIntvl": 500,
+    "maxError": 1e-06
+  },
+  "output": {
+    "outPath": "./LBFlow-Result/Grid20x12y",
+    "rptDir": 0
+  },
+  "model": {
+    "fluidModel": "SCSP",
+    "equilModel": "SRT",
+    "rlxTime": [
+      1
+    ],
+    "latticeSpd": 1,
+    "density": [
+      1
+    ]
+  },
+  "index": [
+    {
+      "idx": 0,
+      "type": "VD",
+      "phase": 0
     },
-    "control" : {
-        "startTime":        "0",
-        "endTime":          "1000",
-        "writeInterval":    "100",
-        "reportInterval":   "10",
-        "restartInterval":  "500",
-        "maxError":         "0.000001"
+    {
+      "idx": 50,
+      "type": "VB",
+      "value": 1e-05,
+      "dir": 1,
+      "phase": 0
     },
-    "output" : {
-        "outPath":      "./LBFlow-Result/Grid20x12y",
-        "reportDir":    "1",
-        "reportSlice":  ["1", "98"]
+    {
+      "idx": 75,
+      "type": "GV",
+      "value": 0.001,
+      "dir": 1,
+      "phase": 0
     },
-    "model" : {
-        "fluidModel":       "SCSP",
-        "equilModel":       "SRT",
-        "rexlationTime":    "1",
-        "latticeSpeed":     "1",
-        "density":          "1"
+    {
+      "idx": 100,
+      "type": "VD",
+      "phase": 1
     },
-    "index" : {
-        "0" : {
-            "type" :  "VD",
-            "phase" : "0"
-        },
-        "50" : {
-            "type" :  "VB",
-            "value" : "0.00001",
-            "dir" :   "1",
-            "phase" : "0"
-        },
-        "75" : {
-            "type" :  "GV",
-            "value" : "0.001",
-            "dir" :   "1",
-        },
-        "100" : {
-            "type" :  "VD",
-            "phase" : "1"
-        },
-        "150" : {
-            "type" :  "VB",
-            "value" : "0.00001",
-            "dir" :   "1",
-            "phase" : "1"
-        },
-        "200" : {
-            "type" :  "PB",
-            "value" : "1",
-            "dir" :   "2",
-            "phase" : "0"
-        },
-        "250" : {
-            "type" :  "SD",
-            "value" : "90",
-        },
-        "255" : {
-            "type" :  "SD",
-            "value" : "160",
-        }
+    {
+      "idx": 150,
+      "type": "VB",
+      "value": 1e-05,
+      "dir": 1,
+      "phase": 1
+    },
+    {
+      "idx": 200,
+      "type": "PB",
+      "value": 1,
+      "dir": 2,
+      "phase": 0
+    },
+    {
+      "idx": 250,
+      "type": "SD",
+      "value": 90
+    },
+    {
+      "idx": 255,
+      "type": "SD",
+      "value": 160
     }
+  ]
 }

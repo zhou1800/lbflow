@@ -23,7 +23,6 @@ enum PAR_FILE{
 typedef enum {
     SCSP,       /*!< Single phase single components model. */
     COLOR,      /*!< Binary color fluid model. */
-    SC          /*!< Pseudo model (shan-chen). */
 } FLUID_MODEL;
 
 /*! Equilibrium function. */
@@ -39,12 +38,12 @@ typedef enum {
  *  sum value of any type combination.
  */
 typedef enum {
-    NA  = 0x0,  /*!< Undefined. */
-    VD  = 0x1,  /*!< Void. */
-    GV  = 0x2,  /*!< Void with gravity force. */
-    PB  = 0x4,  /*!< Pressure boundary. */
-    VB  = 0x8,  /*!< Velocity boundary. */
-    SD  = 0x10, /*!< Solid. */
+    NA  = (0),       /*!< Undefined. */
+    VD  = (1 << 0),  /*!< Void. */
+    GV  = (1 << 1),  /*!< Void with gravity force. */
+    PB  = (1 << 2),  /*!< Pressure boundary. */
+    VB  = (1 << 3),  /*!< Velocity boundary. */
+    SD  = (1 << 4),  /*!< Solid. */
 } GRID_TYPE;
 
 /*!
@@ -69,29 +68,29 @@ typedef struct {
  *  4452.
  */
 typedef struct{
-    char gridFile[MAX_STRING_LEN];   /*!< The gridFile. */
-    int size[MAX_DIMENSION];         /*!< Grid side length. */
-    int nDimension;                  /*!< Number of dimensions. */
-    int nDirection;                  /*!< Number of discrete directions. */
-    DECIMAL latticeLen;              /*!< Length of a unit Lattice. */
-    int startTime;                   /*!< Start time. */
-    int endTime;                     /*!< End time. */
-    int writeInterval;               /*!< Interval for writing result file. */
-    int reportInterval;              /*!< Interval for report output. */
-    int restarInterval;              /*!< Interval for writing restart file. */
-    DECIMAL maxError;                /*!< Terminate condition. */
-    char outputPath[MAX_STRING_LEN]; /*!< Output file path name perfix. */
-    int reportDirection;             /*!< Direction of report. */
-    int reportSlice[NUMBER_OF_SLICE];/*!< Report slice range. */
-    FLUID_MODEL fluidModel;          /*!< Fluid model. */
-    EQUIL_MODEL equilModel;          /*!< Equilibrium function. */
-    DECIMAL rexlationTime[BIN_PHASE];/*!< Rexlation time \f$ \tau \f$ */
-    DECIMAL latticeSpeed;            /*!< Lattice speed. */
-    DECIMAL alpha0;                  /*!< Free parameter. */
-    DECIMAL density[BIN_PHASE];      /*!< Fluid density. */
-    DECIMAL interfacialTension;      /*!< Interfacial tension \f $\sigma \f$. */
-    DECIMAL interfaceThickness;      /*!< Interface thickness. */
-    GRID_IDX gridIdx[MAX_GRAY];      /*!< Grid indexed.*/
+    char gridFile[MAX_STRING_LEN];  /*!< The gridFile. */
+    int size[MAX_DIMENSION];        /*!< Grid side length. */
+    int nDimension;                 /*!< Number of dimensions. */
+    int nDirection;                 /*!< Number of discrete directions. */
+    DECIMAL latticeLen;             /*!< Length of a unit Lattice. */
+    int startTime;                  /*!< Start time. */
+    int endTime;                    /*!< End time. */
+    int writeIntvl;                 /*!< Interval for writing result file. */
+    int rptIntvl;                   /*!< Interval for report output. */
+    int rstIntvl;                   /*!< Interval for writing restart file. */
+    DECIMAL maxError;               /*!< Terminate condition. */
+    char outPath[MAX_STRING_LEN];   /*!< Output file path name perfix. */
+    int rptDir;                     /*!< Direction of report. */
+    int rptSlice[NUMBER_OF_SLICE];  /*!< Report slice range. */
+    FLUID_MODEL fluidModel;         /*!< Fluid model. */
+    EQUIL_MODEL equilModel;         /*!< Equilibrium function. */
+    DECIMAL rlxTime[BIN_PHASE];     /*!< Relaxation time \f$ \tau \f$ */
+    DECIMAL latticeSpd;             /*!< Lattice speed. */
+    DECIMAL density[BIN_PHASE];     /*!< Fluid density. */
+    DECIMAL alpha0;                 /*!< Free parameter. */
+    DECIMAL ift;                    /*!< Interfacial tension \f $\sigma \f$. */
+    DECIMAL intfThk;                /*!< Interface thickness. */
+    GRID_IDX index[MAX_GRAY];     /*!< Grid index.*/
 } PARAMETER;
 
 /*!
