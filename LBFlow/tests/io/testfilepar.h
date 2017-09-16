@@ -24,14 +24,6 @@ struct PARAMETER_FILE{
     PARAMETER par;
 };
 
-class TestFilePar : public ::testing::TestWithParam<PARAMETER_FILE>{
-protected:
-    virtual void SetUp(){
-    }
-    virtual void TearDown(){
-    }
-};
-
 PARAMETER_FILE Grid2D{
     SOURCE_DIR"Examples/Grid2D.json",     // parameter file
     "{\n"
@@ -302,7 +294,13 @@ PARAMETER_FILE Channel3D{
     },
 };
 
-typedef TestFilePar DeathTestFilePar;
+class TestFilePar : public ::testing::TestWithParam<PARAMETER_FILE>{
+protected:
+    virtual void SetUp(){
+    }
+    virtual void TearDown(){
+    }
+};
 
 INSTANTIATE_TEST_CASE_P(2Dand3D, TestFilePar,
                         ::testing::Values(Grid2D, Channel3D));
@@ -376,7 +374,9 @@ TEST_P(TestFilePar, load_parameter){
     CompareParameter(par, GetParam().par);
 }
 
-TEST(DeathTestFilePar, DISABLED_load_parameter){
+typedef TestFilePar DeathTestFilePar;
+
+TEST_F(DeathTestFilePar, load_parameter){
     PARAMETER par;
     const char* veryLongFile = SOURCE_DIR"Examples/Channel3D-24x24y100z.raw";
     if (ID == 0) {
@@ -386,5 +386,7 @@ TEST(DeathTestFilePar, DISABLED_load_parameter){
                      "File size exceeds maximum allowed size");
     }
 }
+
+//! \todo More death tests for LoadParameter().
 
 #endif // TESTFILEPAR_H
