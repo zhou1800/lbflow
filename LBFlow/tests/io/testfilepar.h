@@ -184,7 +184,6 @@ PARAMETER_FILE Channel3D{
     "        \"equilModel\":           \"MRT\",\n"
     "        \"rexlationTime\":        [\"0.57\", \"1.215416667\"],\n"
     "        \"latticeSpeed\":         \"1\",\n"
-    "        \"density\":              \"1\",\n"
     "        \"alpha0\":               \"0.33333333333333333333\",\n"
     "        \"density\":              [\"1\", \"0.831683168\"],\n"
     "        \"interfacialTension\":   \"0.085920139\",\n"
@@ -204,7 +203,7 @@ PARAMETER_FILE Channel3D{
     "        \"75\" : {\n"
     "            \"type\":  \"GV\",\n"
     "            \"value\": \"0.001\",\n"
-    "            \"dir\":   \"1\",\n"
+    "            \"dir\":   \"1\"\n"
     "        },\n"
     "        \"100\" : {\n"
     "            \"type\":  \"VD\",\n"
@@ -224,11 +223,11 @@ PARAMETER_FILE Channel3D{
     "        },\n"
     "        \"250\" : {\n"
     "            \"type\":  \"SD\",\n"
-    "            \"value\": \"90\",\n"
+    "            \"value\": \"90\"\n"
     "        },\n"
     "        \"255\" : {\n"
     "            \"type\":  \"SD\",\n"
-    "            \"value\": \"160\",\n"
+    "            \"value\": \"160\"\n"
     "        }\n"
     "    }\n"
     "}\n",
@@ -309,6 +308,7 @@ TEST_P(TestFilePar, sync_file_content){
 TEST_P(TestFilePar, parse_parameter_string_content){
     PARAMETER par;
     ASSERT_NE(ParseParameterString(GetParam().content, &par), ERROR);
+
 }
 
 TEST_P(TestFilePar, load_parameter){

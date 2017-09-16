@@ -1,73 +1,85 @@
 {
-    "grid" : {
-        "gridFile":     "Channel3D-24x24y100z.raw",
-        "dimension":    ["24", "24", "100"],
-        "directions":   "19",
-        "latticeLen":   "1e-6"
+  "grid": {
+    "gridFile": "Channel3D-24x24y100z.raw",
+    "dimension": [
+      "24",
+      "24",
+      "100"
+    ],
+    "directions": "19",
+    "latticeLen": "1e-6"
+  },
+  "control": {
+    "startTime": "0",
+    "endTime": "1000",
+    "writeInterval": "100",
+    "reportInterval": "10",
+    "restartInterval": "500",
+    "maxError": "0.000001"
+  },
+  "output": {
+    "outPath": "./LBFlow-Result/Channel3D-24x24y100z",
+    "reportDir": "1",
+    "reportSlice": [
+      "1",
+      "98"
+    ]
+  },
+  "model": {
+    "fluidModel": "COLOR",
+    "equilModel": "MRT",
+    "rexlationTime": [
+      "0.57",
+      "1.215416667"
+    ],
+    "latticeSpeed": "1",
+    "alpha0": "0.33333333333333333333",
+    "density": [
+      "1",
+      "0.831683168"
+    ],
+    "interfacialTension": "0.085920139",
+    "interfaceThickness": "0.7"
+  },
+  "index": {
+    "0": {
+      "type": "VD",
+      "phase": "0"
     },
-    "control" : {
-        "startTime":        "0",
-        "endTime":          "1000",
-        "writeInterval":    "100",
-        "reportInterval":   "10",
-        "restartInterval":  "500",
-        "maxError":         "0.000001"
+    "50": {
+      "type": "VB",
+      "value": "0.00001",
+      "dir": "1",
+      "phase": "0"
     },
-    "output" : {
-        "outPath":      "./LBFlow-Result/Channel3D-24x24y100z",
-        "reportDir":    "1",
-        "reportSlice":  ["1", "98"]
+    "75": {
+      "type": "GV",
+      "value": "0.001",
+      "dir": "1"
     },
-    "model" : {
-        "fluidModel":           "COLOR",
-        "equilModel":           "MRT",
-        "rexlationTime":        ["0.57", "1.215416667"],
-        "latticeSpeed":         "1",
-        "density":              "1",
-        "alpha0":               "0.33333333333333333333",
-        "density":              ["1", "0.831683168"],
-        "interfacialTension":   "0.085920139",
-        "interfaceThickness":   "0.7"
+    "100": {
+      "type": "VD",
+      "phase": "1"
     },
-    "index" : {
-        "0" : {
-            "type":  "VD",
-            "phase": "0"
-        },
-        "50" : {
-            "type":  "VB",
-            "value": "0.00001",
-            "dir":   "1",
-            "phase": "0"
-        },
-        "75" : {
-            "type":  "GV",
-            "value": "0.001",
-            "dir":   "1",
-        },
-        "100" : {
-            "type":  "VD",
-            "phase": "1"
-        },
-        "150" : {
-            "type":  "VB",
-            "value": "0.00001",
-            "dir":   "1",
-            "phase": "1"
-        },
-        "200" : {
-            "type":  "PB",
-            "value": "1",
-            "dir":   "2",
-            "phase": "0"
-        },
-        "250" : {
-            "type":  "SD",
-            "value": "90",
-        },
-        "255" : {
-            "type":  "SD",
-            "value": "160",
-        }
+    "150": {
+      "type": "VB",
+      "value": "0.00001",
+      "dir": "1",
+      "phase": "1"
+    },
+    "200": {
+      "type": "PB",
+      "value": "1",
+      "dir": "2",
+      "phase": "0"
+    },
+    "250": {
+      "type": "SD",
+      "value": "90"
+    },
+    "255": {
+      "type": "SD",
+      "value": "160"
     }
+  }
 }
