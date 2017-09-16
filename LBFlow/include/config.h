@@ -13,6 +13,7 @@ extern "C" {
 #endif
 
 #define DECIMAL float       /*!< Precision of the decimal value. */
+#define RAW unsigned char   /*!< Raw file type. */
 
 /*!
  * \brief The MODEL_CONSTS enum defines constants for the simulator.

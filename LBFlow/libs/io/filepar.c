@@ -2,7 +2,6 @@
  * \author Yu Zhou
  */
 #include "filepar.h"
-#include "config.h"
 #include "cJSON.h"
 #include "mpi.h"
 #include <string.h>
