@@ -39,9 +39,9 @@ PARAMETER DEFAULT_PARAMETER = {
 
 /*!
  * \brief LoadFile load a file on disk into string.
- * \param filePathName[in] - full pathe name of the file.
- * \param content[out] - file content.
- * \param maxFileLength[in] - file length must not exceed this number.
+ * \param[in] filePathName - full pathe name of the file.
+ * \param[out] content - file content.
+ * \param[in] maxFileLength - file length must not exceed this number.
  * \return the number of characters read.
  * \return ERROR on fail to open file or incomplete file reading.
  */
@@ -61,8 +61,8 @@ int LoadFile(const char* filePathName, char* content, int maxFileLength)
 
 /*!
  * \brief SyncString syncorize a string between all processors.
- * \param str[in,out] - the string to be syncorized.
- * \param mId[in] - master(source) processor id.
+ * \param[in,out] str - the string to be syncorized.
+ * \param[in] mId - master(source) processor id.
  * \return ERROR / NOERR
  */
 int SyncString(char str[], int mId)
@@ -78,8 +78,8 @@ int SyncString(char str[], int mId)
 
 /*!
  * \brief ParseParameter* parse paramter in the '*' section.
- * \param grid[in] - the '*' section in JSON format.
- * \param par[out] - parse to the parameter file.
+ * \param[in] grid - the '*' section in JSON format.
+ * \param[out] par - parse to the parameter file.
  * \return ERROR / NOERR
  */
 int ParseParameterGrid(const cJSON* grid, PARAMETER* par)
@@ -321,8 +321,8 @@ int ParseParameterIndex(cJSON* index, PARAMETER* par)
 
 /*!
  * \brief ParseParameter parse all the parameters in given string.
- * \param str[in] - parameter source string in JSON format.
- * \param par[out] - parse to the parameter file.
+ * \param[in] str - parameter source string in JSON format.
+ * \param[out] par - parse to the parameter file.
  * \return ERROR / NOERR
  */
 int ParseParameter(const char str[], PARAMETER* par)

@@ -89,7 +89,7 @@ typedef struct{
     DECIMAL latticeSpd;             /*!< Lattice speed. */
     DECIMAL density[BIN_PHASE];     /*!< Fluid density. */
     DECIMAL alpha0;                 /*!< Free parameter. */
-    DECIMAL ift;                    /*!< Interfacial tension \f $\sigma \f$. */
+    DECIMAL ift;                    /*!< Interfacial tension \f$\sigma \f$. */
     DECIMAL intfThk;                /*!< Interface thickness. */
     GRID_IDX index[MAX_GRAY];     /*!< Grid index.*/
 } PARAMETER;

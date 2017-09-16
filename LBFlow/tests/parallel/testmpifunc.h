@@ -34,4 +34,13 @@ TEST(MPIEnviroment, initialize_MPI) {
     ASSERT_GT(MPI_SIZE, 0);
 }
 
+TEST(MPIEnviroment, bcast_a_message) {
+    int a;
+    const int fixed = 1984;
+    if (ID == 0)
+        a = fixed;
+    MPI_Bcast(&a, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    EXPECT_EQ(a, fixed);
+}
+
 #endif // TESTMPIFUNC_H

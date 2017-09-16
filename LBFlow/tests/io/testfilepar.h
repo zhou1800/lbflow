@@ -376,7 +376,7 @@ TEST_P(TestFilePar, load_parameter){
     CompareParameter(par, GetParam().par);
 }
 
-TEST(DeathTestFilePar, load_parameter){
+TEST(DeathTestFilePar, DISABLED_load_parameter){
     PARAMETER par;
     const char* veryLongFile = SOURCE_DIR"Examples/Channel3D-24x24y100z.raw";
     if (ID == 0) {
