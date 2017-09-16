@@ -12,6 +12,7 @@
 
 extern "C" {
     extern int ID;
+    extern PARAMETER DEFAULT_PARAMETER;
     int LoadFile(const char* filePathName, char* content, int maxFileLength);
     int SyncString(char str[], int mId);
     int ParseParameterString(const char str[], PARAMETER* par);
@@ -31,77 +32,84 @@ protected:
     }
 };
 
-
 PARAMETER_FILE Grid2D{
     SOURCE_DIR"Examples/Grid2D.json",     // parameter file
     "{\n"
     "    \"grid\" : {\n"
     "        \"gridFile\":     \"Grid20x12y.raw\",\n"
-    "        \"gridSize\":     [\"20\", \"12\"],\n"
-    "        \"nDirection\":   \"9\",\n"
-    "        \"latticeLen\":   \"1e-6\"\n"
+    "        \"gridSize\":     [20, 12],\n"
+    "        \"nDirection\":   9,\n"
+    "        \"latticeLen\":   1e-6\n"
     "    },\n"
     "    \"control\" : {\n"
-    "        \"startTime\":        \"0\",\n"
-    "        \"endTime\":          \"1000\",\n"
-    "        \"writeInterval\":    \"100\",\n"
-    "        \"reportInterval\":   \"10\",\n"
-    "        \"restartInterval\":  \"500\",\n"
-    "        \"maxError\":         \"0.000001\"\n"
+    "        \"startTime\":    0,\n"
+    "        \"endTime\":      1000,\n"
+    "        \"writeIntvl\":   100,\n"
+    "        \"rptIntvl\":     10,\n"
+    "        \"rstIntvl\":     500,\n"
+    "        \"maxError\":     0.000001\n"
     "    },\n"
     "    \"output\" : {\n"
     "        \"outPath\":      \"./LBFlow-Result/Grid20x12y\",\n"
-    "        \"reportDir\":    \"1\",\n"
-    "        \"reportSlice\":  [\"1\", \"98\"]\n"
+    "        \"rptDir\":       0\n"
     "    },\n"
     "    \"model\" : {\n"
-    "        \"fluidModel\":       \"SCSP\",\n"
-    "        \"equilModel\":       \"SRT\",\n"
-    "        \"rexlationTime\":    \"1\",\n"
-    "        \"latticeSpeed\":     \"1\",\n"
-    "        \"density\":          \"1\"\n"
+    "        \"fluidModel\":   \"SCSP\",\n"
+    "        \"equilModel\":   \"SRT\",\n"
+    "        \"rlxTime\":      [1],\n"
+    "        \"latticeSpd\":   1,\n"
+    "        \"density\":      [1]\n"
     "    },\n"
-    "    \"index\" : {\n"
-    "        \"0\" : {\n"
+    "    \"index\" : [\n"
+    "        {\n"
+    "            \"idx\":    0,\n"
     "            \"type\" :  \"VD\",\n"
-    "            \"phase\" : \"0\"\n"
+    "            \"phase\" : 0\n"
     "        },\n"
-    "        \"50\" : {\n"
+    "        {\n"
+    "            \"idx\":    50,\n"
     "            \"type\" :  \"VB\",\n"
-    "            \"value\" : \"0.00001\",\n"
-    "            \"dir\" :   \"1\",\n"
-    "            \"phase\" : \"0\"\n"
+    "            \"value\" : 0.00001,\n"
+    "            \"dir\" :   1,\n"
+    "            \"phase\" : 0\n"
     "        },\n"
-    "        \"75\" : {\n"
+    "        {\n"
+    "            \"idx\":    75,\n"
     "            \"type\" :  \"GV\",\n"
-    "            \"value\" : \"0.001\",\n"
-    "            \"dir\" :   \"1\",\n"
+    "            \"value\" : 0.001,\n"
+    "            \"dir\" :   1,\n"
+    "            \"phase\" : 0\n"
     "        },\n"
-    "        \"100\" : {\n"
+    "        {\n"
+    "            \"idx\":    100,\n"
     "            \"type\" :  \"VD\",\n"
-    "            \"phase\" : \"1\"\n"
+    "            \"phase\" : 1\n"
     "        },\n"
-    "        \"150\" : {\n"
+    "        {\n"
+    "            \"idx\":    150,\n"
     "            \"type\" :  \"VB\",\n"
-    "            \"value\" : \"0.00001\",\n"
-    "            \"dir\" :   \"1\",\n"
-    "            \"phase\" : \"1\"\n"
+    "            \"value\" : 0.00001,\n"
+    "            \"dir\" :   1,\n"
+    "            \"phase\" : 1\n"
     "        },\n"
-    "        \"200\" : {\n"
+    "        {\n"
+    "            \"idx\":    200,\n"
     "            \"type\" :  \"PB\",\n"
-    "            \"value\" : \"1\",\n"
-    "            \"dir\" :   \"2\",\n"
-    "            \"phase\" : \"0\"\n"
+    "            \"value\" : 1,\n"
+    "            \"dir\" :   2,\n"
+    "            \"phase\" : 0\n"
     "        },\n"
-    "        \"250\" : {\n"
+    "        {\n"
+    "            \"idx\":    250,\n"
     "            \"type\" :  \"SD\",\n"
-    "            \"value\" : \"90\",\n"
+    "            \"value\" : 90\n"
     "        },\n"
-    "        \"255\" : {\n"
+    "        {\n"
+    "            \"idx\":    255,\n"
     "            \"type\" :  \"SD\",\n"
-    "            \"value\" : \"160\",\n"
+    "            \"value\" : 160\n"
     "        }\n"
-    "    }\n"
+    "    ]\n"
     "}\n",
     // parameters
     {
@@ -116,15 +124,15 @@ PARAMETER_FILE Grid2D{
         10,
         500,
         0.000001,
-        "../../../../../../../DRLab-R/Grid20x12y",
-        1,
-        {1, 98},
+        "./LBFlow-Result/Grid20x12y",
+        0,
+        {0, 0},
         SCSP,
         SRT,
         {1, 0},
         1,
-        0,
         {1, 0},
+        0,
         0,
         0,
         {{VD, 0, 0, 0}, {}, {}, {}, {}, {}, {}, {}, {}, {},         //0-9
@@ -162,74 +170,84 @@ PARAMETER_FILE Channel3D{
     "{\n"
     "    \"grid\" : {\n"
     "        \"gridFile\":     \"Channel3D-24x24y100z.raw\",\n"
-    "        \"dimension\":    [\"24\", \"24\", \"100\"],\n"
-    "        \"directions\":   \"19\",\n"
-    "        \"latticeLen\":   \"1e-6\"\n"
+    "        \"gridSize\":     [24, 24, 100],\n"
+    "        \"nDirection\":   19,\n"
+    "        \"latticeLen\":   1e-6\n"
     "    },\n"
     "    \"control\" : {\n"
-    "        \"startTime\":        \"0\",\n"
-    "        \"endTime\":          \"1000\",\n"
-    "        \"writeInterval\":    \"100\",\n"
-    "        \"reportInterval\":   \"10\",\n"
-    "        \"restartInterval\":  \"500\",\n"
-    "        \"maxError\":         \"0.000001\"\n"
+    "        \"startTime\":    0,\n"
+    "        \"endTime\":      1000,\n"
+    "        \"writeIntvl\":   100,\n"
+    "        \"rptIntvl\":     10,\n"
+    "        \"rstIntvl\":     500,\n"
+    "        \"maxError\":     0.000001\n"
     "    },\n"
     "    \"output\" : {\n"
     "        \"outPath\":      \"./LBFlow-Result/Channel3D-24x24y100z\",\n"
-    "        \"reportDir\":    \"1\",\n"
-    "        \"reportSlice\":  [\"1\", \"98\"]\n"
+    "        \"rptDir\":       1,\n"
+    "        \"rptSlice\":     [1, 98]\n"
     "    },\n"
     "    \"model\" : {\n"
-    "        \"fluidModel\":           \"COLOR\",\n"
-    "        \"equilModel\":           \"MRT\",\n"
-    "        \"rexlationTime\":        [\"0.57\", \"1.215416667\"],\n"
-    "        \"latticeSpeed\":         \"1\",\n"
-    "        \"alpha0\":               \"0.33333333333333333333\",\n"
-    "        \"density\":              [\"1\", \"0.831683168\"],\n"
-    "        \"interfacialTension\":   \"0.085920139\",\n"
-    "        \"interfaceThickness\":   \"0.7\"\n"
+    "        \"fluidModel\":   \"COLOR\",\n"
+    "        \"equilModel\":   \"MRT\",\n"
+    "        \"rlxTime\":      [0.57, 1.215416667],\n"
+    "        \"latticeSpd\":   1,\n"
+    "        \"density\":      [1, 0.831683168],\n"
+    "        \"alpha0\":       0.33333333333333333333,\n"
+    "        \"ift\":          0.085920139,\n"
+    "        \"intfThk\":      0.7\n"
     "    },\n"
-    "    \"index\" : {\n"
-    "        \"0\" : {\n"
+
+    "    \"index\" : [\n"
+    "        {\n"
+    "            \"idx\":   0,\n"
     "            \"type\":  \"VD\",\n"
-    "            \"phase\": \"0\"\n"
+    "            \"phase\": 0\n"
     "        },\n"
-    "        \"50\" : {\n"
+    "        {\n"
+    "            \"idx\":   50,\n"
     "            \"type\":  \"VB\",\n"
-    "            \"value\": \"0.00001\",\n"
-    "            \"dir\":   \"1\",\n"
-    "            \"phase\": \"0\"\n"
+    "            \"value\": 0.00001,\n"
+    "            \"dir\":   1,\n"
+    "            \"phase\": 0\n"
     "        },\n"
-    "        \"75\" : {\n"
+    "        {\n"
+    "            \"idx\":   75,\n"
     "            \"type\":  \"GV\",\n"
-    "            \"value\": \"0.001\",\n"
-    "            \"dir\":   \"1\"\n"
+    "            \"value\": 0.001,\n"
+    "            \"dir\":   1,\n"
+    "            \"phase\": 0\n"
     "        },\n"
-    "        \"100\" : {\n"
+    "        {\n"
+    "            \"idx\":   100,\n"
     "            \"type\":  \"VD\",\n"
-    "            \"phase\": \"1\"\n"
+    "            \"phase\": 1\n"
     "        },\n"
-    "        \"150\" : {\n"
+    "        {\n"
+    "            \"idx\":   150,\n"
     "            \"type\":  \"VB\",\n"
-    "            \"value\": \"0.00001\",\n"
-    "            \"dir\":   \"1\",\n"
-    "            \"phase\": \"1\"\n"
+    "            \"value\": 0.00001,\n"
+    "            \"dir\":   1,\n"
+    "            \"phase\": 1\n"
     "        },\n"
-    "        \"200\" : {\n"
+    "        {\n"
+    "            \"idx\":   200,\n"
     "            \"type\":  \"PB\",\n"
-    "            \"value\": \"1\",\n"
-    "            \"dir\":   \"2\",\n"
-    "            \"phase\": \"0\"\n"
+    "            \"value\": 1,\n"
+    "            \"dir\":   2,\n"
+    "            \"phase\": 0\n"
     "        },\n"
-    "        \"250\" : {\n"
+    "        {\n"
+    "            \"idx\":   250,\n"
     "            \"type\":  \"SD\",\n"
-    "            \"value\": \"90\"\n"
+    "            \"value\": 90\n"
     "        },\n"
-    "        \"255\" : {\n"
+    "        {\n"
+    "            \"idx\":   255,\n"
     "            \"type\":  \"SD\",\n"
-    "            \"value\": \"160\"\n"
+    "            \"value\": 160\n"
     "        }\n"
-    "    }\n"
+    "    ]\n"
     "}\n",
     {
         "Channel3D-24x24y100z.raw",
@@ -243,15 +261,15 @@ PARAMETER_FILE Channel3D{
         10,
         500,
         0.000001,
-        "../../../../../../../DRLab-R/Bera-122x102y102z",
+        "./LBFlow-Result/Channel3D-24x24y100z",
         1,
         {1, 98},
         COLOR,
         MRT,
         {0.57, 1.215416667},
         1,
-        0.33333333333333333333,
         {1, 0.831683168},
+        0.33333333333333333333,
         0.085920139,
         0.7,
         {{VD, 0, 0, 0}, {}, {}, {}, {}, {}, {}, {}, {}, {},         //0-9
@@ -289,6 +307,48 @@ typedef TestFilePar DeathTestFilePar;
 INSTANTIATE_TEST_CASE_P(2Dand3D, TestFilePar,
                         ::testing::Values(Grid2D, Channel3D));
 
+void EXPECT_ARR_EQ(const int a[], const int b[], int n){
+    for (int i = 0; i < n; ++i)
+        EXPECT_EQ(a[i], b[i]);
+}
+
+void EXPECT_ARR_EQ(const DECIMAL a[], const DECIMAL b[], int n){
+    for (int i = 0; i < n; ++i)
+        EXPECT_FLOAT_EQ(a[i], b[i]);
+}
+
+void CompareParameter(const PARAMETER& par1, const PARAMETER& par2)
+{
+    EXPECT_STREQ(par1.gridFile, par2.gridFile);
+    EXPECT_ARR_EQ(par1.size, par2.size, MAX_DIMENSION);
+    EXPECT_EQ(par1.nDimension, par2.nDimension);
+    EXPECT_EQ(par1.nDirection, par2.nDirection);
+    EXPECT_FLOAT_EQ(par1.latticeLen, par2.latticeLen);
+    EXPECT_EQ(par1.startTime, par2.startTime);
+    EXPECT_EQ(par1.endTime, par2.endTime);
+    EXPECT_EQ(par1.writeIntvl, par2.writeIntvl);
+    EXPECT_EQ(par1.rptIntvl, par2.rptIntvl);
+    EXPECT_EQ(par1.rstIntvl, par2.rstIntvl);
+    EXPECT_FLOAT_EQ(par1.maxError, par2.maxError);
+    EXPECT_STREQ(par1.outPath, par2.outPath);
+    EXPECT_EQ(par1.rptDir, par2.rptDir);
+    EXPECT_ARR_EQ(par1.rptSlice, par2.rptSlice, NUMBER_OF_SLICE);
+    EXPECT_EQ(par1.fluidModel, par2.fluidModel);
+    EXPECT_EQ(par1.equilModel, par2.equilModel);
+    EXPECT_ARR_EQ(par1.rlxTime, par2.rlxTime, BIN_PHASE);
+    EXPECT_FLOAT_EQ(par1.latticeSpd, par2.latticeSpd);
+    EXPECT_ARR_EQ(par1.density, par2.density, BIN_PHASE);
+    EXPECT_FLOAT_EQ(par1.alpha0, par2.alpha0);
+    EXPECT_FLOAT_EQ(par1.ift, par2.ift);
+    EXPECT_FLOAT_EQ(par1.intfThk, par2.intfThk);
+    for (int i = 0; i < MAX_GRAY; ++i) {
+        EXPECT_EQ(par1.index[i].type, par2.index[i].type);
+        EXPECT_FLOAT_EQ(par1.index[i].value, par2.index[i].value);
+        EXPECT_EQ(par1.index[i].dir, par2.index[i].dir);
+        EXPECT_EQ(par1.index[i].phase, par2.index[i].phase);
+    }
+}
+
 TEST_P(TestFilePar, load_file){
     char fileContent[MAX_FILE_LEN];
     ASSERT_NE(LoadFile(GetParam().parameterFile, fileContent, MAX_FILE_LEN),
@@ -306,9 +366,9 @@ TEST_P(TestFilePar, sync_file_content){
 }
 
 TEST_P(TestFilePar, parse_parameter_string_content){
-    PARAMETER par;
+    PARAMETER par = DEFAULT_PARAMETER;
     ASSERT_NE(ParseParameterString(GetParam().content, &par), ERROR);
-
+    CompareParameter(par, GetParam().par);
 }
 
 TEST_P(TestFilePar, load_parameter){
@@ -318,7 +378,7 @@ TEST_P(TestFilePar, load_parameter){
 
 TEST(DeathTestFilePar, load_parameter){
     PARAMETER par;
-    char* veryLongFile = SOURCE_DIR"Examples/Channel3D-24x24y100z.raw";
+    const char* veryLongFile = SOURCE_DIR"Examples/Channel3D-24x24y100z.raw";
     if (ID == 0) {
         EXPECT_DEATH(LoadParameter("non existing file", &par),
                      "Can not open parameter file");

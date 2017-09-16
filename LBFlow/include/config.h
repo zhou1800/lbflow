@@ -20,7 +20,8 @@ extern "C" {
 enum MODEL_CONSTS{
     MAX_DIMENSION = 3,      /*!< Maximum number of dimensions. */
     NUMBER_OF_SLICE = 2,    /*!< Number of report slices. */
-    BIN_PHASE = 2,          /*!< Number of binary phase. */
+    SINGLE_PHASE = 1,       /*!< Single phase. */
+    BIN_PHASE = 2,          /*!< Binary phase. */
 };
 
 enum PROGRAM_STATUS{
