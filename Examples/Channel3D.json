@@ -23,7 +23,6 @@
         "equilModel":           "MRT",
         "rexlationTime":        ["0.57", "1.215416667"],
         "latticeSpeed":         "1",
-        "density":              "1",
         "alpha0":               "0.33333333333333333333",
         "density":              ["1", "0.831683168"],
         "interfacialTension":   "0.085920139",
@@ -43,7 +42,7 @@
         "75" : {
             "type":  "GV",
             "value": "0.001",
-            "dir":   "1",
+            "dir":   "1"
         },
         "100" : {
             "type":  "VD",
@@ -63,11 +62,11 @@
         },
         "250" : {
             "type":  "SD",
-            "value": "90",
+            "value": "90"
         },
         "255" : {
             "type":  "SD",
-            "value": "160",
+            "value": "160"
         }
     }
 }
