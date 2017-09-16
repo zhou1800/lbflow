@@ -291,7 +291,7 @@ int ParseParameterIndex(cJSON* index, PARAMETER* par)
     return NOERR;
 }
 
-int ParseParameterString(const char str[], PARAMETER* par)
+int ParseParameter(const char str[], PARAMETER* par)
 {
     cJSON* root = cJSON_Parse(str);
     VALIDATE(root, "Parameter format error\n");
@@ -326,6 +326,8 @@ int LoadParameter(const char *filePathName, PARAMETER *par)
     if (ID == 0 && LoadFile(filePathName, fileContent, MAX_FILE_LEN) == ERROR)
         exit(ERROR);
     if (SyncString(fileContent, 0) == ERROR)
+        exit(ERROR);
+    if (ParseParameter(fileContent, par) == ERROR)
         exit(ERROR);
     return NOERR;
 }
