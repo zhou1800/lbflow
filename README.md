@@ -28,7 +28,6 @@ It implements the Lattice Boltzmann Method (LBM).
 [latex]:   http://www.latex-project.org/
 [Git]:     http://www.git-scm.com/
 
-
 ## Libraries, Executables and Tests
 
 ### Executables
