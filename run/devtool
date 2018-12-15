@@ -28,7 +28,7 @@ case $1 in
       mkdir -p $PROJ_DIR/build
       cd $PROJ_DIR/build
       cmake . $PROJ_DIR/src
-      make -j 4
+      make -j
     ;;
     test)
       $RUN_DIR/devtool build

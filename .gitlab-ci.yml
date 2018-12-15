@@ -1,4 +1,4 @@
-test:client:
+test:lbflow:
   stage: test
   tags:
     - lbflow
