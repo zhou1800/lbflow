@@ -1,0 +1,12 @@
+version: '2.3'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sciridge/gitlab-runner:1.0
+    runtime: nvidia
+    restart: always
+    volumes:
+      - $PROJ_DIR/run/logs:/logs

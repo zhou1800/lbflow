@@ -1,0 +1,6 @@
+test:client:
+  stage: test
+  tags:
+    - lbflow
+  script:
+    - run/devtool test
