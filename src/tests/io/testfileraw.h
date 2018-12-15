@@ -18,7 +18,7 @@ protected:
 
 TEST(TestFileRaw, read_raw_file)
 {
-    const char* rawFile = SOURCE_DIR"Examples/Grid20x12y.raw";
+    const char* rawFile = SOURCE_DIR"examples/Grid20x12y.raw";
     const RAW content[] = {
         50,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,200,
         50,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,200,
@@ -46,8 +46,8 @@ TEST(TestFileRaw, read_raw_file)
 typedef TestFileRaw DeathTestFileRaw;
 
 TEST(DeathTestFileRaw, load_parameter){
-    const char* wrongFile = SOURCE_DIR"Examples/Grid2D";
-    const char* shortFile = SOURCE_DIR"Examples/Grid20x12y.raw";
+    const char* wrongFile = SOURCE_DIR"examples/Grid2D";
+    const char* shortFile = SOURCE_DIR"examples/Grid20x12y.raw";
     const int size = 8192;
     RAW* raw = new RAW[size];
     EXPECT_DEATH({LoadRawfile(wrongFile, raw, size); exit(ERROR);},
