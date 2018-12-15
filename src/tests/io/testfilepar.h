@@ -25,7 +25,7 @@ struct PARAMETER_FILE{
 };
 
 PARAMETER_FILE Grid2D{
-    SOURCE_DIR"Examples/Grid2D.json",     // parameter file
+    SOURCE_DIR"examples/Grid2D.json",     // parameter file
     "{\n"
     "    \"grid\" : {\n"
     "        \"gridFile\":     \"Grid20x12y.raw\",\n"
@@ -158,7 +158,7 @@ PARAMETER_FILE Grid2D{
 };
 
 PARAMETER_FILE Channel3D{
-    SOURCE_DIR"Examples/Channel3D.json",  // parameter file
+    SOURCE_DIR"examples/Channel3D.json",  // parameter file
     "{\n"
     "    \"grid\" : {\n"
     "        \"gridFile\":     \"Channel3D-24x24y100z.raw\",\n"
@@ -378,7 +378,7 @@ typedef TestFilePar DeathTestFilePar;
 
 TEST_F(DeathTestFilePar, load_parameter){
     PARAMETER par;
-    const char* veryLongFile = SOURCE_DIR"Examples/Channel3D-24x24y100z.raw";
+    const char* veryLongFile = SOURCE_DIR"examples/Channel3D-24x24y100z.raw";
     if (ID == 0) {
         EXPECT_DEATH(LoadParameter("non existing file", &par),
                      "Can not open parameter file");
