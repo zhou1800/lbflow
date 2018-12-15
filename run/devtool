@@ -1,0 +1,46 @@
+#!/bin/bash
+
+RUN_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+PROJ_DIR=$(cd $RUN_DIR && cd .. && pwd)
+
+print_useage() {
+    cat << \EOF
+Useage: devtool COMMAND
+
+A microrock developer tool.
+
+Commands:
+    build       Build project
+    test        Run unit test
+    coverage    Generagte test coverage report
+    gendoc      Regenerate document
+
+EOF
+}
+
+if [ $# -lt 1 ]; then
+    print_useage
+    exit 1
+fi
+
+case $1 in
+    build)
+      mkdir -p $PROJ_DIR/build
+      cd $PROJ_DIR/build
+      cmake . $PROJ_DIR/src
+      make -j 4
+    ;;
+    test)
+      $RUN_DIR/devtool build
+      cd $PROJ_DIR/build/tests
+      ctest --verbose
+    ;;
+    coverage)
+    ;;
+    gendoc)
+    ;;
+    *)
+        print_useage
+        exit 1
+    ;;
+esac
