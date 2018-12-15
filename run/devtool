@@ -38,6 +38,9 @@ case $1 in
     coverage)
     ;;
     gendoc)
+      cd $PROJ_DIR/documents
+      doxygen Doxyfile
+      sensible-browser doxygen/html/index.html
     ;;
     *)
         print_useage
