@@ -12,4 +12,5 @@ target_include_directories(libParallel PUBLIC
 
 target_link_libraries(libParallel
     ${MPI_CXX_LIBRARIES}
+    gcov
 )

@@ -5,15 +5,14 @@ PROJ_DIR=$(cd $RUN_DIR && cd .. && pwd)
 
 print_useage() {
     cat << \EOF
-Useage: devtool COMMAND
-
-A microrock developer tool.
+Useage: devtool COMMAND [OPTIONS]
 
 Commands:
-    build       Build project
-    test        Run unit test
-    coverage    Generagte test coverage report
-    gendoc      Regenerate document
+    build [OPTIONS] Build project. Release is the default.
+                    OPTIONS=debug for debugging.
+    test            Run unit test
+    coverage        Generagte test coverage report
+    gendoc          Regenerate document
 
 EOF
 }
@@ -25,22 +24,38 @@ fi
 
 case $1 in
     build)
-      mkdir -p $PROJ_DIR/build
-      cd $PROJ_DIR/build
-      cmake . $PROJ_DIR/src
-      make -j
+        if [ $2 == debug ]; then
+            BUILD_TYPE=Debug
+        else
+            BUILD_TYPE=Release
+        fi
+        mkdir -p $PROJ_DIR/build/$BUILD_TYPE
+        cd $PROJ_DIR/build/$BUILD_TYPE
+        cmake . $PROJ_DIR/src -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        make -j
     ;;
     test)
-      $RUN_DIR/devtool build
-      cd $PROJ_DIR/build/tests
-      ctest --verbose
+        BUILD_TYPE=Release
+        $RUN_DIR/devtool build $BUILD_TYPE
+        cd $PROJ_DIR/build/$BUILD_TYPE/tests
+        ctest --verbose
     ;;
     coverage)
+        BUILD_TYPE=Debug
+        $RUN_DIR/devtool build $BUILD_TYPE
+        cd $PROJ_DIR/build/$BUILD_TYPE/tests
+        ctest   # run all tests
+        GCOVR_FILTERS="-r $PROJ_DIR -f $PROJ_DIR/src/ -e $PROJ_DIR/src/3rdparty \
+                      --exclude-directories '$PROJ_DIR/build/Release$'"
+        gcovr $GCOVR_FILTERS
+        gcovr $GCOVR_FILTERS -b -s
+        mkdir -p $PROJ_DIR/documents/coverage
+        gcovr $GCOVR_FILTERS --html --html-details -o $PROJ_DIR/documents/coverage/coverage.html
     ;;
     gendoc)
-      cd $PROJ_DIR/documents
-      doxygen Doxyfile
-      sensible-browser doxygen/html/index.html
+        cd $PROJ_DIR/documents
+        doxygen Doxyfile
+        sensible-browser doxygen/html/index.html
     ;;
     *)
         print_useage
