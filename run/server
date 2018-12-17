@@ -1,0 +1,47 @@
+#!/bin/bash
+
+RUN_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+PROJ_DIR=$(cd $RUN_DIR && cd .. && pwd)
+
+print_useage() {
+    cat << \EOF
+Useage: server COMMAND TYPE [options]
+
+lbflow service manager.
+
+Commands:
+    build           Build image.
+    up              Start service.
+    rm              Stop Service.
+
+Types:
+    runner          Gitlab CI runner.
+
+Options:
+    --no-cache      Build the images without cache.
+
+EOF
+}
+
+if [ $# -lt 2 ]; then
+    print_useage
+    exit 1
+fi
+
+case $1 in
+    build)
+        PROJ_DIR=$PROJ_DIR docker-compose -f $RUN_DIR/server.d/$2/docker-compose.yml build $3
+    ;;
+    up)
+        PROJ_DIR=$PROJ_DIR \
+            docker-compose -f $RUN_DIR/server.d/$2/docker-compose.yml -p lbflow_$2 up -d
+    ;;
+    rm)
+        PROJ_DIR=$PROJ_DIR \
+            docker-compose -f $RUN_DIR/server.d/$2/docker-compose.yml -p lbflow_$2 down
+    ;;
+    *)
+        print_useage
+        exit 1
+    ;;
+esac

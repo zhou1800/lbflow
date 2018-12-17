@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Redirect output to stderr.
+exec 1>&2
+
+grep -P 'refs\:{0,1}\s\#[0-9]+' "$1" || {
+    cat <<\EOF
+-----------------------------------------------------
+-- COMMIT FAILED! Missing Redmine reference        --
+-----------------------------------------------------
+-                                                   -
+- Commit message requires the form: refs: #IssueID  -
+- The IssueID should match the Redmine issue ID.    -
+- Tip: Enable time logging by adding @XXhYYm will   -
+- automatically log XX hours YY minutes on redmine. -
+-----------------------------------------------------
+EOF
+    exit 1
+}

@@ -1,17 +1,16 @@
-/*! \file mpifunc.h
- * \brief MPI functions.
+/*! \file mpi-wrapper.h
+ * \brief MPI wrapper functions.
  *
  * - MPIInit() to initialize the MPI execution envoriment.
  * - extern ID: the local rank.
  * - extern MPI_SIZE: the communication size.
  * - remember to call MPI_Finalize() to terminates the MPI envoriment.
- *
- * \author Yu Zhou
  */
-#ifndef MPIFUNC_H
-#define MPIFUNC_H
-#include <stdint.h>
+
+#ifndef MPI_WRAPPER_H
+#define MPI_WRAPPER_H
 #include "mpi.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,4 +28,4 @@ int MPIInit(int *argc, char ***argv);
 }
 #endif
 
-#endif // MPIFUNC_H
+#endif // MPI_WRAPPER_H

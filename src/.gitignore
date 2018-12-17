@@ -1,9 +1,3 @@
-
-# Qt Creator generated project file
-CMakeLists.txt.user
-CMakeLists.txt.user.*
-
-# Editors
-## vim temporary file
-*.swp
+# ctags
+tags
 

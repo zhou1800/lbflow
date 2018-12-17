@@ -1,0 +1,5 @@
+# vim temporary file
+*.swp
+
+# Build folder
+build/
