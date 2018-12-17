@@ -1,9 +1,9 @@
 # libparallel test executable
-add_executable(testparallel "testparallel.cpp")
-target_link_libraries(testparallel
+add_executable(parallel-test "parallel-test.cpp")
+target_link_libraries(parallel-test
     gtest
     libParallel
 )
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-add_test(NAME test_parallel COMMAND testparallel)
+add_test(NAME parallel_test COMMAND parallel-test)

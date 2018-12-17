@@ -1,7 +1,6 @@
-/*! \file mpifunc.c
- * \author Yu Zhou
- */
- #include "mpifunc.h"
+/*! \file mpi-wrapper.c */
+
+#include "mpi-wrapper.h"
 
 int ID;         /*!< Local rank. */
 int MPI_SIZE;   /*!< Communication size. */
