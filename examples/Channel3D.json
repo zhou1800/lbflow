@@ -2,79 +2,77 @@
     "grid" : {
         "gridFile":     "Channel3D-24x24y100z.raw",
         "gridSize":     [24, 24, 100],
-        "nDirection":   19,
-        "latticeLen":   1e-6
+        "nDirection":   19
     },
     "control" : {
-        "startTime":    0,
-        "endTime":      1000,
-        "writeIntvl":   100,
-        "rptIntvl":     10,
-        "rstIntvl":     500,
+        "startStep":    0,
+        "endStep":      1000,
+        "resultIntvl":  100,
+        "restartIntvl": 500,
+        "reportIntvl":  10,
         "maxError":     0.000001
     },
     "output" : {
         "outPath":      "./LBFlow-Result/Channel3D-24x24y100z",
-        "rptDir":       1,
-        "rptSlice":     [1, 98]
+        "reportROI":    [-1, -1, -1, -1, 98, -1, 77]
     },
     "model" : {
         "fluidModel":   "COLOR",
-        "equilModel":   "MRT",
-        "rlxTime":      [0.57, 1.215416667],
-        "latticeSpd":   1,
+        "relaxModel":   "MRT",
         "density":      [1, 0.831683168],
+        "relaxTime":    [0.57, 1.215416667],
+        "latticeSpeed": 1,
         "alpha0":       0.33333333333333333333,
         "ift":          0.085920139,
-        "intfThk":      0.7
+        "thickness":    0.7
     },
-    "index" : [
+    "grayscale" : [
         {
-            "idx":   0,
-            "type":  "VD",
+            "index": 0,
+            "type": "VD",
             "phase": 0
         },
         {
-            "idx":   50,
-            "type":  "VB",
+            "index": 50,
+            "type": "VB",
             "value": 0.00001,
-            "dir":   1,
+            "direction": 1,
             "phase": 0
         },
         {
-            "idx":   75,
-            "type":  "GV",
+            "index": 75,
+            "type": "GV",
             "value": 0.001,
-            "dir":   1,
+            "direction": 1,
             "phase": 0
         },
         {
-            "idx":   100,
-            "type":  "VD",
+            "index": 100,
+            "type": "VD",
             "phase": 1
         },
         {
-            "idx":   150,
-            "type":  "VB",
+            "index": 150,
+            "type": "VB",
             "value": 0.00001,
-            "dir":   1,
+            "direction": 1,
             "phase": 1
         },
         {
-            "idx":   200,
-            "type":  "PB",
+            "index": 200,
+            "type": "PB",
             "value": 1,
-            "dir":   2,
+            "direction": 2,
             "phase": 0
         },
         {
-            "idx":   250,
-            "type":  "SD",
+            "index": 250,
+            "type": "SD",
             "value": 90
         },
         {
-            "idx":   255,
-            "type":  "SD",
+            "index": 255,
+            "type": "SD",
             "value": 160
         }
     ]

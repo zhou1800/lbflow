@@ -1,6 +1,5 @@
 /*! \file config.h
  * \brief Global configurations.
- * \author Yu Zhou (zhouyu@live.com)
  */
 
 #ifndef CONFIG_H
@@ -20,14 +19,14 @@ extern "C" {
  */
 enum MODEL_CONSTS{
     MAX_DIMENSION = 3,      /*!< Maximum number of dimensions. */
-    NUMBER_OF_SLICE = 2,    /*!< Number of report slices. */
+    ROI_SLICE = 6,          /*!< Number of ROI slice positions (x+, x-, y+, y-, z+, z-). */
     SINGLE_PHASE = 1,       /*!< Single phase. */
     BIN_PHASE = 2,          /*!< Binary phase. */
 };
 
 enum PROGRAM_STATUS{
-    NOERR = 0,          /*!< Return value on successful function call. */
-    ERROR = -1,         /*!< Return value on function call failure. */
+    SUCCESS = 0,            /*!< Return value on successful function call. */
+    ERROR = -1,             /*!< Return value on function call failure. */
 };
 
 /*!
