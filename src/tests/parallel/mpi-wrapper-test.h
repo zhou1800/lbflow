@@ -1,32 +1,33 @@
-/*! \file testmpifunc.h
+/*! \file mpi-wrapper-test.h
  * \brief Setup the mpi envoriment for all tests.
- * \author Yu Zhou (zhouyu@live.com)
  */
-#ifndef TESTMPIFUNC_H
-#define TESTMPIFUNC_H
 
+#ifndef MPI_WRAPPER_TEST_H
+#define MPI_WRAPPER_TEST_H
+
+#include "mpi-wrapper.h"
 #include "gtest/gtest.h"
-#include "mpifunc.h"
 
 extern "C" {
     extern int ID;
     extern int MPI_SIZE;
 }
 
+// TODO: Separate MPIWrapperTest
 class MPIEnviroment : public ::testing::Environment{
-private:
-    int  *m_argc;
-    char ***m_argv;
 public:
     MPIEnviroment(int* argc, char ***argv)
-        :m_argc(argc) ,m_argv(argv) {}
+        :_argc(argc) ,_argv(argv) {}
 protected:
     virtual void SetUp() {
-        ASSERT_FALSE(MPIInit(m_argc, m_argv));
+        ASSERT_EQ(MPIInit(_argc, _argv), 0);
     }
     virtual void TearDown() {
-        ASSERT_FALSE(MPI_Finalize());
+        ASSERT_EQ(MPI_Finalize(), 0);
     }
+private:
+    int  *_argc;
+    char ***_argv;
 };
 
 TEST(MPIEnviroment, initialize_MPI) {
@@ -43,4 +44,4 @@ TEST(MPIEnviroment, bcast_a_message) {
     EXPECT_EQ(a, fixed);
 }
 
-#endif // TESTMPIFUNC_H
+#endif // MPI_WRAPPER_TEST_H
