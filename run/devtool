@@ -24,7 +24,7 @@ fi
 
 case $1 in
     build)
-        if [ $2 == debug ]; then
+        if [ "$2" == "debug" ]; then
             BUILD_TYPE=Debug
         else
             BUILD_TYPE=Release
@@ -36,16 +36,16 @@ case $1 in
     ;;
     test)
         BUILD_TYPE=Release
-        $RUN_DIR/devtool build $BUILD_TYPE
+        $RUN_DIR/devtool build
         cd $PROJ_DIR/build/$BUILD_TYPE/tests
         ctest --verbose
     ;;
     coverage)
         BUILD_TYPE=Debug
-        $RUN_DIR/devtool build $BUILD_TYPE
+        $RUN_DIR/devtool build debug
         cd $PROJ_DIR/build/$BUILD_TYPE/tests
         ctest   # run all tests
-        GCOVR_FILTERS="-r $PROJ_DIR -f $PROJ_DIR/src/ -e $PROJ_DIR/src/3rdparty \
+        GCOVR_FILTERS="-r $PROJ_DIR -f $PROJ_DIR/src/libs
                       --exclude-directories '$PROJ_DIR/build/Release$'"
         gcovr $GCOVR_FILTERS
         gcovr $GCOVR_FILTERS -b -s
