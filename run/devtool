@@ -17,9 +17,7 @@ Options:
     -n              Number of process to run.
     -c, --coverage  Produce coverage report. This option will also turn on debug build.
     --grep=<regex>  Run tests matching given regular expression.
-    -v, --verbose   Enable verbose output from tests.
     -b, --browser   Open browser to view coverage report or documents.
-    -h, --help      Print this message.
 
 EOF
 }
@@ -29,7 +27,7 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
-if ! TEMP=`getopt -n "devtool" -o bcdhn:v --long browser,coverage,debug,grep:,help,verbose -- "$@"`;
+if ! TEMP=`getopt -n "devtool" -o bcdn: --long browser,coverage,debug,grep: -- "$@"`;
 then
     exit 1
 fi
@@ -44,12 +42,8 @@ while true; do
             BUILD_TYPE=Debug; RUN_COVERAGE=true;;
         -d|--debug)
             BUILD_TYPE=Debug;;
-        -h|--help)
-            print_useage; exit 0;;
         -n)
             MPI_RUN="mpirun -n $2"; shift;;
-        -v|--verbose)
-            VERBOSE=--verbose;;
         --grep)
             GREP="-R $2"; shift;;
         --)
@@ -70,7 +64,7 @@ case $1 in
     build)
         build;;
     test)
-        build; cd $PROJ_DIR/build/$BUILD_TYPE/tests; $MPI_RUN ctest $GREP $VERBOSE;
+        build; cd $PROJ_DIR/build/$BUILD_TYPE/tests; CTEST_OUTPUT_ON_FAILURE=1 $MPI_RUN ctest $GREP;
         if [ "$RUN_COVERAGE" = true ] ; then
             GCOVR_FILTERS="-r $PROJ_DIR -f $PROJ_DIR/src/libs
                           --exclude-directories '$PROJ_DIR/build/Release$'"
