@@ -8,11 +8,18 @@ print_useage() {
 Useage: devtool COMMAND [OPTIONS]
 
 Commands:
-    build [OPTIONS] Build project. Release is the default.
-                    OPTIONS=debug for debugging.
+    build           Build project
     test            Run unit test
-    coverage        Generagte test coverage report
     gendoc          Regenerate document
+
+Options:
+    -d, --debug     Build in debug mode.
+    -n              Number of process to run.
+    -c, --coverage  Produce coverage report. This option will also turn on debug build.
+    --grep=<regex>  Run tests matching given regular expression.
+    -v, --verbose   Enable verbose output from tests.
+    -b, --browser   Open browser to view coverage report or documents.
+    -h, --help      Print this message.
 
 EOF
 }
@@ -22,43 +29,67 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
+if ! TEMP=`getopt -n "devtool" -o bcdhn:v --long browser,coverage,debug,grep:,help,verbose -- "$@"`;
+then
+    exit 1
+fi
+eval set -- "$TEMP"
+
+BUILD_TYPE=Release
+while true; do
+    case "$1" in
+        -b|--browser)
+            OPEN_BROWSER=true;;
+        -c|--coverage)
+            BUILD_TYPE=Debug; RUN_COVERAGE=true;;
+        -d|--debug)
+            BUILD_TYPE=Debug;;
+        -h|--help)
+            print_useage; exit 0;;
+        -n)
+            MPI_RUN="mpirun -n $2"; shift;;
+        -v|--verbose)
+            VERBOSE=--verbose;;
+        --grep)
+            GREP="-R $2"; shift;;
+        --)
+            shift; break;;
+        *)
+            echo "$0: error -- Unrecognized options $1"; print_useage; exit 1;;
+    esac
+    shift
+done
+
+build() {
+    mkdir -p $PROJ_DIR/build/$BUILD_TYPE
+    cd $PROJ_DIR/build/$BUILD_TYPE
+    cmake . $PROJ_DIR/src -DCMAKE_BUILD_TYPE=$BUILD_TYPE && make -j
+}
+
 case $1 in
     build)
-        if [ "$2" == "debug" ]; then
-            BUILD_TYPE=Debug
-        else
-            BUILD_TYPE=Release
-        fi
-        mkdir -p $PROJ_DIR/build/$BUILD_TYPE
-        cd $PROJ_DIR/build/$BUILD_TYPE
-        cmake . $PROJ_DIR/src -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-        make -j
-    ;;
+        build;;
     test)
-        BUILD_TYPE=Release
-        $RUN_DIR/devtool build
-        cd $PROJ_DIR/build/$BUILD_TYPE/tests
-        ctest --verbose
-    ;;
-    coverage)
-        BUILD_TYPE=Debug
-        $RUN_DIR/devtool build debug
-        cd $PROJ_DIR/build/$BUILD_TYPE/tests
-        ctest   # run all tests
-        GCOVR_FILTERS="-r $PROJ_DIR -f $PROJ_DIR/src/libs
-                      --exclude-directories '$PROJ_DIR/build/Release$'"
-        gcovr $GCOVR_FILTERS
-        gcovr $GCOVR_FILTERS -b -s
-        mkdir -p $PROJ_DIR/documents/coverage
-        gcovr $GCOVR_FILTERS --html --html-details -o $PROJ_DIR/documents/coverage/coverage.html
-    ;;
+        build; cd $PROJ_DIR/build/$BUILD_TYPE/tests; $MPI_RUN ctest $GREP $VERBOSE;
+        if [ "$RUN_COVERAGE" = true ] ; then
+            GCOVR_FILTERS="-r $PROJ_DIR -f $PROJ_DIR/src/libs
+                          --exclude-directories '$PROJ_DIR/build/Release$'"
+            gcovr $GCOVR_FILTERS && gcovr $GCOVR_FILTERS -b -s
+            mkdir -p $PROJ_DIR/documents/coverage
+            URL=$PROJ_DIR/documents/coverage/coverage.html
+            gcovr $GCOVR_FILTERS --html --html-details -o $URL
+        fi;;
     gendoc)
         cd $PROJ_DIR/documents
         doxygen Doxyfile
-        sensible-browser doxygen/html/index.html
+        URL=$PROJ_DIR/documents/doxygen/html/index.html
     ;;
     *)
         print_useage
         exit 1
     ;;
 esac
+
+if [ "$OPEN_BROWSER" = true ]; then
+    sensible-browser $URL
+fi
