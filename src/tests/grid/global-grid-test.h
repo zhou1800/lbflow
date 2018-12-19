@@ -6,6 +6,18 @@
 #include "global-grid.h"
 #include "gtest/gtest.h"
 
+<<<<<<< HEAD
+=======
+extern "C" {
+    extern int ID;
+    extern int MPI_SIZE;
+    int SeparateCommunication(
+        int comm_size,
+        long image_size_x, long image_size_y, long image_size_z,
+        int *comm_x, int *comm_y, int *comm_z);
+}
+
+>>>>>>> c0ac77790f9a604db6032bc86009a58fd27bee3e
 class GlobalGridTest: public ::testing::Test{
 protected:
     virtual void SetUp(){
@@ -14,9 +26,33 @@ protected:
     }
 };
 
+<<<<<<< HEAD
 TEST(GlobalGridTest, MpiCommunicationSizeTest)
 {
     EXPECT_EQ(1, GetCommunicationSize());
+=======
+TEST(GlobalGridTest, scatter_grid) {
+    const RAW globalGrid[] = {     // 240 lattices.
+        50,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,200,
+        50,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,200,
+        255,255,255,255,255,0,0,0,0,0,255,255,255,0,0,0,0,0,0,200,
+        150,100,100,100,100,0,0,0,0,255,255,255,255,255,0,0,0,0,0,200,
+        150,100,100,100,100,0,0,0,255,255,255,255,255,255,255,0,0,0,0,200,
+        255,255,255,255,255,0,0,0,255,255,255,255,255,255,255,0,0,0,0,200,
+        50,0,0,0,0,0,0,0,255,255,255,255,255,255,255,0,0,0,0,200,
+        50,0,0,0,0,0,0,0,0,255,255,255,255,255,0,0,0,0,0,200,
+        255,255,255,255,255,0,0,0,0,0,255,255,255,0,0,0,0,0,0,200,
+        150,100,100,100,100,0,0,0,0,0,0,0,0,0,0,0,0,0,0,200,
+        150,100,100,100,100,0,0,0,0,0,0,0,0,0,0,0,0,0,0,200,
+        255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255
+    };
+    const int size2D[] = {20, 12};    // Y, X order
+    const int size3D[] = {3, 8, 10};    // Z, Y, X order
+    RAW* localGrid = NULL;
+    SLICE* localSlices = NULL;
+    int localSliceIndex = 0;
+    EXPECT_EQ(ScatterGrid(globalGrid, size2D, localGrid, localSlices, &localSliceIndex), SUCCESS);
+>>>>>>> c0ac77790f9a604db6032bc86009a58fd27bee3e
 }
 
 TEST(GlobalGridTest, SeparateCommunicationTest)
