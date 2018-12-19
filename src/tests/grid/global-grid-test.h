@@ -42,8 +42,14 @@ TEST(GlobalGridTest, scatter_grid) {
     const int size3D[] = {3, 8, 10};    // Z, Y, X order
     RAW* localGrid = NULL;
     SLICE* localSlices = NULL;
-    int localSliceIndex = 0;
-    EXPECT_EQ(ScatterGrid(globalGrid, size2D, localGrid, localSlices, &localSliceIndex), SUCCESS);
+    if (ID == 0) {
+        EXPECT_EQ(ScatterGrid(globalGrid, size2D, localGrid, localSlices), SUCCESS);
+        EXPECT_EQ(ScatterGrid(globalGrid, size3D, localGrid, localSlices), SUCCESS);
+    }
+    else {
+        EXPECT_EQ(ScatterGrid(NULL, NULL, localGrid, localSlices), SUCCESS);
+        EXPECT_EQ(ScatterGrid(NULL, NULL, localGrid, localSlices), SUCCESS);
+    }
 }
 
 TEST(GlobalGridTest, SeparateCommunicationTest)
