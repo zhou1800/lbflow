@@ -7,22 +7,22 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-extern int ID;  // Processor id
+extern int ID;  /* Processor id */
 
 PARAMETER DEFAULT_PARAMETER = {
-    {0},    // Grid
+    {0},    /* Grid */
     {0},
     0,
     0,
-    0,      // Control
+    0,      /* Control */
     0,
     0,
     0,
     0,
     0,
-    {0},    // Output
+    {0},    /* Output */
     {0},
-    SCSP,   // Model
+    SCSP,   /* Model */
     SRT,
     {0},
     {0},
@@ -236,7 +236,6 @@ int ParseGrayscaleParameter(const cJSON* grayscale, PARAMETER* par)
 
     for (int i = 0; i < cJSON_GetArraySize(grayscale); ++i){
         cJSON* item = cJSON_GetArrayItem(grayscale, i);
-        // VALIDATE(item, "Parameter error (grayscale)\n");
 
         cJSON *index= cJSON_GetObjectItemCaseSensitive(item, "index");
         VALIDATE(cJSON_IsNumber(index), "Parameter error (index).\n");
@@ -282,7 +281,7 @@ int ParseGrayscaleParameter(const cJSON* grayscale, PARAMETER* par)
             VALIDATE(cJSON_IsNumber(phase), "Parameter error (phase of index %d).\n", indexValue);
             par->grayscale[indexValue].phase = phase->valuedouble;
             break;
-        default:    //case SD:
+        default:    /* case SD: */
             VALIDATE(cJSON_IsNumber(value), "Parameter error (value of index %d).\n", indexValue);
             par->grayscale[indexValue].value = value->valuedouble;
             break;
