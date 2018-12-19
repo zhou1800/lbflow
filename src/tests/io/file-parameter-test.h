@@ -361,17 +361,17 @@ TEST_P(FileParameterTest, load_parameter){
     CompareParameter(par, GetParam().par);
 }
 
+
 typedef FileParameterTest FileParameterDeathTest;
 
 TEST_F(FileParameterDeathTest, load_parameter){
     PARAMETER par;
-    const char* veryLongFile = SOURCE_DIR"examples/Channel3D-24x24y100z.raw";
     if (ID == 0) {
-        EXPECT_DEATH(LoadParameter("non existing file", &par), "Can not open parameter file");
-        EXPECT_DEATH(LoadParameter(veryLongFile, &par), "File size exceeds maximum allowed size");
+        EXPECT_EQ(LoadParameter("file dose not exist.", &par), ERROR);
+        EXPECT_EQ(LoadParameter(SOURCE_DIR"examples/Channel3D-24x24y100z.raw", &par), ERROR);
     }
 }
 
-//! \todo More death tests for LoadParameter().
+}
 
 #endif // FILE_PARAMETER_TEST_H
