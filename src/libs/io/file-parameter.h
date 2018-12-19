@@ -103,4 +103,4 @@ int LoadParameter(const char *pathName, PARAMETER* par);
 }
 #endif
 
-#endif // FILE_PARAMETER_H
+#endif /* FILE_PARAMETER_H */

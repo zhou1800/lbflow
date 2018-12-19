@@ -28,4 +28,4 @@ int MPIInit(int *argc, char ***argv);
 }
 #endif
 
-#endif // MPI_WRAPPER_H
+#endif /* MPI_WRAPPER_H */
