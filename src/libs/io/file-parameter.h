@@ -49,7 +49,7 @@ typedef enum {
  * \brief The GRAYSCALE struct defines the property of grayscale value in the grid.
  *
  * This struct stores the attributes corresponding to each grayscale value,
- *  which is defined in the parameter file.
+ *  which are defined in the parameter file.
  */
 typedef struct {
     GRID_TYPE type;         /*!< Grid type. */
@@ -60,7 +60,8 @@ typedef struct {
 
 /*!
  * \brief The PARAMETER struct is an image of the parameter file.
- * \note Always initialize with DEFAULT_PARAMETER.
+ * \note Always initialize with DEFAULT_PARAMETER for setting default values to 0. This is required
+ *  because LoadParameter will remain parameters untouched if they are not in JSON file.
  */
 typedef struct{
     /* Grid */
@@ -94,8 +95,8 @@ typedef struct{
  * \brief The LoadParameter function loads the parameter file, and then parse it.
  *
  * \param[in] pathName - parameter file path name.
- * \param[out] par - The loaded parameter structure.
- * \return SUCCESS on success. exit(ERROR) on failure.
+ * \param[out] par - the loaded parameter structure.
+ * \return SUCCESS on success, ERROR on failure.
  */
 int LoadParameter(const char *pathName, PARAMETER* par);
 

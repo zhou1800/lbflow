@@ -17,9 +17,11 @@ typedef struct {
 
 /*!
  * \brief ScatterGrid divide global grid into sub grids, and send them to slave cores.
- * \param[in] comm_size - number of communiations
- * \param[in] image_size_x, image_size_y, image_size_z - shape of image
- * \param[out] comm_x, comm_y, comm_y - shape of communications matrix
+ * \param[in] globalGrid - Raw data of global grid (required for master, NULL for slaves).
+ * \param[in] globalSize - Global grid size (required for master, NULL for slaves).
+ * \param[out] localGrid - Raw data for local grid.
+ * \param[out] localSlices - Array of local Slices.
+ * \return SUCCESS on success, ERROR on failure.
  */
 int ScatterGrid(const RAW* globalGrid, const int globalSize[], RAW* localGrid, SLICE* localSlices);
 
