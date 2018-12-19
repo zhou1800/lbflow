@@ -61,14 +61,13 @@ int LoadFile(const char* pathName, char* content, int maxFileLength)
  * \param[in] mId - master(source) processor id.
  * \return ERROR / SUCCESS
  */
-int SyncString(char str[], int mId)
+void SyncString(char str[], int mId)
 {
     int len;
     if (ID == mId) len = strlen(str) + 1;
     /* Sync string length. */
     MPI_Bcast(&len, 1, MPI_INT, mId, MPI_COMM_WORLD);
     MPI_Bcast(str, len, MPI_CHAR, mId, MPI_COMM_WORLD);
-    return SUCCESS;
 }
 
 /*!
@@ -77,7 +76,7 @@ int SyncString(char str[], int mId)
  * \param[out] par - parse to the parameter file.
  * \return ERROR / SUCCESS
  */
-int ParseParameterGrid(const cJSON* grid, PARAMETER* par)
+int ParseGridParameter(const cJSON* grid, PARAMETER* par)
 {
     VALIDATE(grid, "Parameter error (grid).\n");
 
@@ -93,6 +92,7 @@ int ParseParameterGrid(const cJSON* grid, PARAMETER* par)
         cJSON* size = cJSON_GetArrayItem(gridSize, i);
         VALIDATE(cJSON_IsNumber(size), "Parameter error (gridSize).\n");
         par->size[i] = size->valuedouble;
+        VALIDATE(par->size[i] > 0, "Parameter error (gridSize).\n");
     }
 
     cJSON *nDirection = cJSON_GetObjectItemCaseSensitive(grid, "nDirection");
@@ -103,9 +103,9 @@ int ParseParameterGrid(const cJSON* grid, PARAMETER* par)
 }
 
 /*!
- * \see ParseParameterGrid()
+ * \see ParseGridParameter()
  */
-int ParseParameterControl(const cJSON* control, PARAMETER* par)
+int ParseControlParameter(const cJSON* control, PARAMETER* par)
 {
     VALIDATE(control, "Parameter error (control)\n");
 
@@ -137,9 +137,9 @@ int ParseParameterControl(const cJSON* control, PARAMETER* par)
 }
 
 /*!
- * \see ParseParameterGrid()
+ * \see ParseGridParameter()
  */
-int ParseParameterOutput(const cJSON* output, PARAMETER* par)
+int ParseOutputParameter(const cJSON* output, PARAMETER* par)
 {
     VALIDATE(output, "Parameter error (output)\n");
 
@@ -164,9 +164,9 @@ int ParseParameterOutput(const cJSON* output, PARAMETER* par)
 }
 
 /*!
- * \see ParseParameterGrid()
+ * \see ParseGridParameter()
  */
-int ParseParameterModel(cJSON* model, PARAMETER* par)
+int ParseModelParameter(const cJSON* model, PARAMETER* par)
 {
     VALIDATE(model, "Parameter error (model)\n");
 
@@ -192,14 +192,16 @@ int ParseParameterModel(cJSON* model, PARAMETER* par)
     cJSON* density = cJSON_GetObjectItemCaseSensitive(model, "density");
     VALIDATE(cJSON_IsArray(density), "Parameter error (density).\n");
     VALIDATE(cJSON_GetArraySize(density) >= nPhase, "Parameter error (not enough density).\n");
-    cJSON* relaxTime = cJSON_GetObjectItemCaseSensitive(model, "relaxTime");
-    VALIDATE(cJSON_IsArray(relaxTime), "Parameter error (relaxTime).\n");
-    VALIDATE(cJSON_GetArraySize(relaxTime) >= nPhase, "Parameter error (not enough relaxTime).\n");
     for (int i = 0; i < nPhase; ++i) {
         cJSON* x = cJSON_GetArrayItem(density, i);
         VALIDATE(cJSON_IsNumber(x), "Parameter error (density).\n");
         par->density[i] = x->valuedouble;
-        x = cJSON_GetArrayItem(relaxTime, i);
+    }
+    cJSON* relaxTime = cJSON_GetObjectItemCaseSensitive(model, "relaxTime");
+    VALIDATE(cJSON_IsArray(relaxTime), "Parameter error (relaxTime).\n");
+    VALIDATE(cJSON_GetArraySize(relaxTime) >= nPhase, "Parameter error (not enough relaxTime).\n");
+    for (int i = 0; i < nPhase; ++i) {
+        cJSON* x = cJSON_GetArrayItem(relaxTime, i);
         VALIDATE(cJSON_IsNumber(x), "Parameter error (relaxTime).\n");
         par->relaxTime[i] = x->valuedouble;
     }
@@ -226,15 +228,15 @@ int ParseParameterModel(cJSON* model, PARAMETER* par)
 }
 
 /*!
- * \see ParseParameterGrid()
+ * \see ParseGridParameter()
  */
-int ParseParameterGrayscale(cJSON* grayscale, PARAMETER* par)
+int ParseGrayscaleParameter(const cJSON* grayscale, PARAMETER* par)
 {
     VALIDATE(grayscale, "Parameter error (grayscale)\n");
 
     for (int i = 0; i < cJSON_GetArraySize(grayscale); ++i){
         cJSON* item = cJSON_GetArrayItem(grayscale, i);
-        VALIDATE(item, "Parameter error (grayscale)\n");
+        // VALIDATE(item, "Parameter error (grayscale)\n");
 
         cJSON *index= cJSON_GetObjectItemCaseSensitive(item, "index");
         VALIDATE(cJSON_IsNumber(index), "Parameter error (index).\n");
@@ -280,7 +282,7 @@ int ParseParameterGrayscale(cJSON* grayscale, PARAMETER* par)
             VALIDATE(cJSON_IsNumber(phase), "Parameter error (phase of index %d).\n", indexValue);
             par->grayscale[indexValue].phase = phase->valuedouble;
             break;
-        case SD:
+        default:    //case SD:
             VALIDATE(cJSON_IsNumber(value), "Parameter error (value of index %d).\n", indexValue);
             par->grayscale[indexValue].value = value->valuedouble;
             break;
@@ -307,23 +309,23 @@ int ParseParameter(const char str[], PARAMETER* par)
     }
 
     cJSON* grid = cJSON_GetObjectItemCaseSensitive(root, "grid");
-    if (ParseParameterGrid(grid, par) == ERROR)
+    if (ParseGridParameter(grid, par) == ERROR)
         goto end;
 
     cJSON* control = cJSON_GetObjectItemCaseSensitive(root, "control");
-    if (ParseParameterControl(control, par) == ERROR)
+    if (ParseControlParameter(control, par) == ERROR)
         goto end;
 
     cJSON* output = cJSON_GetObjectItemCaseSensitive(root, "output");
-    if (ParseParameterOutput(output, par) == ERROR)
+    if (ParseOutputParameter(output, par) == ERROR)
         goto end;
 
     cJSON* model = cJSON_GetObjectItemCaseSensitive(root, "model");
-    if (ParseParameterModel(model, par) == ERROR)
+    if (ParseModelParameter(model, par) == ERROR)
         goto end;
 
     cJSON* grayscale = cJSON_GetObjectItemCaseSensitive(root, "grayscale");
-    if (ParseParameterGrayscale(grayscale, par) == ERROR)
+    if (ParseGrayscaleParameter(grayscale, par) == ERROR)
         goto end;
 
     status = SUCCESS;
@@ -336,8 +338,7 @@ end:
 int LoadParameter(const char *pathName, PARAMETER *par)
 {
     char fileContent[MAX_FILE_LEN];
-    return (ID == 0 && LoadFile(pathName, fileContent, MAX_FILE_LEN) == ERROR) ||
-           (SyncString(fileContent, 0) == ERROR) ||
-           (ParseParameter(fileContent, par) == ERROR) ?
-           ERROR : SUCCESS;
+    if (ID == 0 && LoadFile(pathName, fileContent, MAX_FILE_LEN) == ERROR) return ERROR;
+    SyncString(fileContent, 0);
+    return ParseParameter(fileContent, par);
 }

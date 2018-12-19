@@ -7,12 +7,18 @@
 #include "../testcfg.h"
 #include "mpi-wrapper.h"
 #include "gtest/gtest.h"
+#include "cJSON.h"
 
 extern "C" {
     extern int ID;
     extern PARAMETER DEFAULT_PARAMETER;
     int LoadFile(const char* filePathName, char* content, int maxFileLength);
     int SyncString(char str[], int mId);
+    int ParseGridParameter(const cJSON* grid, PARAMETER* par);
+    int ParseControlParameter(const cJSON* control, PARAMETER* par);
+    int ParseOutputParameter(const cJSON* output, PARAMETER* par);
+    int ParseModelParameter(const cJSON* model, PARAMETER* par);
+    int ParseGrayscaleParameter(const cJSON* grayscale, PARAMETER* par);
     int ParseParameter(const char str[], PARAMETER* par);
 }
 
@@ -341,7 +347,7 @@ TEST_P(FileParameterTest, load_file){
     EXPECT_STREQ(fileContent, GetParam().content);
 }
 
-TEST_P(FileParameterTest, sync_file_content){
+TEST_P(FileParameterTest, sync_string){
     char fileContent[MAX_FILE_LEN];
     if (ID == 0)
         strcpy(fileContent, GetParam().content);
@@ -349,7 +355,7 @@ TEST_P(FileParameterTest, sync_file_content){
     EXPECT_STREQ(fileContent, GetParam().content);
 }
 
-TEST_P(FileParameterTest, parse_parameter_string_content){
+TEST_P(FileParameterTest, parse_parameter){
     PARAMETER par = DEFAULT_PARAMETER;
     ASSERT_NE(ParseParameter(GetParam().content, &par), ERROR);
     CompareParameter(par, GetParam().par);
@@ -361,8 +367,190 @@ TEST_P(FileParameterTest, load_parameter){
     CompareParameter(par, GetParam().par);
 }
 
-
 typedef FileParameterTest FileParameterDeathTest;
+
+void EXPECT_STRING_OBJECT(cJSON* root, const char key[],
+                          int(*parser)(const cJSON* model, PARAMETER* par), std::string value="")
+{
+    PARAMETER par;
+    cJSON_AddNumberToObject(root, key, 0);
+    EXPECT_EQ(parser(root, &par), ERROR);
+    cJSON_DeleteItemFromObjectCaseSensitive(root, key);
+    cJSON_AddStringToObject(root, key, "");
+    if (value != ""){
+        EXPECT_EQ(parser(root, &par), ERROR);
+        cJSON_DeleteItemFromObjectCaseSensitive(root, key);
+        cJSON_AddStringToObject(root, key, value.c_str());
+    }
+}
+
+void EXPECT_NUMBER_OBJECT(cJSON* root, const char key[],
+                          int(*parser)(const cJSON* model, PARAMETER* par))
+{
+    PARAMETER par;
+    cJSON_AddStringToObject(root, key, "");
+    EXPECT_EQ(parser(root, &par), ERROR);
+    cJSON_DeleteItemFromObjectCaseSensitive(root, key);
+    cJSON_AddNumberToObject(root, key, 0);
+}
+
+void EXPECT_NUMBER_ARRAY_OBJECT(cJSON* root, const char key[],
+                                int(*parser)(const cJSON* model, PARAMETER* par),
+                                int value=0, int min_length=0)
+{
+    PARAMETER par;
+    cJSON_AddStringToObject(root, key, "");
+    EXPECT_EQ(parser(root, &par), ERROR);
+    cJSON_DeleteItemFromObjectCaseSensitive(root, key);
+    cJSON* array = cJSON_CreateArray();
+    cJSON_AddItemToObject(root, key, array);
+    if (min_length > 0){
+        EXPECT_EQ(parser(root, &par), ERROR);
+        for (int i = 0; i < min_length; ++i)
+            cJSON_AddItemToArray(array, cJSON_CreateString(""));
+    } else {
+        cJSON_AddItemToArray(array, cJSON_CreateString(""));
+        min_length = 1; // ensure at least 1 item in the array for testing.
+    }
+    EXPECT_EQ(parser(root, &par), ERROR);
+    while (cJSON_GetArraySize(array) > 0)
+        cJSON_DeleteItemFromArray(array, 0);
+    for (int i = 0; i < min_length; ++i)
+        cJSON_AddItemToArray(array, cJSON_CreateNumber(0));
+    if (value != 0){
+        EXPECT_EQ(parser(root, &par), ERROR);
+        cJSON_DeleteItemFromArray(array, 0);
+        cJSON_AddItemToArray(array, cJSON_CreateNumber(value));
+    }
+}
+
+TEST_F(FileParameterDeathTest, parse_grid_parameter){
+    cJSON* grid = cJSON_CreateArray();
+    EXPECT_STRING_OBJECT(grid, "gridFile", ParseGridParameter);
+    EXPECT_NUMBER_ARRAY_OBJECT(grid, "gridSize", ParseGridParameter, 1);
+    EXPECT_NUMBER_OBJECT(grid, "nDirection", ParseGridParameter);
+    cJSON_Delete(grid);
+}
+
+TEST_F(FileParameterDeathTest, parse_control_parameter){
+    cJSON* control = cJSON_CreateObject();
+    for (auto key : {"startStep", "endStep", "resultIntvl", "restartIntvl", "reportIntvl",
+                     "maxError"})
+        EXPECT_NUMBER_OBJECT(control, key, ParseControlParameter);
+    cJSON_Delete(control);
+}
+
+TEST_F(FileParameterDeathTest, parse_output_parameter){
+    cJSON* output = cJSON_CreateObject();
+    EXPECT_STRING_OBJECT(output, "outPath", ParseOutputParameter);
+    EXPECT_NUMBER_ARRAY_OBJECT(output, "reportROI", ParseOutputParameter);
+    cJSON_Delete(output);
+}
+
+TEST_F(FileParameterDeathTest, parse_model_parameter){
+    cJSON* model = cJSON_CreateObject();
+    EXPECT_STRING_OBJECT(model, "fluidModel", ParseModelParameter, "COLOR");
+    EXPECT_STRING_OBJECT(model, "relaxModel", ParseModelParameter, "SRT");
+    EXPECT_NUMBER_ARRAY_OBJECT(model, "density", ParseModelParameter, 0, 2);
+    EXPECT_NUMBER_ARRAY_OBJECT(model, "relaxTime", ParseModelParameter, 0, 2);
+    EXPECT_NUMBER_OBJECT(model, "latticeSpeed", ParseModelParameter);
+    EXPECT_NUMBER_OBJECT(model, "alpha0", ParseModelParameter);
+    EXPECT_NUMBER_OBJECT(model, "ift", ParseModelParameter);
+    EXPECT_NUMBER_OBJECT(model, "thickness", ParseModelParameter);
+    cJSON_Delete(model);
+}
+
+TEST_F(FileParameterDeathTest, parse_grayscale_parameter){
+    PARAMETER par;
+    cJSON* grayscale = cJSON_CreateArray();
+
+    cJSON* item = cJSON_CreateObject();
+    cJSON_AddStringToObject(item, "index", "0");
+    cJSON_AddItemToArray(grayscale, item);
+    item = cJSON_CreateObject();
+    cJSON_AddNumberToObject(item, "index", -1);
+    cJSON_AddItemToArray(grayscale, item);
+    item = cJSON_CreateObject();
+    cJSON_AddNumberToObject(item, "index", 32768);
+    cJSON_AddItemToArray(grayscale, item);
+    item = cJSON_CreateObject();
+    cJSON_AddNumberToObject(item, "index", 0);
+    cJSON_AddNumberToObject(item, "type", 0);
+    cJSON_AddItemToArray(grayscale, item);
+    item = cJSON_CreateObject();
+    cJSON_AddNumberToObject(item, "index", 0);
+    cJSON_AddStringToObject(item, "type", "NA");
+    cJSON_AddItemToArray(grayscale, item);
+    item = cJSON_CreateObject();
+    cJSON_AddNumberToObject(item, "index", 0);
+    cJSON_AddStringToObject(item, "type", "VD");
+    cJSON_AddItemToArray(grayscale, item);
+    item = cJSON_CreateObject();
+    cJSON_AddNumberToObject(item, "index", 0);
+    cJSON_AddStringToObject(item, "type", "GV");
+    cJSON_AddItemToArray(grayscale, item);
+    item = cJSON_CreateObject();
+    cJSON_AddNumberToObject(item, "index", 0);
+    cJSON_AddStringToObject(item, "type", "GV");
+    cJSON_AddNumberToObject(item, "value", 1);
+    cJSON_AddItemToArray(grayscale, item);
+    item = cJSON_CreateObject();
+    cJSON_AddNumberToObject(item, "index", 0);
+    cJSON_AddStringToObject(item, "type", "GV");
+    cJSON_AddNumberToObject(item, "value", 1);
+    cJSON_AddNumberToObject(item, "direction", 1);
+    cJSON_AddItemToArray(grayscale, item);
+    item = cJSON_CreateObject();
+    cJSON_AddNumberToObject(item, "index", 0);
+    cJSON_AddStringToObject(item, "type", "SD");
+    cJSON_AddItemToArray(grayscale, item);
+
+    while (cJSON_GetArraySize(grayscale) > 0) {
+        EXPECT_EQ(ParseGrayscaleParameter(grayscale, &par), ERROR);
+        cJSON_DeleteItemFromArray(grayscale, 0);
+    }
+
+    cJSON_Delete(grayscale);
+}
+
+TEST_F(FileParameterDeathTest, parse_parameter){
+    PARAMETER par;
+    EXPECT_EQ(ParseParameter("{", &par), ERROR);
+    EXPECT_EQ(ParseParameter("{}", &par), ERROR);
+#define GRID \
+    "    \"grid\" : {\n" \
+    "        \"gridFile\":     \"Grid20x12y.raw\",\n" \
+    "        \"gridSize\":     [20, 12],\n" \
+    "        \"nDirection\":   9\n" \
+    "    }\n"
+    EXPECT_EQ(ParseParameter("{" GRID "}", &par), ERROR);
+#define CONTROL \
+    "    \"control\" : {\n" \
+    "        \"startStep\":    0,\n" \
+    "        \"endStep\":      1000,\n" \
+    "        \"resultIntvl\":  100,\n" \
+    "        \"restartIntvl\": 500,\n" \
+    "        \"reportIntvl\":  10,\n" \
+    "        \"maxError\":     0.000001\n" \
+    "    }\n"
+    EXPECT_EQ(ParseParameter("{" GRID "," CONTROL "}", &par), ERROR);
+#define OUTPUT \
+    "    \"output\" : {\n" \
+    "        \"outPath\":      \"./LBFlow-Result/Grid20x12y\",\n" \
+    "        \"reportROI\":    [0, 98]\n" \
+    "    }\n"
+    EXPECT_EQ(ParseParameter("{" GRID "," CONTROL "," OUTPUT "}", &par), ERROR);
+#define MODEL \
+    "    \"model\" : {\n" \
+    "        \"fluidModel\":   \"SCSP\",\n" \
+    "        \"relaxModel\":   \"SRT\",\n" \
+    "        \"density\":      [1],\n" \
+    "        \"relaxTime\":    [1],\n" \
+    "        \"latticeSpeed\": 1\n" \
+    "    }\n"
+    EXPECT_EQ(ParseParameter("{" GRID "," CONTROL "," OUTPUT "," MODEL "}", &par), ERROR);
+}
+
 
 TEST_F(FileParameterDeathTest, load_parameter){
     PARAMETER par;
@@ -370,8 +558,6 @@ TEST_F(FileParameterDeathTest, load_parameter){
         EXPECT_EQ(LoadParameter("file dose not exist.", &par), ERROR);
         EXPECT_EQ(LoadParameter(SOURCE_DIR"examples/Channel3D-24x24y100z.raw", &par), ERROR);
     }
-}
-
 }
 
 #endif // FILE_PARAMETER_TEST_H
