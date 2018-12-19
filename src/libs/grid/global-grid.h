@@ -12,6 +12,12 @@ extern "C" {
  */
 int GetCommunicationSize();
 
+/**!
+ * \brief seperate communications into dimensions, follow the image shape
+ * \param[in] comm_size - number of communiations
+ * \param[in] image_size_x, image_size_y, image_size_z - shape of image
+ * \param[out] comm_x, comm_y, comm_y - shape of communications matrix
+ */
 int SeparateCommunication(
     int comm_size,
     long image_size_x, long image_size_y, long image_size_z,
