@@ -29,4 +29,4 @@ int ScatterGrid(const RAW* globalGrid, const int globalSize[], RAW* localGrid, S
 }
 #endif
 
-#endif // GLOBAL_GRID_H
+#endif /* GLOBAL_GRID_H */
