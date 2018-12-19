@@ -15,4 +15,4 @@ int LoadRawfile(const char* pathName, RAW *raw, int size);
 }
 #endif
 
-#endif // FILE_RAW_H
+#endif /* FILE_RAW_H */
