@@ -1,19 +1,5 @@
 /* \file global-grid.c */
 
-<<<<<<< HEAD
-#include <mpi.h>
-#include <math.h>
-#include "config.h"
-#include "global-grid.h"
-
-int GetCommunicationSize() {
-    // get size of mpi Communication
-    int world_size;
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    return world_size;
-}
-
-=======
 #include "global-grid.h"
 #include "config.h"
 #include <mpi.h>
@@ -37,7 +23,6 @@ typedef struct {
  * \param[in] image_size_x, image_size_y, image_size_z - shape of image
  * \param[out] comm_x, comm_y, comm_y - shape of communications matrix
  */
->>>>>>> c0ac77790f9a604db6032bc86009a58fd27bee3e
 int SeparateCommunication(
     int comm_size,
     long image_size_x, long image_size_y, long image_size_z,
@@ -87,13 +72,9 @@ int SeparateCommunication(
     *comm_x = dim_tgt[0];
     *comm_y = dim_tgt[1];
     *comm_z = dim_tgt[2];
-<<<<<<< HEAD
-}
-=======
 }
 
 int ScatterGrid(const RAW* globalGrid, const int globalSize[], RAW* localGrid,
                 SLICE* localSlices, int* localSliceIndex) {
     return SUCCESS;
 }
->>>>>>> c0ac77790f9a604db6032bc86009a58fd27bee3e
