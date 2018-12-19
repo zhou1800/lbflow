@@ -21,8 +21,7 @@ typedef struct {
  * \param[in] image_size_x, image_size_y, image_size_z - shape of image
  * \param[out] comm_x, comm_y, comm_y - shape of communications matrix
  */
-int ScatterGrid(const RAW* globalGrid, const int globalSize[], RAW* localGrid,
-                SLICE* localSlices, int* localSliceIndex);
+int ScatterGrid(const RAW* globalGrid, const int globalSize[], RAW* localGrid, SLICE* localSlices);
 
 #ifdef __cplusplus
 }
