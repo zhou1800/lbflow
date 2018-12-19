@@ -2,6 +2,7 @@
 
 #include <mpi.h>
 #include <math.h>
+#include "config.h"
 #include "global-grid.h"
 
 int GetCommunicationSize() {

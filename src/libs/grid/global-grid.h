@@ -8,11 +8,20 @@ extern "C" {
 #endif
 
 /*!
+ * \brief The SUBDIVISION struct defines the description of sub grid.
+ */
+typedef struct {
+    int comm_index;         /*!< Index of communication. */
+    long position[3];       /*!< location{x, y, z} of the sub grid in the global grid. */
+    long size[3];           /*!< size{x, y, z} of the sub grid. */
+} SUBDIVISION;
+
+/*!
  * \brief get the total processors of mpi.
  */
 int GetCommunicationSize();
 
-/**!
+/*!
  * \brief seperate communications into dimensions, follow the image shape
  * \param[in] comm_size - number of communiations
  * \param[in] image_size_x, image_size_y, image_size_z - shape of image
