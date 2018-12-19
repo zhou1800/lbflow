@@ -64,11 +64,10 @@ int LoadFile(const char* pathName, char* content, int maxFileLength)
 int SyncString(char str[], int mId)
 {
     int len;
-    (ID == mId) && (len = strlen(str) + 1);
+    if (ID == mId) len = strlen(str) + 1;
     /* Sync string length. */
-    VALIDATE(MPI_Bcast(&len, 1, MPI_INT, mId, MPI_COMM_WORLD) == MPI_SUCCESS &&
-             MPI_Bcast(str, len, MPI_CHAR, mId, MPI_COMM_WORLD) == MPI_SUCCESS,
-             "MPI_Bcast fail to Bcast string : '%s' on node %d.\n", str, ID);
+    MPI_Bcast(&len, 1, MPI_INT, mId, MPI_COMM_WORLD);
+    MPI_Bcast(str, len, MPI_CHAR, mId, MPI_COMM_WORLD);
     return SUCCESS;
 }
 
@@ -337,11 +336,8 @@ end:
 int LoadParameter(const char *pathName, PARAMETER *par)
 {
     char fileContent[MAX_FILE_LEN];
-    if (ID == 0 && LoadFile(pathName, fileContent, MAX_FILE_LEN) == ERROR)
-        exit(ERROR);
-    if (SyncString(fileContent, 0) == ERROR)
-        exit(ERROR);
-    if (ParseParameter(fileContent, par) == ERROR)
-        exit(ERROR);
-    return SUCCESS;
+    return (ID == 0 && LoadFile(pathName, fileContent, MAX_FILE_LEN) == ERROR) ||
+           (SyncString(fileContent, 0) == ERROR) ||
+           (ParseParameter(fileContent, par) == ERROR) ?
+           ERROR : SUCCESS;
 }
