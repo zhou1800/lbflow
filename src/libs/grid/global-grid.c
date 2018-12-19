@@ -74,7 +74,6 @@ int SeparateCommunication(
     *comm_z = dim_tgt[2];
 }
 
-int ScatterGrid(const RAW* globalGrid, const int globalSize[], RAW* localGrid,
-                SLICE* localSlices, int* localSliceIndex) {
+int ScatterGrid(const RAW* globalGrid, const int globalSize[], RAW* localGrid, SLICE* localSlices) {
     return SUCCESS;
 }
