@@ -20,13 +20,38 @@ typedef struct {
 } SLICE;
 
 /*!
+ * \brief The BOX struct defines a bounding box for selecting a rectangular subset from a
+ * multi-dimensional array.
+ */
+typedef struct {
+    int start[MAX_DIMENSION];
+    int sizes[MAX_DIMENSION];
+} BOX;
+
+/*!
  * \brief SliceToIndices calculates indices from a slice.
  * \param[in] slice - the slice.
  * \param[out] indices - array indices of the grid selected by slice.
  * \param[out] nIndices - number of indices.
  * \return SUCCESS on success, ERROR on failure.
  */
-int SliceToIndices(const SLICE* slice, int* indices, int* nIndices);
+int SliceToIndices(const SLICE* slice, int** indices, int* nIndices);
+
+/*!
+ * \brief SliceToBox convert a slice into a bounding box.
+ * \param[in] slice - the slice.
+ * \param[out] box - the box.
+ * \return SUCCESS on success, ERROR on failure.
+ */
+int SliceToBox(const SLICE* slice, BOX* box);
+
+/*!
+ * \brief BoxToSlice convert a bounding box into a slice.
+ * \param[in] box - the box.
+ * \param[out] slice - the slice.
+ * \return SUCCESS on success, ERROR on failure.
+ */
+int BoxToSlice(const BOX* box, SLICE* slice);
 
 /*!
  * \brief Convert an index in 1D array to it's position in grid.

@@ -53,8 +53,8 @@ typedef enum {
 typedef struct {
     GRID_TYPE type;         /*!< Grid type. */
     DECIMAL value;          /*!< Value of the physical quantity. */
-    int direction;          /*!< Direction of the physical quantity. */
-    int phase;              /*!< Phase index. */
+    size_t direction;       /*!< Direction index of the physical quantity. */
+    size_t phase;           /*!< Phase index. */
 } GRAYSCALE;
 
 /*!

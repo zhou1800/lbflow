@@ -4,8 +4,8 @@
 #define FILE_PARAMETER_TEST_H
 
 #include "file-parameter.h"
-#include "../testcfg.h"
-#include "mpi-wrapper.h"
+#include "../test-cfg.h"
+#include "../gtest-helper.h"
 #include "gtest/gtest.h"
 #include "cJSON.h"
 
@@ -303,16 +303,6 @@ protected:
 };
 
 INSTANTIATE_TEST_CASE_P(2Dand3D, FileParameterTest, ::testing::Values(Grid2D, Channel3D));
-
-void EXPECT_ARR_EQ(const int a[], const int b[], int n){
-    for (int i = 0; i < n; ++i)
-        EXPECT_EQ(a[i], b[i]);
-}
-
-void EXPECT_ARR_EQ(const DECIMAL a[], const DECIMAL b[], int n){
-    for (int i = 0; i < n; ++i)
-        EXPECT_FLOAT_EQ(a[i], b[i]);
-}
 
 void CompareParameter(const PARAMETER& par1, const PARAMETER& par2)
 {
