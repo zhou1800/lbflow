@@ -5,10 +5,15 @@
 
 int LoadRawfile(const char *pathName, RAW *raw, int length)
 {
+    int status = ERROR;
+
     FILE* fp = fopen(pathName, "rb");
-    VALIDATE(fp != NULL, "Can not open raw file '%s'.\n", pathName);
-    VALIDATE(fread(raw, sizeof(RAW), length, fp) == length,
+    ASSERT(fp != NULL, "Can not open raw file '%s'.\n", pathName);
+    TO_END(fread(raw, sizeof(RAW), length, fp) != length,
              "Failed to read raw file '%s'.\n", pathName);
+
+    status = SUCCESS;
+end:
     fclose(fp);
-    return SUCCESS;
+    return status;
 }

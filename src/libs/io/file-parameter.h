@@ -15,7 +15,6 @@ enum PARAMETE_FILE{
     MAX_GRAYSCALE = 256,    /*!< Grid file grayscale range: 0 ~ 255. */
     MAX_STRING_LEN = 256,   /*!< Maximum number of characters in a string. */
     MAX_KEY_LEN = 32,       /*!< Maximum number of characters in a keyword. */
-    MAX_FILE_LEN = 8192,    /*!< Maximum length of parameter file. */
 };
 
 /*! Fluid model. */

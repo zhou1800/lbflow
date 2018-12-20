@@ -12,8 +12,8 @@
 extern "C" {
     extern int ID;
     extern PARAMETER DEFAULT_PARAMETER;
-    int LoadFile(const char* filePathName, char* content, int maxFileLength);
-    int SyncString(char str[], int mId);
+    int LoadFile(const char* filePathName, char** content);
+    int SyncString(char** str, int mId);
     int ParseGridParameter(const cJSON* grid, PARAMETER* par);
     int ParseControlParameter(const cJSON* control, PARAMETER* par);
     int ParseOutputParameter(const cJSON* output, PARAMETER* par);
@@ -294,9 +294,12 @@ PARAMETER_FILE Channel3D{
 class FileParameterTest : public ::testing::TestWithParam<PARAMETER_FILE>{
 protected:
     virtual void SetUp(){
+        fileContent = NULL;
     }
     virtual void TearDown(){
+        free(fileContent);
     }
+    char* fileContent;
 };
 
 INSTANTIATE_TEST_CASE_P(2Dand3D, FileParameterTest, ::testing::Values(Grid2D, Channel3D));
@@ -342,16 +345,16 @@ void CompareParameter(const PARAMETER& par1, const PARAMETER& par2)
 }
 
 TEST_P(FileParameterTest, load_file){
-    char fileContent[MAX_FILE_LEN];
-    ASSERT_NE(LoadFile(GetParam().parameterFile, fileContent, MAX_FILE_LEN), ERROR);
+    ASSERT_NE(LoadFile(GetParam().parameterFile, &fileContent), ERROR);
     EXPECT_STREQ(fileContent, GetParam().content);
 }
 
 TEST_P(FileParameterTest, sync_string){
-    char fileContent[MAX_FILE_LEN];
-    if (ID == 0)
+    if (ID == 0) {
+        fileContent = (char*) malloc((strlen(GetParam().content) + 1) * sizeof(char));
         strcpy(fileContent, GetParam().content);
-    ASSERT_NE(SyncString(fileContent, 0), ERROR);
+    }
+    ASSERT_NE(SyncString(&fileContent, 0), ERROR);
     EXPECT_STREQ(fileContent, GetParam().content);
 }
 
@@ -554,10 +557,8 @@ TEST_F(FileParameterDeathTest, parse_parameter){
 
 TEST_F(FileParameterDeathTest, load_parameter){
     PARAMETER par;
-    if (ID == 0) {
-        EXPECT_EQ(LoadParameter("file dose not exist.", &par), ERROR);
-        EXPECT_EQ(LoadParameter(SOURCE_DIR"examples/Channel3D-24x24y100z.raw", &par), ERROR);
-    }
+    EXPECT_EQ(LoadParameter("file dose not exist.", &par), ERROR);
+    EXPECT_EQ(LoadParameter(SOURCE_DIR"examples/Channel3D-24x24y100z.raw", &par), ERROR);
 }
 
 #endif // FILE_PARAMETER_TEST_H
