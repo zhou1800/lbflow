@@ -2,15 +2,17 @@
 
 #include "file-raw.h"
 #include <stdio.h>
+#include <stdlib.h>
 
-int LoadRawfile(const char *pathName, RAW *raw, int length)
+int LoadRawFile(const char* pathName, RAW** raw, int length)
 {
     int status = ERROR;
 
     FILE* fp = fopen(pathName, "rb");
-    ASSERT(fp != NULL, "Can not open raw file '%s'.\n", pathName);
-    TO_END(fread(raw, sizeof(RAW), length, fp) != length,
-             "Failed to read raw file '%s'.\n", pathName);
+    ASSERT(fp != NULL, "[LoadRawFile] Can not open raw file '%s'.\n", pathName);
+    *raw = (RAW*) malloc(length * sizeof(RAW));
+    TO_END(fread(*raw, sizeof(RAW), length, fp) != length,
+           "[LoadRawFile] Failed to read raw file '%s'.\n", pathName);
 
     status = SUCCESS;
 end:

@@ -33,7 +33,6 @@ TEST(MPIWrapperTest, bcast_a_message) {
     if (ID == 0)
         a = fixed;
     MPI_Bcast(&a, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    printf("ID: %d, Size: %d, Value: %d\n", ID, MPI_SIZE, a);
     EXPECT_EQ(a, fixed);
 }
 
