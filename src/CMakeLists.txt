@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4)
 
 project(LBFlow C CXX)
 SET(CMAKE_CXX_STANDARD 14)
-set(CMAKE_C_FLAGS_DEBUG "-g -O0 -fprofile-arcs -ftest-coverage")
+set(CMAKE_C_FLAGS_DEBUG "-g -O0 -Wall -fprofile-arcs -ftest-coverage")
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-lgcov")
 
 # Headers
