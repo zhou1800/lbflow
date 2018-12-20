@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-#define DECIMAL float       /*!< Precision of the decimal value. */
+#define DECIMAL float       /*!< Decimal value type. */
 #define RAW unsigned char   /*!< Raw file type. */
 
 /*!

@@ -4,7 +4,7 @@
 #define FILE_RAW_TEST_H
 
 #include "file-raw.h"
-#include "../testcfg.h"
+#include "../test-cfg.h"
 #include "gtest/gtest.h"
 
 class FileRawTest: public ::testing::Test{
