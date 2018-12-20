@@ -13,65 +13,91 @@ extern int MPI_SIZE;    /* Communication size. */
  */
 typedef struct {
     int comm_index;         /*!< Index of communication. */
-    long position[3];       /*!< location{x, y, z} of the sub grid in the global grid. */
-    long size[3];           /*!< size{x, y, z} of the sub grid. */
+    int position[MAX_DIMENSION];       /*!< location{x, y, z} of the sub grid in the global grid. */
+    int size[MAX_DIMENSION];           /*!< size{x, y, z} of the sub grid. */
 } SUBDIVISION;
+
+/*! 
+ * \brief prime
+ * \param[in] value
+ * \param[out] primes
+ * \return number of primes
+*/
+int Primes(int value, int primes[]) {
+    int i = 2, j = 0;
+    while (value > 1) {
+        if (value % i ==0) {
+            primes[j++] = i; 
+            value /= i;
+        } else {
+            i++;
+        }
+    }
+    return j;
+}
+
+/*! 
+ * \brief prime
+ * \param[in] array
+ * \param[in] n - length of array
+ * \return index of max item
+*/
+int FindMaximum(const float array[], int n) {
+    int i, index = 0;
+    for (i = 1; i < n; i++) {
+        if (array[i] > array[index]) {
+            index = i;
+        }
+    }
+    return index;
+}
 
 /*!
  * \brief seperate communications into dimensions, follow the image shape
- * \param[in] comm_size - number of communiations
- * \param[in] image_size_x, image_size_y, image_size_z - shape of image
- * \param[out] comm_x, comm_y, comm_y - shape of communications matrix
+ * \param[in] value - number of communiations
+ * \param[in] image_size[3] - shape of image, {z, y, x}
+ * \param[out] proc_size[3] - shape of communications matrix, {z, y, x}
+ * \return SUCCESS
  */
-int SeparateCommunication(
-    int comm_size,
-    long image_size_x, long image_size_y, long image_size_z,
-    int *comm_x, int *comm_y, int *comm_z) {
-    // divide processors into several dimension
-    int i,j;
-    long dim_size[3], swap_size;
-    int dim_idx[3] = {0,1,2}, swap_idx;
-    int target, dim_tgt[3], limit;
-    // order dimensions, less first
-    dim_size[0] = image_size_x;
-    dim_size[1] = image_size_y;
-    dim_size[2] = image_size_z;
-    for(i = 0; i <= 1; i++) {
-        for (j = i+1; j<=2; j++) {
-            if (dim_size[i] > dim_size[j]) {
-                swap_size = dim_size[j];
-                dim_size[j] = dim_size[i];
-                dim_size[i] = swap_size;
-                swap_idx = dim_idx[j];
-                dim_idx[j] = dim_idx[i];
-                dim_idx[i] = swap_idx;
-            }
-        }
+int SeparateCommunication(int value, int image_size[], int proc_size[]) {
+    int i, max;
+    int primes[64];
+    float dim_size[MAX_DIMENSION];
+    for (i = 0; i<MAX_DIMENSION; i++) {
+        dim_size[i] = image_size[i];
+        proc_size[i] = 1;
     }
-    target = comm_size;
-    for (i = 0; i<2; i++) {
-        if (dim_size[i] == 1) {
-            dim_tgt[dim_idx[i]] = 1;
-        } else {
-            dim_tgt[dim_idx[i]] = 1;
-            if (i==0) {
-                limit = cbrt((double) target);
-            } else {
-                limit = sqrt((double) target);
-            }
-            for (j = limit; j>1; j--) {
-                if (target % j==0) {
-                    dim_tgt[dim_idx[i]] = j;
-                    target = target / j;
-                    break;
-                }
-            }
-        }
+    i = Primes(value, primes);
+    while (i > 0) {
+        max = FindMaximum(dim_size, MAX_DIMENSION);
+        proc_size[max] *= primes[i-1];
+        dim_size[max] /= primes[--i];
     }
-    dim_tgt[dim_idx[2]] = target;
-    *comm_x = dim_tgt[0];
-    *comm_y = dim_tgt[1];
-    *comm_z = dim_tgt[2];
+    return SUCCESS;
+}
+
+/*! 
+ * \brief calculate effective points
+ * \param[in] effective - value of effective point
+ * \param[in] globalGrid
+ * \param[in] localSlice - the slice need to calculate effective points
+ * \return the number of effective points
+*/
+int EffectivePoints(int effective, RAW globalGrid[], SLICE localSlice) {
+    int i, j, k, result = 0, index = localSlice.start, start[2];
+    for (i = 0; i < localSlice.sizes[0]; i++) {
+        start[0] = index;
+        for (j = 0; j < localSlice.sizes[1]; j++) {
+            start[1] = index;
+            for (k = 0; k < localSlice.sizes[2]; k++) {
+                result += (globalGrid[index] == effective ? 1 : 0);
+                index += localSlice.stride[2];
+            }
+            index = start[1] + localSlice.stride[1];
+        }
+        index = start[0] + localSlice.stride[0];
+    }
+    return result;
 }
 
 int ScatterGrid(const RAW* globalGrid, const int globalSize[], RAW* localGrid, SLICE* localSlices) {
