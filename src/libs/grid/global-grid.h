@@ -3,17 +3,12 @@
 #ifndef GLOBAL_GRID_H
 #define GLOBAL_GRID_H
 
+#include "array-grid.h"
 #include "config.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct {
-    int start;
-    int sizes[MAX_DIMENSION];
-    int stride[MAX_DIMENSION];
-} SLICE;
 
 /*!
  * \brief ScatterGrid divide global grid into sub grids, and send them to slave cores.
