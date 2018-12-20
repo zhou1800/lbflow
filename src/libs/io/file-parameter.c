@@ -47,7 +47,7 @@ int LoadFile(const char* pathName, char** content)
     int fileLength = ftell(fp);
     rewind(fp);
     *content = (char*) malloc((fileLength + 1) * sizeof(char));
-    fread(*content, sizeof(char), fileLength, fp);
+    fileLength = fread(*content, sizeof(char), fileLength, fp);
     (*content)[fileLength] = '\0';
     fclose(fp);
     return SUCCESS;
