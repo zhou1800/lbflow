@@ -8,15 +8,6 @@
 extern int ID;          /* Processor id */
 extern int MPI_SIZE;    /* Communication size. */
 
-/*!
- * \brief The SUBDIVISION struct defines the description of sub grid.
- */
-typedef struct {
-    int comm_index;         /*!< Index of communication. */
-    int position[MAX_DIMENSION];       /*!< location{x, y, z} of the sub grid in the global grid. */
-    int size[MAX_DIMENSION];           /*!< size{x, y, z} of the sub grid. */
-} SUBDIVISION;
-
 /*! 
  * \brief prime
  * \param[in] value
