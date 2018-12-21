@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-int SliceToIndices(const SLICE* slice, size_t** indices, size_t* nIndices) {
+int SliceToIndices(const SLICE* slice, size_t** indices, size_t* nIndices)
+{
     ASSERT((*nIndices = slice->sizes[0]) != 0, "[SliceToIndices] Slice is empty.\n");
     size_t dimensions = 1;
     for (size_t i = 1; i < MAX_DIMENSION && slice->sizes[i] != 0; ++i) {
@@ -32,18 +33,22 @@ int SliceToIndices(const SLICE* slice, size_t** indices, size_t* nIndices) {
     return SUCCESS;
 }
 
-int SliceToBox(const SLICE* slice, BOX* box) {
+int SliceToBox(const SLICE* slice, BOX* box)
+{
     return SUCCESS;
 }
 
-int BoxToSlice(const BOX* box, SLICE* slice) {
+int BoxToSlice(const BOX* box, SLICE* slice)
+{
     return SUCCESS;
 }
 
-int IndexToPosition(size_t index, const size_t size[], size_t position[]) {
+int IndexToPosition(size_t index, const size_t size[], size_t position[])
+{
     return SUCCESS;
 }
 
-int PositionToIndex(const size_t position[], const size_t size[], size_t* index) {
+int PositionToIndex(const size_t position[], const size_t size[], size_t* index)
+{
     return SUCCESS;
 }

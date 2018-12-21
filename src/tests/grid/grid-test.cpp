@@ -1,5 +1,6 @@
 /* \file grid-test.cpp */
 
+#include "grid-common-test.h"
 #include "array-grid-test.h"
 #include "global-grid-test.h"
 #include "../mpi-environment.h"

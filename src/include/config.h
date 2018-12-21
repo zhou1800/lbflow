@@ -19,6 +19,7 @@ extern "C" {
  */
 enum MODEL_CONSTS{
     MAX_DIMENSION = 3,      /*!< Maximum number of dimensions. */
+    MAX_GRAYSCALE = 256,    /*!< Grid file grayscale range: 0 ~ 255. */
     ROI_SLICE = 6,          /*!< Number of ROI slice positions (x+, x-, y+, y-, z+, z-). */
     SINGLE_PHASE = 1,       /*!< Single phase. */
     BIN_PHASE = 2,          /*!< Binary phase. */

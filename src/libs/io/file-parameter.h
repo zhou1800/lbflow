@@ -12,7 +12,6 @@ extern "C" {
 
 /*! Conventions of parameter file. */
 enum PARAMETE_FILE{
-    MAX_GRAYSCALE = 256,    /*!< Grid file grayscale range: 0 ~ 255. */
     MAX_STRING_LEN = 256,   /*!< Maximum number of characters in a string. */
     MAX_KEY_LEN = 32,       /*!< Maximum number of characters in a keyword. */
 };
