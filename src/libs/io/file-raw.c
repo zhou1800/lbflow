@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int LoadRawFile(const char* pathName, RAW** raw, int length)
+int LoadRawFile(const char* pathName, RAW** raw, size_t length)
 {
     int status = ERROR;
 

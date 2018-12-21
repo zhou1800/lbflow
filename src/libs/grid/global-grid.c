@@ -91,6 +91,6 @@ int EffectivePoints(int effective, RAW globalGrid[], SLICE localSlice) {
     return result;
 }
 
-int ScatterGrid(const RAW* globalGrid, const int globalSize[], RAW* localGrid, SLICE* localSlices) {
+int ScatterGrid(const RAW* globalGrid, const size_t globalSize[], RAW* localGrid, SLICE* localSlices) {
     return SUCCESS;
 }

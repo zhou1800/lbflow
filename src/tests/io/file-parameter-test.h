@@ -389,7 +389,7 @@ void EXPECT_NUMBER_OBJECT(cJSON* root, const char key[],
 
 void EXPECT_NUMBER_ARRAY_OBJECT(cJSON* root, const char key[],
                                 int(*parser)(const cJSON* model, PARAMETER* par),
-                                int value=0, int min_length=0)
+                                DECIMAL value=0, size_t min_length=0)
 {
     PARAMETER par;
     cJSON_AddStringToObject(root, key, "");
@@ -399,7 +399,7 @@ void EXPECT_NUMBER_ARRAY_OBJECT(cJSON* root, const char key[],
     cJSON_AddItemToObject(root, key, array);
     if (min_length > 0){
         EXPECT_EQ(parser(root, &par), ERROR);
-        for (int i = 0; i < min_length; ++i)
+        for (size_t i = 0; i < min_length; ++i)
             cJSON_AddItemToArray(array, cJSON_CreateString(""));
     } else {
         cJSON_AddItemToArray(array, cJSON_CreateString(""));
@@ -408,7 +408,7 @@ void EXPECT_NUMBER_ARRAY_OBJECT(cJSON* root, const char key[],
     EXPECT_EQ(parser(root, &par), ERROR);
     while (cJSON_GetArraySize(array) > 0)
         cJSON_DeleteItemFromArray(array, 0);
-    for (int i = 0; i < min_length; ++i)
+    for (size_t i = 0; i < min_length; ++i)
         cJSON_AddItemToArray(array, cJSON_CreateNumber(0));
     if (value != 0){
         EXPECT_EQ(parser(root, &par), ERROR);
@@ -462,9 +462,6 @@ TEST_F(FileParameterDeathTest, parse_grayscale_parameter){
     cJSON_AddItemToArray(grayscale, item);
     item = cJSON_CreateObject();
     cJSON_AddNumberToObject(item, "index", -1);
-    cJSON_AddItemToArray(grayscale, item);
-    item = cJSON_CreateObject();
-    cJSON_AddNumberToObject(item, "index", 32768);
     cJSON_AddItemToArray(grayscale, item);
     item = cJSON_CreateObject();
     cJSON_AddNumberToObject(item, "index", 0);

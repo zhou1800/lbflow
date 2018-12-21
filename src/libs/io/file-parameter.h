@@ -65,15 +65,15 @@ typedef struct {
 typedef struct{
     /* Grid */
     char gridFile[MAX_STRING_LEN];      /*!< The gridFile. */
-    int size[MAX_DIMENSION];            /*!< Grid side length. */
-    int nDimension;                     /*!< Number of dimensions. */
-    int nDirection;                     /*!< Number of discrete directions. */
+    size_t size[MAX_DIMENSION];         /*!< Grid side length. */
+    size_t nDimension;                  /*!< Number of dimensions. */
+    size_t nDirection;                  /*!< Number of discrete directions. */
     /* Control */
-    int startStep;                      /*!< Start time step. */
-    int endStep;                        /*!< End time step. */
-    int resultIntvl;                    /*!< Interval for writing result file. */
-    int restartIntvl;                   /*!< Interval for writing restart file. */
-    int reportIntvl;                    /*!< Interval for report output. */
+    size_t startStep;                   /*!< Start time step. */
+    size_t endStep;                     /*!< End time step. */
+    size_t resultIntvl;                 /*!< Interval for writing result file. */
+    size_t restartIntvl;                /*!< Interval for writing restart file. */
+    size_t reportIntvl;                 /*!< Interval for report output. */
     DECIMAL maxError;                   /*!< Terminate condition. */
     /* Output */
     char outPath[MAX_STRING_LEN];       /*!< Output file dir with name perfix. */

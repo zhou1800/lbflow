@@ -35,10 +35,10 @@ TEST_F(FileRawTest, read_raw_file)
         150,100,100,100,100,0,0,0,0,0,0,0,0,0,0,0,0,0,0,200,
         255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255
     };
-    const int size = 20 * 12;
+    const size_t size = 20 * 12;
 
     ASSERT_NE(LoadRawFile(rawFile, &raw, size), ERROR);
-    for (int i = 0; i < size; ++i)
+    for (size_t i = 0; i < size; ++i)
         EXPECT_EQ(raw[i], content[i]);
 
 }

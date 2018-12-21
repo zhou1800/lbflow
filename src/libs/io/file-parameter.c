@@ -44,7 +44,7 @@ int LoadFile(const char* pathName, char** content)
     FILE *fp = fopen(pathName, "r");
     ASSERT(fp, "[LoadFile] Can not open parameter file '%s'.\n", pathName);
     fseek(fp, 0L, SEEK_END);
-    int fileLength = ftell(fp);
+    size_t fileLength = ftell(fp);
     rewind(fp);
     *content = (char*) malloc((fileLength + 1) * sizeof(char));
     fileLength = fread(*content, sizeof(char), fileLength, fp);
@@ -61,7 +61,7 @@ int LoadFile(const char* pathName, char** content)
  */
 void SyncString(char** str, int mId)
 {
-    int len = 0;
+    size_t len = 0;
     if (ID == mId)
         len = strlen(*str) + 1;   /* including the ending '\0' */
     /* Sync string length. */
@@ -89,7 +89,7 @@ int ParseGridParameter(const cJSON* grid, PARAMETER* par)
     ASSERT(cJSON_IsArray(gridSize), "[ParseGridParameter] Parameter error (gridSize).\n");
     par->nDimension = cJSON_GetArraySize(gridSize) < MAX_DIMENSION ?
                       cJSON_GetArraySize(gridSize) : MAX_DIMENSION;
-    for (int i = 0; i < par->nDimension; ++i){
+    for (size_t i = 0; i < par->nDimension; ++i){
         cJSON* size = cJSON_GetArrayItem(gridSize, i);
         ASSERT(cJSON_IsNumber(size), "[ParseGridParameter] Parameter error (gridSize).\n");
         par->size[i] = size->valuedouble;
@@ -243,13 +243,13 @@ int ParseGrayscaleParameter(const cJSON* grayscale, PARAMETER* par)
 
         cJSON *index= cJSON_GetObjectItemCaseSensitive(item, "index");
         ASSERT(cJSON_IsNumber(index), "[ParseGrayscaleParameter] Parameter error (index).\n");
-        int indexValue = index->valuedouble;
-        ASSERT(indexValue < MAX_GRAYSCALE && indexValue >= 0,
-               "[ParseGrayscaleParameter] Parameter error (index %d out of range).\n", indexValue);
+        size_t indexValue = index->valuedouble;
+        ASSERT(indexValue < MAX_GRAYSCALE,
+               "[ParseGrayscaleParameter] Parameter error (index %ld out of range).\n", indexValue);
 
         cJSON *type = cJSON_GetObjectItemCaseSensitive(item, "type");
         ASSERT(cJSON_IsString(type),
-               "[ParseGrayscaleParameter] Parameter error (type of index %d).\n", indexValue);
+               "[ParseGrayscaleParameter] Parameter error (type of index %ld).\n", indexValue);
         if (!strcmp("VD", type->valuestring)) {
             par->grayscale[indexValue].type = VD;
         }
@@ -271,28 +271,28 @@ int ParseGrayscaleParameter(const cJSON* grayscale, PARAMETER* par)
         switch (par->grayscale[indexValue].type) {
         case VD:
             ASSERT(cJSON_IsNumber(phase),
-                   "[ParseGrayscaleParameter] Parameter error (phase of index %d).\n", indexValue);
+                   "[ParseGrayscaleParameter] Parameter error (phase of index %ld).\n", indexValue);
             par->grayscale[indexValue].phase = phase->valuedouble;
             break;
         case GV:
         case PB:
         case VB:
             ASSERT(cJSON_IsNumber(value),
-                   "[ParseGrayscaleParameter] Parameter error (value of index %d).\n", indexValue);
+                   "[ParseGrayscaleParameter] Parameter error (value of index %ld).\n", indexValue);
             par->grayscale[indexValue].value = value->valuedouble;
 
             ASSERT(cJSON_IsNumber(direction),
-                   "[ParseGrayscaleParameter] Parameter error (direction of index %d).\n",
+                   "[ParseGrayscaleParameter] Parameter error (direction of index %ld).\n",
                    indexValue);
             par->grayscale[indexValue].direction = direction->valuedouble;
 
             ASSERT(cJSON_IsNumber(phase),
-                   "[ParseGrayscaleParameter] Parameter error (phase of index %d).\n", indexValue);
+                   "[ParseGrayscaleParameter] Parameter error (phase of index %ld).\n", indexValue);
             par->grayscale[indexValue].phase = phase->valuedouble;
             break;
         default:    /* case SD: */
             ASSERT(cJSON_IsNumber(value),
-                   "[ParseGrayscaleParameter] Parameter error (value of index %d).\n", indexValue);
+                   "[ParseGrayscaleParameter] Parameter error (value of index %ld).\n", indexValue);
             par->grayscale[indexValue].value = value->valuedouble;
             break;
         }
