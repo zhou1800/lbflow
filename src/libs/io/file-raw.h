@@ -17,7 +17,7 @@ extern "C" {
  * \param[in] length - raw data length.
  * \return SUCCESS on success, ERROR on failure.
  */
-int LoadRawFile(const char* pathName, RAW** raw, int length);
+int LoadRawFile(const char* pathName, RAW** raw, size_t length);
 
 #ifdef __cplusplus
 }

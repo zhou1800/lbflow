@@ -18,7 +18,7 @@ extern "C" {
  * \param[out] localSlices - Array of local Slices.
  * \return SUCCESS on success, ERROR on failure.
  */
-int ScatterGrid(const RAW* globalGrid, const int globalSize[], RAW* localGrid, SLICE* localSlices);
+int ScatterGrid(const RAW* globalGrid, const size_t globalSize[], RAW* localGrid, SLICE* localSlices);
 
 #ifdef __cplusplus
 }

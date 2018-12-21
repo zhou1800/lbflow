@@ -5,16 +5,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-int SliceToIndices(const SLICE* slice, int** indices, int* nIndices) {
+int SliceToIndices(const SLICE* slice, size_t** indices, size_t* nIndices) {
     ASSERT((*nIndices = slice->sizes[0]) != 0, "[SliceToIndices] Slice is empty.\n");
-    int dimensions = 1;
-    for (int i = 1; i < MAX_DIMENSION && slice->sizes[i] != 0; ++i) {
+    size_t dimensions = 1;
+    for (size_t i = 1; i < MAX_DIMENSION && slice->sizes[i] != 0; ++i) {
         *nIndices *= slice->sizes[i];
         ++dimensions;
     }
-    *indices = (int*) malloc(*nIndices * sizeof(int));
-    int* temp = (int*) malloc(dimensions * sizeof(int));
-    memcpy(temp, slice->sizes, dimensions * sizeof(int));
+    *indices = (size_t*) malloc(*nIndices * sizeof(size_t));
+    size_t* temp = (size_t*) malloc(dimensions * sizeof(size_t));
+    memcpy(temp, slice->sizes, dimensions * sizeof(size_t));
     size_t start = slice->start;
 
     for (size_t i = 0; i < *nIndices; ++i) {
@@ -40,10 +40,10 @@ int BoxToSlice(const BOX* box, SLICE* slice) {
     return SUCCESS;
 }
 
-int IndexToPosition(int index, const int size[], int position[]) {
+int IndexToPosition(size_t index, const size_t size[], size_t position[]) {
     return SUCCESS;
 }
 
-int PositionToIndex(const int position[], const int size[], int* index) {
+int PositionToIndex(const size_t position[], const size_t size[], size_t* index) {
     return SUCCESS;
 }

@@ -14,9 +14,9 @@ extern "C" {
  *  an 1D array.
  */
 typedef struct {
-    int start;
-    int sizes[MAX_DIMENSION];
-    int stride[MAX_DIMENSION];
+    size_t start;
+    size_t sizes[MAX_DIMENSION];
+    size_t stride[MAX_DIMENSION];
 } SLICE;
 
 /*!
@@ -24,8 +24,8 @@ typedef struct {
  * multi-dimensional array.
  */
 typedef struct {
-    int start[MAX_DIMENSION];
-    int sizes[MAX_DIMENSION];
+    size_t start[MAX_DIMENSION];
+    size_t sizes[MAX_DIMENSION];
 } BOX;
 
 /*!
@@ -35,7 +35,7 @@ typedef struct {
  * \param[out] nIndices - number of indices.
  * \return SUCCESS on success, ERROR on failure.
  */
-int SliceToIndices(const SLICE* slice, int** indices, int* nIndices);
+int SliceToIndices(const SLICE* slice, size_t** indices, size_t* nIndices);
 
 /*!
  * \brief SliceToBox convert a slice into a bounding box.
@@ -60,7 +60,7 @@ int BoxToSlice(const BOX* box, SLICE* slice);
  * \param[out] position - position in the grid. Must be allocated the same size of grid size.
  * \return SUCCESS on success, ERROR on failure.
  */
-int IndexToPosition(int index, const int size[], int position[]);
+int IndexToPosition(size_t index, const size_t size[], size_t position[]);
 
 /*!
  * \brief Convert a position in grid to it's index in 1D array.
@@ -69,7 +69,7 @@ int IndexToPosition(int index, const int size[], int position[]);
  * \param[out] index - index in 1D array.
  * \return SUCCESS on success, ERROR on failure.
  */
-int PositionToIndex(const int position[], const int size[], int* index);
+int PositionToIndex(const size_t position[], const size_t size[], size_t* index);
 
 #ifdef __cplusplus
 }
