@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-#define DECIMAL float       /*!< Precision of the decimal value. */
+#define DECIMAL float       /*!< Decimal value type. */
 #define RAW unsigned char   /*!< Raw file type. */
 
 /*!
@@ -30,11 +30,18 @@ enum PROGRAM_STATUS{
 };
 
 /*!
- * If expr is FALSE, print an error message and return ERROR.
+ * If expr is TRUE, print an error message and goto end.
  * \param[in] expr - expression.
  * \param[in] ... - error message.
  */
-#define VALIDATE(expr, ...)\
+#define TO_END(expr, ...)\
+    if ((expr)) { fprintf(stderr, __VA_ARGS__); goto end; }
+/*!
+ * If expr is FALSE, print an error message and terminate functiona (return ERROR).
+ * \param[in] expr - expression.
+ * \param[in] ... - error message.
+ */
+#define ASSERT(expr, ...)\
     if (!(expr)) { fprintf(stderr, __VA_ARGS__); return ERROR; }
 
 /*!

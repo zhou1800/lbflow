@@ -3,17 +3,12 @@
 #ifndef GLOBAL_GRID_H
 #define GLOBAL_GRID_H
 
+#include "array-grid.h"
 #include "config.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct {
-    int start;
-    int sizes[MAX_DIMENSION];
-    int stride[MAX_DIMENSION];
-} SLICE;
 
 /*!
  * \brief ScatterGrid divide global grid into sub grids, and send them to slave cores.
@@ -23,7 +18,7 @@ typedef struct {
  * \param[out] localSlices - Array of local Slices.
  * \return SUCCESS on success, ERROR on failure.
  */
-int ScatterGrid(const RAW* globalGrid, const int globalSize[], RAW* localGrid, SLICE* localSlices);
+int ScatterGrid(const RAW* globalGrid, const size_t globalSize[], RAW* localGrid, SLICE* localSlices);
 
 #ifdef __cplusplus
 }
