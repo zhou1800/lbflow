@@ -4,18 +4,10 @@
 #include "config.h"
 #include <mpi.h>
 #include <math.h>
+#include <stdlib.h>
 
 extern int ID;          /* Processor id */
 extern int MPI_SIZE;    /* Communication size. */
-
-/*!
- * \brief The SUBDIVISION struct defines the description of sub grid.
- */
-typedef struct {
-    int comm_index;         /*!< Index of communication. */
-    int position[MAX_DIMENSION];       /*!< location{x, y, z} of the sub grid in the global grid. */
-    int size[MAX_DIMENSION];           /*!< size{x, y, z} of the sub grid. */
-} SUBDIVISION;
 
 /*! 
  * \brief prime
@@ -77,26 +69,127 @@ int SeparateCommunication(int value, int image_size[], int proc_size[]) {
 }
 
 /*! 
- * \brief calculate effective points
+ * \brief count effective points in dimension
  * \param[in] effective - value of effective point
+ * \param[in] dimension - divide which dimesion
  * \param[in] globalGrid
  * \param[in] localSlice - the slice need to calculate effective points
- * \return the number of effective points
+ * \return pointer of histogram || NULL
 */
-int EffectivePoints(int effective, RAW globalGrid[], SLICE localSlice) {
-    int i, j, k, result = 0, index = localSlice.start, start[2];
-    for (i = 0; i < localSlice.sizes[0]; i++) {
-        start[0] = index;
-        for (j = 0; j < localSlice.sizes[1]; j++) {
-            start[1] = index;
-            for (k = 0; k < localSlice.sizes[2]; k++) {
-                result += (globalGrid[index] == effective ? 1 : 0);
-                index += localSlice.stride[2];
+int* EffectivePoints(int effective, int dimension, const RAW* globalGrid, const SLICE* localSlice) {
+    int i, j, k;
+    int max_i, max_j, max_k;
+    int step_i, step_j, step_k;
+    int start_i, start_j;
+    int index = localSlice->start;
+    int *histogram;
+    // calloc result array
+    AVAILIBLE(histogram = (int *) calloc(localSlice->sizes[dimension], sizeof(int)));
+    // initialize loop
+    max_i = localSlice->sizes[dimension];
+    max_j = localSlice->sizes[(dimension + 1) % 3];
+    max_k = localSlice->sizes[(dimension + 2) % 3];
+    step_i = localSlice->stride[dimension];
+    step_j = localSlice->stride[(dimension + 1) % 3];
+    step_k = localSlice->stride[(dimension + 2) % 3];
+    // calculate histogram of dimension
+    for (i = 0; i < max_i; i++) {
+        start_i = index;
+        for (j = 0; j < max_j; j++) {
+            start_j = index;
+            for (k = 0; k < max_k; k++) {
+                if (globalGrid[index] == effective) {
+                    histogram[i]++;
+                }
+                index += step_k;
             }
-            index = start[1] + localSlice.stride[1];
+            index = start_j + step_j;
         }
-        index = start[0] + localSlice.stride[0];
+        index = start_i + step_i;
     }
+    // return histogram array
+    return histogram;
+}
+
+/*!
+ * \brief divide effective points into several slices
+ * \param[in] effective - value of effective point
+ * \param[in] dimension - divide which dimesion
+ * \param[in] parts - divide how many parts
+ * \param[in] globalGrid
+ * \param[in] localSlice - the slice need to calculate effective points
+ * \param[in] results - part slices
+ * \return pointer of part slices
+*/
+SLICE* DivideEffectivePoints(int effective, int dimension, int parts,
+    const RAW* globalGrid, const SLICE* localSlice) {
+    int i, j, k, last;
+    int step = 0, partial = 0, sum = 0, index = localSlice->start;
+    int *histogram, start[2];
+    SLICE* result;
+    // calloc result array
+    AVAILIBLE(result = (SLICE *) malloc(parts * sizeof(SLICE)));
+    // return whole slice directly
+    if (parts == 1) {
+        result[0] = *localSlice;
+        return result;
+    }
+    // calloc histogram array
+    histogram = EffectivePoints(effective, dimension, globalGrid, localSlice);
+    // calculate sum of effective points
+    for (i = 0; i < localSlice->sizes[dimension]; i++) {
+        sum += histogram[i];
+    }
+    for (i = 0; i < parts; i++) {
+        last = step;
+        while (partial < ((i + 1) * sum / parts)) {
+            partial += histogram[step++];
+        }
+        result[i] = *localSlice;
+        if (i == (parts - 1)) {
+            result[i].sizes[dimension] = localSlice->sizes[dimension] - last;
+        } else {
+            result[i].sizes[dimension] = step - last;
+        }
+        result[i].start = localSlice->start + last * localSlice->stride[dimension];
+    }
+    // free histogram array
+    FREE(histogram);
+    return result;
+}
+
+/*!
+ * \brief divide gird by dimension
+ * \param[in] effective - value of effective point
+ * \param[in] parts - divide how many parts
+ * \param[in] globalGrid
+ * \param[in] localSlice - divide which slice
+ * \param[out] len - how many slices divided
+ * \param[out] dividedSlices - slices of result
+*/
+SLICE* DivideGridByDimension(int effective, int parts[],
+    const RAW* globalGrid, const SLICE* localSlice) {
+    int i, j, k, n;
+    SLICE *first, *second, *third;
+    SLICE local;
+    SLICE *result;
+    AVAILIBLE(result = (SLICE *) malloc(parts[0] * parts[1] * parts[2] * sizeof(SLICE)));
+    first = DivideEffectivePoints(effective, 0, parts[0], globalGrid, localSlice);
+    for (i = 0; i < parts[0]; i++) {
+        local = first[i];
+        second = DivideEffectivePoints(effective, 1, parts[1], globalGrid, &local);
+        for (j = 0; j < parts[1]; j++) {
+            local = second[j];
+            third = DivideEffectivePoints(effective, 2, parts[2], globalGrid, &local);
+            for (k = 0; k < parts[2]; k++) {
+                n = (i * parts[1] + j) * parts[2] + k;
+                result[n] = third[k];
+            }
+            FREE(third);
+        }
+        FREE(second);
+    }
+    FREE(first);
     return result;
 }
 

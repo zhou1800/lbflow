@@ -37,6 +37,18 @@ enum PROGRAM_STATUS{
 #define VALIDATE(expr, ...)\
     if (!(expr)) { fprintf(stderr, __VA_ARGS__); return ERROR; }
 
+/*!
+ * If pointer is not NULL, free the pointer and set it to NULL.
+*/
+#define FREE(pointer)\
+    if (pointer!=NULL) { free(pointer); pointer=NULL; }
+
+/*!
+ * If can not malloc memory, return NULL
+*/
+#define AVAILIBLE(expr)\
+    if ((expr)==NULL) { return NULL; }
+
 #ifdef __cplusplus
 }
 #endif
