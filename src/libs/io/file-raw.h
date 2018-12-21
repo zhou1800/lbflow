@@ -10,14 +10,14 @@ extern "C" {
 #endif
 
 /*!
- * \brief The LoadParameter function loads the parameter file, and then parse it.
+ * \brief The LoadRawFile function loads the raw file.
  *
  * \param[in] pathName - parameter file path name.
  * \param[out] raw - raw data from loaded file.
- * \param[out] length - raw data length (should be smaller or equal to file length).
+ * \param[in] length - raw data length.
  * \return SUCCESS on success, ERROR on failure.
  */
-int LoadRawfile(const char* pathName, RAW *raw, int length);
+int LoadRawFile(const char* pathName, RAW** raw, size_t length);
 
 #ifdef __cplusplus
 }

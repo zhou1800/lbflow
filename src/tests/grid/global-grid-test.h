@@ -44,8 +44,8 @@ TEST(GlobalGridTest, scatter_grid) {
         150,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,200, // 10
         255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255  // 11
     };
-    const int size2D[] = {20, 12};    // Y, X order
-    const int size3D[] = {3, 8, 10};    // Z, Y, X order
+    const size_t size2D[] = {20, 12};    // Y, X order
+    const size_t size3D[] = {3, 8, 10};    // Z, Y, X order
     RAW* localGrid = NULL;
     SLICE* localSlices = NULL;
     if (ID == 0) {

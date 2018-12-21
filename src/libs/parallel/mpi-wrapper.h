@@ -9,6 +9,7 @@
 
 #ifndef MPI_WRAPPER_H
 #define MPI_WRAPPER_H
+
 #include "mpi.h"
 #include <stdint.h>
 

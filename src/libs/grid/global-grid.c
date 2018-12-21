@@ -193,6 +193,6 @@ SLICE* DivideGridByDimension(int effective, int parts[],
     return result;
 }
 
-int ScatterGrid(const RAW* globalGrid, const int globalSize[], RAW* localGrid, SLICE* localSlices) {
+int ScatterGrid(const RAW* globalGrid, const size_t globalSize[], RAW* localGrid, SLICE* localSlices) {
     return SUCCESS;
 }

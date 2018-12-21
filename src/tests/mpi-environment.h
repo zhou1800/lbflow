@@ -2,6 +2,9 @@
  * \brief Set up MPI environment for testing.
  */
 
+#ifndef MPI_ENVIRONMENT_H
+#define MPI_ENVIRONMENT_H
+
 #include "mpi-wrapper.h"
 #include "gtest/gtest.h"
 
@@ -20,3 +23,5 @@ private:
     int  *_argc;
     char ***_argv;
 };
+
+#endif // MPI_ENVIRONMENT_H
