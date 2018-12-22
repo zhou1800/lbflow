@@ -6,4 +6,8 @@ target_link_libraries(grid-test
 )
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-add_test(NAME grid_test COMMAND grid-test)
+if ($ENV{N_PROC})
+    add_test(NAME grid_test COMMAND mpirun -n $ENV{N_PROC} ./grid-test)
+else()
+    add_test(NAME grid_test COMMAND grid-test)
+endif()
