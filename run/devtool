@@ -43,7 +43,7 @@ while true; do
         -d|--debug)
             BUILD_TYPE=Debug;;
         -n)
-            MPI_RUN="mpirun -n $2"; shift;;
+            export N_PROC=$2; shift;;
         -v|--verbose)
             VERBOSE=--verbose;;
         --grep)
@@ -68,7 +68,7 @@ case $1 in
     test)
         build; [ $? -ne 0 ] && exit 1;
         cd $PROJ_DIR/build/$BUILD_TYPE/tests
-        CTEST_OUTPUT_ON_FAILURE=1 $MPI_RUN ctest $GREP $VERBOSE; [ $? -ne 0 ] && exit 1;
+        CTEST_OUTPUT_ON_FAILURE=1 ctest $GREP $VERBOSE; [ $? -ne 0 ] && exit 1;
         if [ "$RUN_COVERAGE" = true ] ; then
             GCOVR_FILTERS="-r $PROJ_DIR -f $PROJ_DIR/src/libs
                           --exclude-directories '$PROJ_DIR/build/Release$'"

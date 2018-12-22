@@ -4,7 +4,7 @@ ENV TZ=America/Edmonton
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-get update && apt-get -y upgrade
-RUN apt-get install -y cmake g++ libopenmpi-dev ssh-client
+RUN apt-get install -y cmake g++ mpich ssh-client
 
 RUN apt-get install -y curl
 RUN curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh \
