@@ -52,7 +52,7 @@ int FindMaximum(const float array[], int n) {
  * \return SUCCESS
  */
 int SeparateCommunication(int value, int image_size[], int proc_size[]) {
-    int i, max;
+    int i, max, prime;
     int primes[64];
     float dim_size[MAX_DIMENSION];
     for (i = 0; i<MAX_DIMENSION; i++) {
@@ -62,8 +62,10 @@ int SeparateCommunication(int value, int image_size[], int proc_size[]) {
     i = Primes(value, primes);
     while (i > 0) {
         max = FindMaximum(dim_size, MAX_DIMENSION);
-        proc_size[max] *= primes[i-1];
-        dim_size[max] /= primes[--i];
+        prime = (dim_size[max] / primes[i-1] >= 1) ? primes[i-1] : dim_size[max];
+        proc_size[max] *= prime;
+        dim_size[max] /= prime;
+        i--;
     }
     return SUCCESS;
 }
@@ -74,17 +76,19 @@ int SeparateCommunication(int value, int image_size[], int proc_size[]) {
  * \param[in] dimension - divide which dimesion
  * \param[in] globalGrid
  * \param[in] localSlice - the slice need to calculate effective points
- * \return pointer of histogram || NULL
+ * \param[out] result - the array of histogram
+ * \return SUCCESS
 */
-int* EffectivePoints(int effective, int dimension, const RAW* globalGrid, const SLICE* localSlice) {
-    int i, j, k;
-    int max_i, max_j, max_k;
-    int step_i, step_j, step_k;
-    int start_i, start_j;
-    int index = localSlice->start;
-    int *histogram;
+int EffectivePoints(int effective, int dimension,
+    const RAW* globalGrid, const SLICE* localSlice, size_t **ppresult) {
+    size_t i, j, k;
+    size_t max_i, max_j, max_k;
+    size_t step_i, step_j, step_k;
+    size_t start_i, start_j;
+    size_t index = localSlice->start;
+    size_t* result;
     // calloc result array
-    AVAILIBLE(histogram = (int *) calloc(localSlice->sizes[dimension], sizeof(int)));
+    result = *ppresult = (size_t *) calloc(localSlice->sizes[dimension], sizeof(size_t));
     // initialize loop
     max_i = localSlice->sizes[dimension];
     max_j = localSlice->sizes[(dimension + 1) % 3];
@@ -99,7 +103,7 @@ int* EffectivePoints(int effective, int dimension, const RAW* globalGrid, const 
             start_j = index;
             for (k = 0; k < max_k; k++) {
                 if (globalGrid[index] == effective) {
-                    histogram[i]++;
+                    result[i]++;
                 }
                 index += step_k;
             }
@@ -107,35 +111,34 @@ int* EffectivePoints(int effective, int dimension, const RAW* globalGrid, const 
         }
         index = start_i + step_i;
     }
-    // return histogram array
-    return histogram;
+    return SUCCESS;
 }
 
 /*!
- * \brief divide effective points into several slices
+ * \brief divide effective points into several slices by single dimension
  * \param[in] effective - value of effective point
  * \param[in] dimension - divide which dimesion
  * \param[in] parts - divide how many parts
  * \param[in] globalGrid
  * \param[in] localSlice - the slice need to calculate effective points
- * \param[in] results - part slices
- * \return pointer of part slices
+ * \param[out] result - part slices
+ * \return SUCCESS
 */
-SLICE* DivideEffectivePoints(int effective, int dimension, int parts,
-    const RAW* globalGrid, const SLICE* localSlice) {
-    int i, j, k, last;
-    int step = 0, partial = 0, sum = 0, index = localSlice->start;
-    int *histogram, start[2];
+int DivideEffectivePoints(int effective, int dimension, int parts,
+    const RAW* globalGrid, const SLICE* localSlice, SLICE** ppresult) {
+    size_t i, last;
+    size_t step = 0, partial = 0, sum = 0;
+    size_t *histogram;
     SLICE* result;
     // calloc result array
-    AVAILIBLE(result = (SLICE *) malloc(parts * sizeof(SLICE)));
+    result = *ppresult = (SLICE *) malloc(parts * sizeof(SLICE));
     // return whole slice directly
     if (parts == 1) {
         result[0] = *localSlice;
-        return result;
+        return SUCCESS;
     }
     // calloc histogram array
-    histogram = EffectivePoints(effective, dimension, globalGrid, localSlice);
+    EffectivePoints(effective, dimension, globalGrid, localSlice, &histogram);
     // calculate sum of effective points
     for (i = 0; i < localSlice->sizes[dimension]; i++) {
         sum += histogram[i];
@@ -155,32 +158,27 @@ SLICE* DivideEffectivePoints(int effective, int dimension, int parts,
     }
     // free histogram array
     FREE(histogram);
-    return result;
+    return SUCCESS;
 }
 
 /*!
- * \brief divide gird by dimension
+ * \brief divide gird by three dimension
  * \param[in] effective - value of effective point
  * \param[in] parts - divide how many parts
  * \param[in] globalGrid
  * \param[in] localSlice - divide which slice
- * \param[out] len - how many slices divided
- * \param[out] dividedSlices - slices of result
+ * \param[out] result - slices of result
 */
-SLICE* DivideGridByDimension(int effective, int parts[],
-    const RAW* globalGrid, const SLICE* localSlice) {
+int DivideGridByDimension(int effective, int parts[],
+    const RAW* globalGrid, const SLICE* localSlice, SLICE **ppresult) {
     int i, j, k, n;
-    SLICE *first, *second, *third;
-    SLICE local;
-    SLICE *result;
-    AVAILIBLE(result = (SLICE *) malloc(parts[0] * parts[1] * parts[2] * sizeof(SLICE)));
-    first = DivideEffectivePoints(effective, 0, parts[0], globalGrid, localSlice);
+    SLICE *first, *second, *third, *result;
+    result = *ppresult = (SLICE *) calloc (parts[0] * parts[1] * parts[2], sizeof(SLICE));
+    DivideEffectivePoints(effective, 0, parts[0], globalGrid, localSlice, &first);
     for (i = 0; i < parts[0]; i++) {
-        local = first[i];
-        second = DivideEffectivePoints(effective, 1, parts[1], globalGrid, &local);
+        DivideEffectivePoints(effective, 1, parts[1], globalGrid, &first[i], &second);
         for (j = 0; j < parts[1]; j++) {
-            local = second[j];
-            third = DivideEffectivePoints(effective, 2, parts[2], globalGrid, &local);
+            DivideEffectivePoints(effective, 2, parts[2], globalGrid, &second[j], &third);
             for (k = 0; k < parts[2]; k++) {
                 n = (i * parts[1] + j) * parts[2] + k;
                 result[n] = third[k];
@@ -190,9 +188,10 @@ SLICE* DivideGridByDimension(int effective, int parts[],
         FREE(second);
     }
     FREE(first);
-    return result;
+    return SUCCESS;
 }
 
-int ScatterGrid(const RAW* globalGrid, const size_t globalSize[], RAW* localGrid, SLICE* localSlices) {
+int ScatterGrid(const RAW* globalGrid, const size_t globalSize[],
+    RAW* localGrid, SLICE* localSlices) {
     return SUCCESS;
 }
