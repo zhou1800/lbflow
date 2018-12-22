@@ -12,12 +12,12 @@ extern "C" {
     int Primes(int value, int primes[]);
     int FindMaximum(const float array[], int n);
     int SeparateCommunication(int processor, int image_size[], int proc_size[]);
-    int* EffectivePoints(int effective, int dimension,
-        const RAW* globalGrid, const SLICE* localSlice);
-    SLICE* DivideEffectivePoints(int effective, int dimension, int parts,
-        const RAW* globalGrid, const SLICE* localSlice);
-    SLICE* DivideGridByDimension(int effective, int parts[],
-        const RAW* globalGrid, const SLICE* localSlice);
+    int EffectivePoints(int effective, int dimension,
+        const RAW* globalGrid, const SLICE* localSlice, size_t **result);
+    int DivideEffectivePoints(int effective, int dimension, int parts,
+        const RAW* globalGrid, const SLICE* localSlice, SLICE** result);
+    int DivideGridByDimension(int effective, int parts[],
+        const RAW* globalGrid, const SLICE* localSlice, SLICE** result);
 }
 
 class GlobalGridTest: public ::testing::Test{
@@ -86,6 +86,7 @@ TEST(GlobalGridTest, SeparateCommunicationTest)
     int proc[3];
     int image1[3] = {80, 90, 1};
     int image2[3] = {80, 90, 70};
+    int image3[3] = {1, 3, 2};
     SeparateCommunication(1, image1, proc);
     EXPECT_EQ(1, proc[0]);
     EXPECT_EQ(1, proc[1]);
@@ -105,6 +106,11 @@ TEST(GlobalGridTest, SeparateCommunicationTest)
     SeparateCommunication(32, image2, proc);
     EXPECT_EQ(4, proc[0]);
     EXPECT_EQ(4, proc[1]);
+    EXPECT_EQ(2, proc[2]);
+    SeparateCommunication(48, image3, proc);
+    // too many processors 48 -> 6 pixels
+    EXPECT_EQ(1, proc[0]);
+    EXPECT_EQ(3, proc[1]);
     EXPECT_EQ(2, proc[2]);
 }
 
@@ -129,13 +135,13 @@ TEST(GlobalGridTest, EffectivePointsTest) {
         {1, 12, 20},
         {240, 20, 1}
     };
-    int* result;
-    result = EffectivePoints(100, 1, globalGrid, &localSlice);
+    size_t* result;
+    EffectivePoints(100, 1, globalGrid, &localSlice, &result);
     EXPECT_EQ(18, result[0]);
     EXPECT_EQ(13, result[3]);
     EXPECT_EQ(0, result[11]);
     FREE(result);
-    result = EffectivePoints(255, 2, globalGrid, &localSlice);
+    EffectivePoints(255, 2, globalGrid, &localSlice, &result);
     EXPECT_EQ(4, result[0]);
     EXPECT_EQ(6, result[9]);
     EXPECT_EQ(8, result[11]);
@@ -162,21 +168,21 @@ TEST(GlobalGridTest, DivideEffectivePointsTest) {
         {1, 5, 25}
     };
     SLICE* result;
-    result = DivideEffectivePoints(100, 1, 3, globalGrid, &localSlice);
+    DivideEffectivePoints(100, 1, 3, globalGrid, &localSlice, &result);
     EXPECT_EQ(0, result[0].start);
     EXPECT_EQ(2, result[0].sizes[1]);
     EXPECT_EQ(10, result[1].start);
     EXPECT_EQ(15, result[2].start);
     EXPECT_EQ(2, result[2].sizes[1]);
     FREE(result);
-    result = DivideEffectivePoints(100, 0, 3, globalGrid, &localSlice2);
+    DivideEffectivePoints(100, 0, 3, globalGrid, &localSlice2, &result);
     EXPECT_EQ(1, result[0].start);
     EXPECT_EQ(2, result[0].sizes[0]);
     EXPECT_EQ(3, result[1].start);
     EXPECT_EQ(4, result[2].start);
     EXPECT_EQ(1, result[2].sizes[0]);
     FREE(result);
-    result = DivideEffectivePoints(100, 1, 1, globalGrid, &localSlice);
+    DivideEffectivePoints(100, 1, 1, globalGrid, &localSlice, &result);
     EXPECT_EQ(0, result[0].start);
     EXPECT_EQ(5, result[0].sizes[1]);
     FREE(result);
@@ -207,12 +213,12 @@ TEST(GlobalGridTest, DivideGridByDimensionTest)
     int parts[3] = {1, 1, 1};
     int parts2[3] = {1, 2, 3};
     SLICE *result;
-    result = DivideGridByDimension(0, parts, globalGrid, &localSlice);
+    DivideGridByDimension(0, parts, globalGrid, &localSlice, &result);
     EXPECT_EQ(1, result[0].sizes[0]);
     EXPECT_EQ(6, result[0].sizes[1]);
     EXPECT_EQ(20, result[0].sizes[2]);
     FREE(result);
-    result = DivideGridByDimension(100, parts2, globalGrid, &localSlice);
+    DivideGridByDimension(100, parts2, globalGrid, &localSlice, &result);
     EXPECT_EQ(0, result[0].start);
     EXPECT_EQ(8, result[1].start);
     EXPECT_EQ(14, result[2].start);
