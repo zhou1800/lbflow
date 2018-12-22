@@ -49,13 +49,7 @@ enum PROGRAM_STATUS{
  * If pointer is not NULL, free the pointer and set it to NULL.
 */
 #define FREE(pointer)\
-    if (pointer!=NULL) { free(pointer); pointer=NULL; }
-
-/*!
- * If can not malloc memory, return NULL
-*/
-#define AVAILIBLE(expr)\
-    if ((expr)==NULL) { return NULL; }
+    { free(pointer); pointer=NULL; }
 
 #ifdef __cplusplus
 }

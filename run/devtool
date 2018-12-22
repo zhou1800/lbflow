@@ -43,7 +43,7 @@ while true; do
         -d|--debug)
             BUILD_TYPE=Debug;;
         -n)
-            MPI_RUN="mpirun -n $2"; shift;;
+            MPI_RUN="mpirun -n $2 --allow-run-as-root"; shift;;
         -v|--verbose)
             VERBOSE=--verbose;;
         --grep)
