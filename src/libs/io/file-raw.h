@@ -9,10 +9,18 @@
 extern "C" {
 #endif
 
-int LoadRawfile(const char* pathName, RAW *raw, int size);
+/*!
+ * \brief The LoadRawFile function loads the raw file.
+ *
+ * \param[in] pathName - parameter file path name.
+ * \param[out] raw - raw data from loaded file.
+ * \param[in] length - raw data length.
+ * \return SUCCESS on success, ERROR on failure.
+ */
+int LoadRawFile(const char* pathName, RAW** raw, size_t length);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // FILE_RAW_H
+#endif /* FILE_RAW_H */

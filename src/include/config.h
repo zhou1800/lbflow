@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-#define DECIMAL float       /*!< Precision of the decimal value. */
+#define DECIMAL float       /*!< Decimal value type. */
 #define RAW unsigned char   /*!< Raw file type. */
 
 /*!
@@ -19,6 +19,7 @@ extern "C" {
  */
 enum MODEL_CONSTS{
     MAX_DIMENSION = 3,      /*!< Maximum number of dimensions. */
+    MAX_GRAYSCALE = 256,    /*!< Grid file grayscale range: 0 ~ 255. */
     ROI_SLICE = 6,          /*!< Number of ROI slice positions (x+, x-, y+, y-, z+, z-). */
     SINGLE_PHASE = 1,       /*!< Single phase. */
     BIN_PHASE = 2,          /*!< Binary phase. */
@@ -30,12 +31,25 @@ enum PROGRAM_STATUS{
 };
 
 /*!
- * If expr is FALSE, print an error message and return ERROR.
+ * If expr is TRUE, print an error message and goto end.
  * \param[in] expr - expression.
  * \param[in] ... - error message.
  */
-#define VALIDATE(expr, ...)\
+#define TO_END(expr, ...)\
+    if ((expr)) { fprintf(stderr, __VA_ARGS__); goto end; }
+/*!
+ * If expr is FALSE, print an error message and terminate functiona (return ERROR).
+ * \param[in] expr - expression.
+ * \param[in] ... - error message.
+ */
+#define ASSERT(expr, ...)\
     if (!(expr)) { fprintf(stderr, __VA_ARGS__); return ERROR; }
+
+/*!
+ * If pointer is not NULL, free the pointer and set it to NULL.
+*/
+#define FREE(pointer)\
+    { free(pointer); pointer=NULL; }
 
 #ifdef __cplusplus
 }

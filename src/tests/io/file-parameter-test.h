@@ -4,16 +4,16 @@
 #define FILE_PARAMETER_TEST_H
 
 #include "file-parameter.h"
-#include "../testcfg.h"
-#include "mpi-wrapper.h"
+#include "../test-cfg.h"
+#include "../gtest-helper.h"
 #include "gtest/gtest.h"
 #include "cJSON.h"
 
 extern "C" {
     extern int ID;
     extern PARAMETER DEFAULT_PARAMETER;
-    int LoadFile(const char* filePathName, char* content, int maxFileLength);
-    int SyncString(char str[], int mId);
+    int LoadFile(const char* filePathName, char** content);
+    int SyncString(char** str, int mId);
     int ParseGridParameter(const cJSON* grid, PARAMETER* par);
     int ParseControlParameter(const cJSON* control, PARAMETER* par);
     int ParseOutputParameter(const cJSON* output, PARAMETER* par);
@@ -294,22 +294,15 @@ PARAMETER_FILE Channel3D{
 class FileParameterTest : public ::testing::TestWithParam<PARAMETER_FILE>{
 protected:
     virtual void SetUp(){
+        fileContent = NULL;
     }
     virtual void TearDown(){
+        free(fileContent);
     }
+    char* fileContent;
 };
 
 INSTANTIATE_TEST_CASE_P(2Dand3D, FileParameterTest, ::testing::Values(Grid2D, Channel3D));
-
-void EXPECT_ARR_EQ(const int a[], const int b[], int n){
-    for (int i = 0; i < n; ++i)
-        EXPECT_EQ(a[i], b[i]);
-}
-
-void EXPECT_ARR_EQ(const DECIMAL a[], const DECIMAL b[], int n){
-    for (int i = 0; i < n; ++i)
-        EXPECT_FLOAT_EQ(a[i], b[i]);
-}
 
 void CompareParameter(const PARAMETER& par1, const PARAMETER& par2)
 {
@@ -342,16 +335,16 @@ void CompareParameter(const PARAMETER& par1, const PARAMETER& par2)
 }
 
 TEST_P(FileParameterTest, load_file){
-    char fileContent[MAX_FILE_LEN];
-    ASSERT_NE(LoadFile(GetParam().parameterFile, fileContent, MAX_FILE_LEN), ERROR);
+    ASSERT_NE(LoadFile(GetParam().parameterFile, &fileContent), ERROR);
     EXPECT_STREQ(fileContent, GetParam().content);
 }
 
 TEST_P(FileParameterTest, sync_string){
-    char fileContent[MAX_FILE_LEN];
-    if (ID == 0)
+    if (ID == 0) {
+        fileContent = (char*) malloc((strlen(GetParam().content) + 1) * sizeof(char));
         strcpy(fileContent, GetParam().content);
-    ASSERT_NE(SyncString(fileContent, 0), ERROR);
+    }
+    ASSERT_NE(SyncString(&fileContent, 0), ERROR);
     EXPECT_STREQ(fileContent, GetParam().content);
 }
 
@@ -396,7 +389,7 @@ void EXPECT_NUMBER_OBJECT(cJSON* root, const char key[],
 
 void EXPECT_NUMBER_ARRAY_OBJECT(cJSON* root, const char key[],
                                 int(*parser)(const cJSON* model, PARAMETER* par),
-                                int value=0, int min_length=0)
+                                DECIMAL value=0, size_t min_length=0)
 {
     PARAMETER par;
     cJSON_AddStringToObject(root, key, "");
@@ -406,7 +399,7 @@ void EXPECT_NUMBER_ARRAY_OBJECT(cJSON* root, const char key[],
     cJSON_AddItemToObject(root, key, array);
     if (min_length > 0){
         EXPECT_EQ(parser(root, &par), ERROR);
-        for (int i = 0; i < min_length; ++i)
+        for (size_t i = 0; i < min_length; ++i)
             cJSON_AddItemToArray(array, cJSON_CreateString(""));
     } else {
         cJSON_AddItemToArray(array, cJSON_CreateString(""));
@@ -415,7 +408,7 @@ void EXPECT_NUMBER_ARRAY_OBJECT(cJSON* root, const char key[],
     EXPECT_EQ(parser(root, &par), ERROR);
     while (cJSON_GetArraySize(array) > 0)
         cJSON_DeleteItemFromArray(array, 0);
-    for (int i = 0; i < min_length; ++i)
+    for (size_t i = 0; i < min_length; ++i)
         cJSON_AddItemToArray(array, cJSON_CreateNumber(0));
     if (value != 0){
         EXPECT_EQ(parser(root, &par), ERROR);
@@ -469,9 +462,6 @@ TEST_F(FileParameterDeathTest, parse_grayscale_parameter){
     cJSON_AddItemToArray(grayscale, item);
     item = cJSON_CreateObject();
     cJSON_AddNumberToObject(item, "index", -1);
-    cJSON_AddItemToArray(grayscale, item);
-    item = cJSON_CreateObject();
-    cJSON_AddNumberToObject(item, "index", 32768);
     cJSON_AddItemToArray(grayscale, item);
     item = cJSON_CreateObject();
     cJSON_AddNumberToObject(item, "index", 0);
@@ -554,10 +544,8 @@ TEST_F(FileParameterDeathTest, parse_parameter){
 
 TEST_F(FileParameterDeathTest, load_parameter){
     PARAMETER par;
-    if (ID == 0) {
-        EXPECT_EQ(LoadParameter("file dose not exist.", &par), ERROR);
-        EXPECT_EQ(LoadParameter(SOURCE_DIR"examples/Channel3D-24x24y100z.raw", &par), ERROR);
-    }
+    EXPECT_EQ(LoadParameter("file dose not exist.", &par), ERROR);
+    EXPECT_EQ(LoadParameter(SOURCE_DIR"examples/Channel3D-24x24y100z.raw", &par), ERROR);
 }
 
 #endif // FILE_PARAMETER_TEST_H
