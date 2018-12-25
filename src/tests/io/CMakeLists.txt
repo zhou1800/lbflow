@@ -6,4 +6,8 @@ target_link_libraries(io-test
 )
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-add_test(NAME io_test COMMAND io-test)
+if ($ENV{N_PROC})
+    add_test(NAME io_test COMMAND mpirun -n $ENV{N_PROC} ./io-test)
+else()
+    add_test(NAME io_test COMMAND io-test)
+endif()

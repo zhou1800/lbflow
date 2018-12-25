@@ -9,6 +9,7 @@
 
 #ifndef MPI_WRAPPER_H
 #define MPI_WRAPPER_H
+
 #include "mpi.h"
 #include <stdint.h>
 
@@ -28,4 +29,4 @@ int MPIInit(int *argc, char ***argv);
 }
 #endif
 
-#endif // MPI_WRAPPER_H
+#endif /* MPI_WRAPPER_H */
