@@ -14,8 +14,8 @@ RUN apt-get install -y gitlab-runner
 
 RUN gitlab-runner register \
     --non-interactive \
-    --url "http://git.sciridge.com/" \
-    --registration-token "qx5bJCiaDKt8Ni_7f3uK" \
+    --url "https://gitlab.com/" \
+    --registration-token "gru6Un1AyR2ErVRWGYVb" \
     --executor "shell" \
     --description "lbflow-runner" \
     --tag-list "lbflow" \
