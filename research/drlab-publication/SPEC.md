@@ -63,3 +63,32 @@ The main paper explains the research use, algorithms, software structure and ind
 5. Measure computation and I/O separately, with fixed inputs, repetitions, hardware/affinity/compiler/rank details and identical fields where relevant. A workstation timing experiment is not a cluster or GPU scaling result.
 6. Compare scope and conventions with directly relevant pore-scale software and publications, especially LBPM and current OpenLB. Do not claim a runtime comparison unless both implementations were actually measured with a defensible matched configuration.
 7. Rewrite the manuscript and supplement around the selected application; update references, figures, program metadata and packages from completed evidence. Funding, competing interests and affiliation country must come from the author.
+
+## Physics Research Extension
+
+The research question is how finite interface thickness and wall treatment affect
+viscous transport and capillary trapping in resolved pore geometries.
+The existing program manuscript remains a measured baseline; a new physical
+claim requires a mechanism, a controlled test and a comparison with recent work.
+
+1. Derive the continuum hydraulic response of a variable-viscosity slit from
+   momentum balance. Separate diffuse constitutive bias, interface-profile
+   changes and residual lattice error. Test both viscosity closures at a 9:1
+   ratio, three pore widths and three recoloring parameters. Calibrate the
+   bulk interface separately. Preserve low-speed diffusive force and surface
+   tension scaling. Do not call these coupled sharp-interface/grid sequences
+   a fixed-interface grid convergence study.
+2. Quantify the wall stencil's directional and magnitude errors in the
+   capillary stress. Distinguish an exactly reconstructed linear gradient from
+   a nonlinear contact-line or thermodynamic consistency result.
+3. Treat capillary-threshold shifts, artificial pinning and residual trapping
+   as hypotheses until controlled invasion and retraction sequences resolve
+   their pressure intervals and rate dependence. Use a specified throat
+   length for confinement, not a rock distance-transform median.
+4. Compare recent viscosity, wetting, interface-materiality and porous-medium
+   studies before making a novelty claim. Established closures, interface
+   thickness sensitivity and familiar trapping mechanisms are not new by
+   themselves. AI is optional and is not part of the present research scope.
+5. Put implementation history and parallel checks in support of the physical
+   evidence. Update the paper only with completed derivations and measured
+   results. Keep a bounded next-stage plan for unmeasured pore-throat physics.

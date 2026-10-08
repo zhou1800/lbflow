@@ -2,13 +2,13 @@ Draft cover letter for author review; final submission declarations remain pendi
 
 Dear Editor,
 
-Please consider "LBFlow: verification-guided MPI simulation of two-phase flow in digital rock" for the Computer Programs in Physics category of Computer Physics Communications.
+Please consider "Finite-interface transport and wetting effects in pore-scale lattice Boltzmann simulations with LBFlow" for the Computer Programs in Physics category of Computer Physics Communications.
 
-The accompanying implementation and experiments make collision, forcing, interface and restart behavior inspectable. Reproducible counterexamples identify defects in a historical solver, including fixed first-phase MRT relaxation and incompatible momentum forcing. The corrected implementation recovers analytic acceleration and channel flow, while layered-flow and Laplace tests quantify its multiphase operating range. A wall-stencil ablation reports both contact-angle improvements and increased spurious flow in some cases.
+The physical question is how diffuse numerical interfaces and wall treatment change pore-scale transport. A continuum momentum balance expresses slit conductance through inverse-viscosity moments. For a centered tanh interface, arithmetic and harmonic interpolation produce distinct leading conductance errors. Eighteen layered-flow calculations and three independent planar calibrations separate this constitutive effect from residual lattice error. At the thickest tested interface and viscosity ratio 9:1, arithmetic and harmonic flux shifts are -9.19% and +21.59%, largely reproduced by the independent continuum prediction. Wall-stencil analysis further distinguishes imposed interface direction from capillary-stress magnitude; static-angle improvement is not equated with uniformly better parasitic flow or dynamic wetting.
 
 The application is pore-scale flow on an attributed, openly licensed Bentheimer sandstone image. Analytic pore controls verify phase flux and viscosity normalization; an unmodified LBPM reference checks single-phase permeability on matching coarse and subdivided specimens. The two-phase cases retain their measured transient behavior and resolution limits, rather than infer an unverified relative-permeability curve. Dedicated repeated CPU/MPI timings separate numerical work from I/O and retain output identity across ranks.
 
-The contribution is an inspectable MIT-licensed program, physical coupling checks and a reproducible digital-rock workflow. The manuscript states the measured operating range, the distinction between source history and scientific priority, and AI-assisted work.
+The MIT-licensed program supports reproducible analysis of these physical effects, with corrected local collision and forcing, measured coupling checks and consistent MPI restart. The elementary continuum relation and the viscosity closures are not claimed as new physical laws. Capillary trapping thresholds remain unmeasured. The manuscript states the measured operating range, the distinction between source history and scientific priority, and AI-assisted work.
 
 Before submission, public software access, an immutable release citation and required journal declarations must be verified. This draft does not attest originality, exclusive submission, authorship approval or publication rights on behalf of the author.
 

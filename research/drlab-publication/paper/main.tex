@@ -14,36 +14,38 @@
 \input{data/cpc-numbers.tex}
 \begin{document}
 \begin{frontmatter}
-\title{LBFlow: verification-guided MPI simulation of two-phase flow in digital rock}
+\title{Finite-interface transport and wetting effects in pore-scale lattice Boltzmann simulations with LBFlow}
 \author{Yu Zhou\corref{cor1}}
 \address{Independent Researcher}
 \ead{[private contact omitted]}
 \cortext[cor1]{Corresponding author.}
 \begin{abstract}
-LBFlow is a C++/MPI lattice Boltzmann program for pore-scale single-phase and
-immiscible two-phase flow on segmented digital-rock images. It combines D2Q9/D3Q19 color-gradient operators, geometrical
-wetting, voxel input and explicit population checkpoints. We present a
-verification-guided workflow in which force integration, local moment
-relaxation, surface tension, velocity conventions and phase flux are checked
-before interpreting porous-medium transport. Counterexamples expose
-incorrect second-phase relaxation and force integration in the historical
-implementation; consistent local collision and forcing recover analytic
-behavior. Isolated pore bundles verify phase advective flux at viscosity
-ratio 9:1, while layered flow and Laplace tests distinguish constitutive
-and finite-interface errors. Slit and square-tube displacement controls
-exercise capillary entry and reveal wetting-dependent deviations. An
-attributed public Bentheimer crop demonstrates mass monitoring, phase
-redistribution and bitwise MPI/restart agreement. Independent single-phase
-LBPM calculations differ by at most \RockReferenceDifference\ percent in
-the matched cases. Voxel subdivision and zero-force controls expose the
-limits of interpreting transient two-phase flux when pores are comparable
-to the diffuse interface. Repeated workstation timings distinguish numerical
-work from I/O. The contribution is an inspectable program and a reproducible
-set of physical and computational checks for digital-rock research within
-the measured operating range.
+Finite numerical interfaces can alter pore-scale transport even when a
+two-phase calculation conserves mass and remains stable. We use the C++/MPI
+program LBFlow to distinguish diffuse constitutive bias, residual lattice
+error and wall-wetting effects in equal-density color-gradient simulations.
+A continuum momentum balance expresses slit conductance through three
+moments of inverse viscosity. For a centered tanh interface, arithmetic and
+harmonic interpolation produce leading flux shifts linear and quadratic
+in interface thickness, respectively. Eighteen layered-flow calculations
+at viscosity ratio 9:1 test these mechanisms using separately calibrated
+interface widths. In the thickest tested interface, arithmetic interpolation
+reduces flux by 9.19\%, whereas harmonic interpolation increases it by
+21.59\%; continuum predictions account for most of both shifts.
+Wall-stencil analysis further distinguishes prescribed interface direction
+from capillary-stress magnitude. Contact-angle improvement does not uniformly
+reduce parasitic flow. Slit and square-tube displacement controls connect
+these concerns to capillary entry. On a public Bentheimer specimen,
+independent single-phase LBPM comparisons differ by at most
+\RockReferenceDifference\ percent, while voxel subdivision changes
+permeability by \RefinedKChange\ percent. Closed two-phase rock calculations
+remain transient and do not establish relative-permeability curves.
+The accompanying verified operators, recorded inputs and MPI/restart checks
+support reproducible investigation of finite-interface and wetting effects;
+capillary trapping thresholds and a new multiphase model are not established.
 \end{abstract}
 \begin{keyword}
-lattice Boltzmann \sep two-phase flow \sep digital rock \sep porous media \sep MPI \sep verification
+lattice Boltzmann \sep two-phase flow \sep digital rock \sep diffuse interface \sep viscosity interpolation \sep wetting
 \end{keyword}
 \end{frontmatter}
 
@@ -56,14 +58,23 @@ verified before submission.
 \input{program-summary.tex}
 
 \section{Motivation and significance}
-Pore-scale two-phase calculations connect the arrangement of immiscible
-fluids in a rock image with its flow response. Segmentation, wetting,
-interface resolution and the definitions used to average velocity all affect
-this connection. Image-based flow benchmarks emphasize the need to compare
-the actual computational domain and observable, not only a material name
-\cite{saxena2017}. A simulator intended for digital-rock research therefore
-needs a reproducible chain from a labelled image to independently checked
-flux and interface measurements.
+Pore-scale two-phase flow is controlled by viscous momentum transport,
+capillary stress and fluid--solid wetting. A diffuse numerical interface
+spreads these processes over several grid nodes. When that width approaches
+a pore dimension, a regularization chosen for computation can become part
+of the measured flow response. The physical question addressed here is how
+to distinguish that constitutive change from a remaining discretization
+error, and why an accurate static contact angle alone is insufficient to
+verify capillary displacement.
+
+This question matters when simulations connect fluid arrangements in
+segmented rock images with transport properties. Geometry, wetting and
+averaging conventions already affect that connection; image-based flow
+benchmarks emphasize matching the computational domain and observable
+\cite{saxena2017}. Recent work measures the influence of pore-size-dependent
+wetting on relative permeability \cite{yu2025}. Resolving numerical interface
+effects is necessary before assigning a computed response to such material
+physics, although the present study does not reproduce those experiments.
 
 Long-lived numerical software can continue producing finite fields after
 changes in physical configuration expose an implementation defect. In
@@ -78,9 +89,16 @@ established color-gradient family \cite{reis2007,latva2005,liu2012,liuerratum201
 Direct and modified-gradient contact-angle treatments already appear in
 two- and three-dimensional work \cite{leclaire2016,leclaire2017,xu2017,akai2018}.
 Later comparisons and curved-wall developments continue to examine
-wetting accuracy \cite{sedahmed2024,bhattacharya2026}. Our software contribution
-is therefore a recoverable, tested realization of established methods, with
-explicit evidence about its reliable operating range and remaining errors.
+wetting accuracy \cite{sedahmed2024,bhattacharya2026}. A recent review already
+compares viscosity, gradient and forcing choices \cite{zahid2025}; a 2026
+preprint relates interfacial motion to curvature and additional phase fluxes
+\cite{entwistle2026}. Interface sensitivity, harmonic viscosity and geometric
+wetting are consequently established subjects. Our analysis uses a simple
+continuum conductance relation to separate the physical response of a
+diffuse constitutive profile from the error in solving it, then tests the
+result over controlled interface and pore-width sequences. Neither this
+elementary continuum relation nor the existing interpolation schemes are
+claimed as new fundamental laws.
 
 The source baseline is the reference solver, historical revision
 \texttt{1bef9bbe7047}. The full source identity is recorded in the supplement. The original archive is
@@ -92,13 +110,15 @@ LBPM already supplies extensive digital-rock multiphase protocols, including
 morphological preparation and capillary/relative-permeability workflows
 \cite{mcclure2021}. OpenLB offers a broader LBM framework \cite{krause2021};
 its current releases include vectorized CPU and GPU execution
-\cite{openlb2025}. LBFlow's scope is narrower: a compact voxel program with
-few runtime dependencies, inspectable D2Q9/D3Q19 operators and a verification
-corpus that connects implementation failures with pore-scale measurements.
-It does not claim the first digital-rock LBM implementation, performance
-superiority over these frameworks, or a new bulk multiphase theory.
+\cite{openlb2025}. LBFlow supplies a compact, inspectable implementation for
+the present controlled transport and wall-stencil analysis, together with
+the recorded digital-rock application. Its independent single-phase
+comparison tests the geometric baseline. The paper does not claim
+performance superiority over those frameworks, the first digital-rock
+simulator or a new bulk multiphase theory. Additional pore-throat trapping
+research remains separate from the completed transport results.
 
-\section{Software description}
+\section{Governing model and implementation}
 \subsection{Architecture and workflow}
 The code separates lattice/grid geometry, MPI exchange, parameter and field
 I/O, and fluid collision operators. A byte-valued voxel file assigns initial
@@ -224,6 +244,114 @@ reference-density momentum and equilibrium, whereas color flow divides
 momentum by local total density. A pure-phase comparison consequently uses
 $\vct u_{ref}/\rho$ at unit reference density. The rock comparison retains
 this convention and its small finite-density differences explicitly.
+
+\section{Physical origin of finite-interface transport bias}
+\subsection{Hydraulic response of a diffuse viscosity profile}
+Consider two equal-density fluids layered across a no-slip slit of width $H$,
+driven parallel to their interface by uniform force $F$. In steady low-speed
+flow, $d(\mu du/dy)/dy=-F$. Define the inverse-viscosity moments
+\begin{equation}
+ I_n=\int_0^H\frac{y^n}{\mu(y)}\,dy,\qquad n=0,1,2.
+\end{equation}
+Integrating the momentum balance and imposing $u(0)=u(H)=0$ gives
+\begin{equation}
+ \mu u'=F(I_1/I_0-y),\qquad
+ Q=\int_0^H u\,dy=F\left(I_2-\frac{I_1^2}{I_0}\right).
+ \label{eq:conductance}
+\end{equation}
+This elementary continuum relation evaluates the response of a specified
+constitutive profile without solving the lattice dynamics. A sharp step,
+the viscosity reconstructed from measured phase fractions, and a separately
+calibrated tanh profile therefore provide distinct references. At unit
+equal reference density, dynamic and kinematic viscosities coincide to
+leading order; small density departures remain recorded in the data.
+
+Let $s=y-H/2$, $\varphi=(1-\tanh(s/\xi))/2$, and
+$r=\mu_1/\mu_0$. For a well-separated interface, the integrated excess shear
+compliance relative to the sharp step is
+\begin{equation}
+ \mathcal C_A=\frac{\xi}{2}\left(\frac1{\mu_1}-\frac1{\mu_0}\right)\ln r,
+ \qquad \mathcal C_H=0.
+\end{equation}
+The subscripts denote arithmetic and harmonic interpolation. Harmonic
+interpolation cancels this zeroth-moment excess, but the stress varies across
+the interface in pressure-driven flow. Its first and second weighted moments
+still change the conductance. Writing $\gamma=(r-1)/(r+1)$, expansion of
+Eq.~\ref{eq:conductance} about the centered sharp interface gives
+\begin{align}
+ \frac{Q_A-Q_{sharp}}{Q_{sharp}}&=
+ -\frac{3\gamma^3\ln r}{4-3\gamma^2}\frac{\xi}{H}
+ +O((\xi/H)^2),\\
+ \frac{Q_H-Q_{sharp}}{Q_{sharp}}&=
+ \frac{2\pi^2\gamma^2}{4-3\gamma^2}\left(\frac{\xi}{H}\right)^2
+ +O((\xi/H)^4).
+ \label{eq:thininterface}
+\end{align}
+Exponential wall-tail corrections vanish in the separated-interface limit.
+The supplement derives these expressions. They describe the stated
+one-dimensional constitutive problem, not universal error laws for curved
+interfaces or heterogeneous rock. Harmonic interpolation's improved leading
+order therefore does not imply superior accuracy at every confinement.
+
+Three independent unforced planar calculations calibrate $W_{0.9}$ at
+$\beta=0.35,0.7,0.9$. The widths are 9.376, 4.765 and 3.929 nodes;
+$\xi=W_{0.9}/[2\operatorname{atanh}(0.9)]$ specifies a tanh approximation
+without fitting any velocity. Eighteen forced calculations combine these
+parameters with $H=16,32,64$, both closures and $(\tau_0,\tau_1)=(0.6,1.4)$.
+Force scales as $H^{-3}$ and surface tension as $H^{-1}$, with fixed
+relaxation times. Fixed $\beta$ makes the physical interface shrink during
+this diffusive-scale sequence, so it is not a fixed-interface spatial
+convergence test. All late relative velocity changes are below $10^{-11}$.
+
+At $H=16$, $\beta=0.35$, arithmetic interpolation decreases the sampled
+volume flux by 9.19\%, while harmonic interpolation increases it by 21.59\%.
+Independent planar-tanh predictions give $-9.08$\% and $+21.30$\%.
+The corresponding profile discrepancies against the \emph{sharp} solution
+are 17.02\% and 24.66\%, but discrepancies against the continuum solution
+using the measured diffuse profile are only 0.160\% and 0.100\%.
+Most of the apparent failure is consequently the response of the chosen
+finite constitutive transition, rather than failure of the solver to recover
+its continuum momentum balance.
+
+Fig.~\ref{fig:transport} also shows the competing effect of sharpening an
+interface. At $H=16$, increasing $\beta$ from 0.35 to 0.9 reduces the
+arithmetic sharp-flux bias, but increases its measured-diffuse profile error
+from 0.160\% to 0.753\%. Interface confinement and lattice representation
+must therefore be assessed separately. The remaining error is not assigned
+exclusively to one discrete operator, and these flat interfaces do not test
+curved-interface spurious currents or capillary trapping.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\linewidth]{interfacial-transport.pdf}
+\caption{Controlled transport at viscosity ratio 9:1. Left: measured flux
+shifts against the midpoint-sampled sharp profile; lines show continuous
+tanh-profile predictions from the independent width calibration, with no
+flow-data fitting. Right: velocity-profile error against the continuum
+reference reconstructed from measured phase fractions. Residual lattice
+error and diffuse constitutive bias are distinct observables.}
+\label{fig:transport}\end{figure}
+
+\subsection{Wall direction and capillary-stress magnitude}
+The capillary second moment is proportional to
+$|\vct g|(\vct n\vct n-I)$, so setting $\vct n$ alone does not set the stress
+magnitude. On a flat D2Q9 lower wall, a locally linear gradient has the
+clipped-stencil transformation
+\begin{equation}
+ \vct g_{clip}=\operatorname{diag}(5/6,1/2)\vct g,\qquad
+ \frac{|\vct g_{clip}|}{|\vct g|}
+ =\sqrt{\frac{25}{36}\sin^2\theta+\frac14\cos^2\theta}.
+ \label{eq:wallmagnitude}
+\end{equation}
+The recovered wall rotation preserves the magnitude of the gradient it
+receives. Even after an imposed direction correction, the local perturbation
+amplitude thus retains this linear-field attenuation: 0.764 at 60 or 120
+degrees and 0.833 at 90 degrees. Moment reconstruction removes that specific
+linear-stencil bias. It does not prove discrete mechanical equilibrium at a
+nonlinear contact line or prescribe an accurate curved-wall normal. The
+measured static-angle improvement and increased parasitic flow reported
+below are consistent with needing both checks; Eq.~\ref{eq:wallmagnitude}
+alone is not a quantitative prediction of the observed capillary pressure
+or spurious velocity.
 
 \section{Illustrative verification}
 All runs use double precision, GCC 13.3, CMake 3.28.3 and Open MPI 4.1.6 on
@@ -453,12 +581,25 @@ at one rank.}
 \label{fig:performance}\end{figure}
 
 \section{Impact and limitations}
-The package enables users to reproduce numerical contracts before extending
-the solver or porting kernels. It makes source provenance, executable
-identity, termination and restart stage inspectable, and provides both
-positive results and counterexamples. Demonstrated applications include
-controlled pore-flow checks and a public digital-rock workflow; current external
-adoption or cluster performance is not inferred from source history.
+The physical analysis distinguishes two questions that can otherwise be
+confounded: whether a solver recovers the momentum balance for its chosen
+diffuse viscosity profile, and whether that profile represents the desired
+sharp-interface flow. In the controlled slit, the independent continuum
+reference accounts for most of the transport discrepancy. Neither good
+conservation nor selection of a familiar viscosity closure removes it.
+The local wall analysis makes the analogous distinction between an imposed
+interface direction and capillary-stress magnitude.
+
+Extending these findings to capillary trapping requires a different test.
+Quasistatic invasion and retraction in a specified pore throat must resolve
+the pressure interval, contact-line rate dependence, interface width and
+wall representation before a change in occupancy is called physical
+pinning or hysteresis. Such thresholds are not measured by the current
+half/one-and-a-half-entry-pressure direction checks. The controlled viscous
+asymptotics also cannot be assigned directly to a curved interface in rock.
+The accompanying code, exact inputs and checks support that next physical
+study; current external adoption or cluster performance is not inferred
+from source history.
 
 The validation covers equal density, standard pressure weights and the
 reported viscosity range. Higher density contrast, moving contact lines,
@@ -474,18 +615,31 @@ reset conservatively and the native population format is not claimed to be
 portable across unlike machine representations.
 
 \section{Conclusions}
-LBFlow's corrected, inspectable implementation recovers analytic force and
-viscosity behavior, conserves component mass in closed domains and supports
-consistent restart. Laplace and layered-flow tests bound the multiphase
-claims. Wall-stencil renormalization has a clear linear-field rationale and
-measurable contact-angle benefits, but also exposes unresolved spurious-flow
-and wall-location effects. The public-rock application adds independently
-checked single-phase flow, explicit phase observables and repeatable MPI
-execution. Its transient two-phase behavior and resolution sensitivity also
-demonstrate why mass conservation alone is insufficient to interpret rock
-transport. The program and evidence support further digital-rock research
-within this bounded scope; a new bulk multiphase model or universal wetting
-method is not claimed.
+Finite interface thickness changes transport through the constitutive
+profile as well as through its lattice representation. In a centered
+equal-density layered slit, inverse-viscosity moments explain the distinct
+leading arithmetic and harmonic flux shifts. Harmonic interpolation removes
+the leading excess shear compliance, while a thicker transition can still
+increase pressure-driven flow substantially. Sharpening an interface reduces
+this constitutive bias but can increase residual profile error. The
+eighteen-case study distinguishes these mechanisms with independently
+calibrated widths and a continuum momentum reference.
+
+At a wall, rotating a clipped gradient to the desired direction preserves
+its attenuated magnitude. Linear moment reconstruction addresses that
+specific issue; measured contact-angle improvement does not establish
+uniformly improved parasitic flow or dynamic capillary response. The
+public-rock application adds an independently checked geometric flow
+baseline and exposes inadequate interface separation and continued
+two-phase evolution. It supports neither a steady relative-permeability
+curve nor a quantified trapping threshold.
+
+LBFlow provides reproducible implementations and measurements for this
+physical analysis, including corrected local relaxation and forcing,
+mass monitoring and consistent MPI restart. These results motivate a
+controlled pore-throat study of capillary transport with separate
+confinement, wall and rate checks. A new bulk multiphase theory or universal
+wetting method is not claimed.
 
 \clearpage
 \section*{Declarations --- author confirmation required}

@@ -10,6 +10,27 @@ licensed under MIT. The article has not been submitted or accepted. Funding,
 competing interests, public repository access and the final release citation
 must be resolved before submission.
 
+## Physical Research Extension
+
+The study addresses finite-interface transport and wetting effects, supported by a
+continuum momentum derivation and a new controlled campaign. See
+[the physical research direction](notes/physics-direction.md) for literature
+overlap, completed evidence and the remaining capillary-trapping experiments.
+Neither a new bulk model nor a measured trapping threshold is claimed.
+
+```sh
+python3 scripts/interfacial_transport.py --solver build/bin/LBFlow --root results/interfacial-transport --jobs 2
+python3 scripts/make_transport_figure.py --data results/interfacial-transport/interfacial-transport.json --paper results/regenerated-transport
+```
+
+The campaign contains three independent planar calibrations and eighteen
+layered-flow calculations. No kernel change or new dependency is required.
+Rebuild its figure from the included data with:
+
+```sh
+python3 scripts/make_transport_figure.py --paper results/regenerated-transport
+```
+
 ## CPC Digital-Rock Extension
 
 The selected target is Computer Physics Communications, Computer Programs in
@@ -62,7 +83,8 @@ The three new figures can also be rebuilt from included data alone:
 python3 scripts/make_porous_figures.py --paper results/regenerated-cpc
 ```
 
-Together with `make_figures.py`, this regenerates all seven manuscript figures.
+Together with `make_figures.py` and `make_transport_figure.py`, this regenerates
+all eight manuscript figures.
 Text numbers and the timing table are generated from measured JSON. The raw
 VTI and populations are regenerated rather than bundled. Rock results are
 numerical crosschecks and transient observations, not an experimental

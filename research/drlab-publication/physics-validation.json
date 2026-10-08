@@ -1,0 +1,61 @@
+{
+  "status": "Completed constitutive transport campaign; no capillary-trapping claim",
+  "recorded_date": "2026-10-08",
+  "production_source_base_commit": "41588702969db10aa50855b60fb573e091271e27",
+  "kernel_changed": false,
+  "solver_sha256": "5d11ceff95bab7a9c1532cb8b0b47a8f7fff5d99982b7223f7ecbf4a83563142",
+  "analysis_script_sha256": "d2f9df1c414c5c7a01e649e69b7e9ab48b61865cf9b88ec7408c7f9d5e78e44c",
+  "execution_script_sha256": "c744a0015dfda005bd27ac22efac35574d70da5e4da277b6d0926ca9056cfa57",
+  "measurement_file_sha256": "87eecc0391ec7d4a1c8a91070299fc249ef64e2b446f4da69f1141c7de70ab90",
+  "planar_executions": 3,
+  "layered_executions": 18,
+  "checks": {
+    "constant_viscosity_profile_max_error": 5.421010862427522e-20,
+    "constant_viscosity_flux_relative_error": 7.450580596923828e-09,
+    "tanh_compliance_quadrature": -58.59265539563254,
+    "tanh_compliance_formula": -58.59265539563253,
+    "harmonic_excess_compliance": 1.4210854715202004e-14,
+    "analytic_thin_interface_coefficients": {
+      "arithmetic_linear": -1.6225658417252091,
+      "harmonic_quadratic": 6.073602708362684,
+      "small_parameter": "xi/H for a centered tanh interface; continuous volume flux"
+    },
+    "continuum_quadrature_limits": [
+      {
+        "xi_over_height": 0.01,
+        "coefficients": {
+          "arithmetic": -1.5040814359388421,
+          "harmonic": 6.072604021409855
+        }
+      },
+      {
+        "xi_over_height": 0.005,
+        "coefficients": {
+          "arithmetic": -1.562605879917589,
+          "harmonic": 6.073354463884684
+        }
+      },
+      {
+        "xi_over_height": 0.0025,
+        "coefficients": {
+          "arithmetic": -1.5924075393409787,
+          "harmonic": 6.073546356120119
+        }
+      }
+    ]
+  },
+  "verification": {
+    "reanalysis_matches_all_18_records": true,
+    "all_receipt_input_geometry_executable_hashes_match": true,
+    "all_21_receipt_input_geometry_executable_hashes_match": true
+  },
+  "png_figure_rebuild_byte_identical": true,
+  "local_ctest_groups_passed": [
+    "numerical_moments",
+    "simulator_contracts",
+    "pore_flow"
+  ],
+  "main_pdf_pages": 19,
+  "supplement_pdf_pages": 8,
+  "remaining_research": "Controlled viscous transport only. No capillary-entry, trapping, universal confinement threshold or novel viscosity closure is demonstrated."
+}
