@@ -1,0 +1,202 @@
+\documentclass[11pt]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,bm,booktabs,longtable,hyperref,graphicx}
+\emergencystretch=3em
+\title{Supplement: operator derivation and reproducibility for LBFlow}
+\author{Yu Zhou\\Independent Researcher\\\texttt{zhouyu@live.com}}
+\date{Research snapshot: 8 October 2026}
+\begin{document}\maketitle
+\section{Source identity and scope}
+The historical baseline is DRLab 0.2.2.1, full revision:\\
+\texttt{1bef9bbe7047ca74280f5870f4787be4df12fe20}.
+The maintained LBFlow implementation contains the repairs; the original
+archive is preserved. The main executable accepts one simulation configuration per MPI
+job. A reentrant multi-object library interface is not verified.
+
+Quantitative results use equal reference densities, unit lattice speed and
+the standard pressure weights ($\alpha=4/9$ in D2Q9, $1/3$ in D3Q19).
+SRT and MRT, relaxation times 0.6--1.4 and two arithmetic/harmonic
+kinematic-viscosity choices are exercised. The physical force is force
+density. An acceleration would require multiplying by density, which is not
+the meaning of the constant \texttt{GV} value used here.
+
+\section{Equilibrium and source moments}
+For the actual lattice weights,
+\begin{align}
+ \sum_iw_i&=1,&\sum_iw_i e_{ia}&=0,&\sum_iw_i e_{ia}e_{ib}&=\delta_{ab}/3,\\
+ \sum_iw_i e_{ia}e_{ib}e_{ic}e_{id}
+ &= (\delta_{ab}\delta_{cd}+\delta_{ac}\delta_{bd}+\delta_{ad}\delta_{bc})/9.
+\end{align}
+Thus the equilibrium has mass $\rho$, momentum $\rho\bm u$, and second moment
+$pI+\rho\bm u\bm u$, where
+$p=\rho_0c_{p,0}^2+\rho_1c_{p,1}^2$.
+The recovered phase weights yield
+$c_{p,k}^2=3(1-\alpha_k)/5$ in D2Q9 and $(1-\alpha_k)/2$ in D3Q19.
+The reference-density relation between the two alphas balances pure-phase
+pressure; it does not establish thermodynamic consistency.
+
+The unprefactored Guo source $G_i$ has
+\begin{equation}
+ \sum_iG_i=0,\quad \sum_i\bm e_iG_i=\bm F,\quad
+ \sum_i\bm e_i\bm e_iG_i=\bm u\bm F+\bm F\bm u.
+\end{equation}
+These identities are tested against the source emitted by the production
+function, at nonzero velocity and force in all coordinate components.
+Actual $M$ and $M^{-1}$ are emitted and checked independently.
+
+The force-integration counterexample follows directly from the original
+shifted equilibrium. Its momentum increment is $s_j\tau F$.
+The old D3Q19 momentum rates were zero; old D2Q9 momentum rates were one.
+SRT's $s_j=1/\tau$ gives $F$ instead. The corrected source and half-force
+velocity give net $F$ in both collision operators.
+
+\section{Perturbation and recoloring}
+The actual perturbation arrays satisfy
+\begin{equation}
+ \sum_iB_i=1/3,\qquad \sum_i\bm e_iB_i=0,\qquad
+ \sum_i\bm e_i\bm e_iB_i=I/3.
+\end{equation}
+For a unit normal $\bm n$ and
+$\Delta_i=9\sigma|\bm g|[w_i(\bm e_i\cdot\bm n)^2-B_i]/(4\tau)$,
+\begin{equation}
+ \sum_i\Delta_i=0,\quad \sum_i\bm e_i\Delta_i=0,\quad
+ \sum_i\bm e_i\bm e_i\Delta_i=\frac{\sigma|\bm g|}{2\tau}(\bm n\bm n-I).
+\end{equation}
+The trace is nonzero, so an MRT implementation must account for energy and
+other even moments as well as shear. Direct projection of the actual arrays
+onto $M$, using 32 deterministic random normals, identifies coupled rows
+\{1,2,7,8\} in D2Q9 and \{1,2,9,10,11,12,13,14,15\} in D3Q19
+(zero-based indices). All use local rate $1/\tau$. Odd perturbation moments
+vanish. Applying an additional Guo source prefactor to this calibrated
+perturbation would change its surface tension and is not done.
+
+Opposite directions have opposite recoloring cosine and equal equilibrium
+weights at rest. Consequently the recoloring correction sums to zero, and
+$f_i^{0,*}+f_i^{1,*}=f_i^{post}$ pointwise. Component momentum can change by
+equal and opposite segregation fluxes; total momentum is unchanged.
+
+If the original fixed MRT rate $1/\tau_0$ is combined with a perturbation
+scaled by local $1/\tau(\chi)$, its capillary stress has factor
+$\tau_0/\tau(\chi)$. A thin-interface estimate with arithmetic interpolation is
+\begin{equation}
+ \sigma_{eff}\simeq\sigma\tau_0
+ \int_{-1}^{1}\frac{d\chi}{2\tau(\chi)}
+ =\sigma\frac{\tau_0}{\tau_0-\tau_1}\log\frac{\tau_0}{\tau_1}.
+\end{equation}
+This is a leading continuum estimate, not an exact finite-grid prediction.
+At prescribed $\sigma=0.005$, the original solver gives 0.0031483 for
+$(\tau_0,\tau_1)=(0.6,1.4)$ after 40000 steps and 0.0076439 for the opposite
+pair after 12000 steps. Relative late pressure changes are
+$4.8\times10^{-5}$ and $3.2\times10^{-9}$. The corrected arithmetic cases have
+Laplace errors 0.145\% and 0.170\%; the harmonic cases have 0.841\% and
+1.159\%. Local relaxation therefore removes the major capillary calibration
+defect without proving exact finite-grid viscosity independence.
+
+\section{Time and checkpoint contract}
+The integer-time incoming momentum is $\bm j_n=\rho\bm u_n-\bm F/2$.
+At physical rest, populations are initialized as
+$f_i^{eq}(0)-G_i(0)/2$. The normal collision, perturbation and recoloring
+kernel is applied once to create the outgoing state at time zero.
+For uniform constant forcing,
+\begin{equation}
+ \bm j_n=(n-1/2)\bm F,\quad \bm j_n^*=(n+1/2)\bm F,\quad
+ \bm u_n=n\bm F/\rho.
+\end{equation}
+An outgoing checkpoint labelled $n$ is followed by streaming and reporting
+at $n+1$. Its physical velocity, if reconstructed directly before streaming,
+would use $(\bm j_n^*-\bm F/2)/\rho$, not the incoming-state plus sign.
+The sidecar identifies the outgoing stage, lattice, dimensions, phase count,
+time and next action. Population-file length is checked. The complete
+configuration and geometry are recorded separately in run receipts; the
+sidecar does not validate every physical parameter.
+
+Nonfinite outgoing populations abort before checkpoint writing.
+Convergence histories reset on restart, so the same later state is
+reproduced while an identical automatic stopping time is not promised.
+The native-double restart representation is tested on the same Linux
+platform; cross-endian portability is not claimed.
+
+\section{References and measurement protocols}
+For a force-density-driven channel of wall spacing $H$,
+\begin{equation}
+ u(y)=\frac{F_x}{2\mu}y(H-y),\quad \overline u=\frac{F_xH^2}{12\mu}.
+\end{equation}
+Fluid-node coordinates are $y=1/2,3/2,\ldots,H-1/2$ relative to the lower
+halfway wall. Force scales as $H^{-3}$ and duration as $H^2$, with fixed
+lattice viscosity. This is diffusive refinement of the same physical channel.
+
+For two layers, each solution is $-F_xy^2/(2\mu_k)+a_ky+b_k$.
+Four linear conditions enforce two no-slip walls and continuity of velocity
+and shear stress. A second reference solves the measured diffuse-viscosity
+problem independently:
+\begin{equation}
+ C=F_x\frac{\int_0^H y/\mu(y)\,dy}{\int_0^H 1/\mu(y)\,dy},\quad
+ u(y)=\int_0^y\frac{C-F_xs}{\mu(s)}\,ds.
+\end{equation}
+Viscosity is interpolated between node centers and numerical quadrature is
+performed on 64 subdivisions per lattice spacing. This reference uses the
+measured phase profile and is not a manufactured analytic interface profile.
+
+Laplace pressure is compared with $(d-1)\sigma/R$. Subgrid intersections
+on all Cartesian edges are fit with orthogonal-distance circle/sphere
+regression. Pressure is averaged where $|\chi|>0.99$ and the sampling point
+is at least three nodes from the fitted interface. Fit residuals, sample
+counts, spurious velocity, component masses and late pressure changes are
+retained. The smallest radii are finite-interface tests.
+
+The wetting angle is measured through phase 1 using
+\begin{equation}
+ \theta=\arccos\frac{y_w-y_c}{R_c},\qquad y_w=0.5.
+\end{equation}
+The convention is consistent with $\bm n_\chi\cdot\bm n_w=\cos\theta$,
+where $\bm n_w$ points away from solid and $\bm n_\chi$ toward phase 0.
+Solid-to-fluid contour crossings are excluded. The principal fit uses
+$\chi=0$ and wall exclusion $0.75W_{0.9}$; the sensitivity envelope uses
+$\chi=-0.1,0,0.1$ and exclusions $0.5,0.75,1,1.5$ interface widths.
+Invalid fits are recorded rather than replaced with invented angles.
+
+For a flat wall, weighted stencil reconstruction solves
+$A\bm g=\bm b$ with $A=\sum_{fluid}w_i\bm e_i\bm e_i$.
+In physical $(x,y)$ coordinates, $A=\operatorname{diag}(5/18,1/6)$, so
+the clipped estimator $3\bm b$ has factors $5/6$ and $1/2$.
+This linear-field result does not ensure a nonlinear diffuse profile,
+halfway-wall placement or surface-energy consistency. The wall normal and
+angle rotation are held common in the ablation.
+
+\section{Experiment inventory and numerical data}
+The main verification suite contains 16 force cases, 24 channel cases,
+8 continuous/parallel/restart executions and 4 invalid-configuration cases.
+Six global-field comparisons are bitwise identical. Twelve layered-flow
+executions cover two viscosity permutations, three heights and two
+interpolation laws. Thirty distinct wall configurations cover two gradients,
+three angles and five radius/width combinations. Larger cases use complete
+population checkpoints or fresh initialization and up to eight MPI ranks.
+An interrupted initial batch is recorded; its six partial large-radius
+macro-output sets are excluded and rerun from initial geometry.
+
+\input{data/wetting-table.tex}
+
+The companion \texttt{data/measurements.json} and \texttt{data/wetting.csv}
+contain fitted radii, sensitivity bounds, late-time changes and spurious
+velocity. Raw VTI, parameter and log files reside in the experiment artifact
+directories selected when running the scripts. Measurement summaries are
+included with the source repository; raw VTI fields are not bundled. Scripts regenerate
+geometries and figures. No stochastic error bars or confidence intervals
+are inferred from these deterministic calculations.
+
+\section{Scientific limits and publication status}
+Only equal-density, low-speed flow in the documented parameter range is
+verified. Curved-wall and three-dimensional wetting accuracy, contact-line
+dynamics, hysteresis, high density ratio, arbitrary pressure weights, and
+phase-specific Darcy permeability are not established. The two viscosity
+rules represent alternative finite-interface closures. The geometrical
+projection and weighted linear reconstruction are established ideas;
+the ablation does not demonstrate superiority over all published wetting
+schemes or a new bulk model.
+
+The sole author is Yu Zhou, Independent Researcher; the software license is MIT.
+Public repository access, an immutable release citation, funding and competing
+interest declarations remain to be finalized before submission.
+The manuscript is a research draft, not a submitted article or a peer-review
+decision. AI-assisted inspection and drafting are disclosed in the main text.
+\end{document}

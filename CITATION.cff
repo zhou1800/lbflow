@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, cite the repository and the exact commit used."
+type: software
+title: "LBFlow: an MPI lattice Boltzmann simulator restored from DRLab"
+authors:
+  - family-names: Zhou
+    given-names: Yu
+    affiliation: Independent Researcher
+    email: zhouyu@live.com
+repository-code: "https://github.com/zhou1800/lbflow"
+license: MIT

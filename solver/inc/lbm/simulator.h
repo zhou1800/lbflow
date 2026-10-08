@@ -190,7 +190,21 @@ protected:
      * \brief Get diagonal matrix S for MRT.
      * \return valarray of diagonal elements of matrix S.
      */
-    va_val_t getMRTS();
+    va_val_t getMRTS(double relaxationTime = 0.0);
+    va_val_t forceForIndex(size_t idx) const;
+    va_val_t forceSource(size_t i, const vava_val_t& velocity,
+                         const va_val_t& force) const;
+    bool updateConvergence(const vava_val_t& velocity, bool scalarsStable,
+                           double tolerance, ostream& os,
+                           const va_val_t* phaseIndicator = nullptr);
+    void validatePopulations(const vava_val_t& populations) const;
+    void prepareRestart(const string& path);
+    void saveRestartMetadata(const string& path, size_t time, size_t phases);
+    void validateRestart(const string& path, size_t time, size_t phases);
+    vava_val_t previousReportVelocity;
+    va_val_t previousPhaseIndicator;
+    size_t stableReports = 0;
+    bool hasReportVelocity = false;
 
     ///@}
 

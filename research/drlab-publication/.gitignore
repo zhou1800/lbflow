@@ -1,0 +1,14 @@
+solver/
+scripts/
+*.zip
+package-manifest.json
+paper/*.pdf
+paper/*.zip
+paper/*.log
+paper/*.blg
+paper/*.aux
+paper/*.out
+paper/bibliography-metadata.json
+notes/chatgpt-review-request.txt
+__pycache__/
+*.pyc

@@ -1,5 +1,11 @@
-# vim temporary file
+# Generated builds, simulation outputs and local editor state.
+build*/
+results/
+__pycache__/
+*.pyc
 *.swp
-
-# Build folder
-build/
+*.un~
+*.user
+*.vti
+*.rst
+*.rst.meta

@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-08",
+  "baseline_import_commit": "66923961c911684cff8b703914118e431f8ce445",
+  "toolchain": {
+    "compiler": "GCC 13.3.0",
+    "cmake": "3.28.3",
+    "mpi": "Open MPI 4.1.6"
+  },
+  "executable_sha256": "cd689dcd7d5bb3947ef47536d3a7ca3b27273e0a50448f1c42ffc0bb5aee8db3",
+  "ctest": {
+    "passed": 2,
+    "failed": 0,
+    "forcing_cases": 16,
+    "field_comparisons": 3,
+    "failure_contracts": 5
+  },
+  "extended_verification": {
+    "executions": 52,
+    "physical_measurements": 40,
+    "field_comparisons": 6,
+    "invalid_input_checks": 4,
+    "all_fields_bitwise_equal": true,
+    "maximum_change_from_recorded_measurements": 0.0
+  },
+  "generated_examples": {
+    "channel_8x10x4_two_ranks": "passed",
+    "drop_24x24_one_rank": "passed",
+    "installed_executable": "passed"
+  },
+  "exported_git_source": {
+    "fresh_configure": "passed",
+    "fresh_build": "passed",
+    "ctest": "2/2 passed"
+  },
+  "original_archive_integrity": "82/82 recorded file hashes unchanged",
+  "historical_c_prototype": "65/65 moved tracked files byte-identical",
+  "numerical_cpp_source": "byte-identical to the previously validated research implementation",
+  "figures": "4/4 regenerated PNGs byte-identical to recorded figures",
+  "remote_ci": "Not executed: GitHub Actions is disabled in the repository. Workflow source is included.",
+  "historical_import_counterexample": {
+    "expected_velocity": 0.0001,
+    "original_mean_velocity": -2.7755575615628914e-17
+  }
+}

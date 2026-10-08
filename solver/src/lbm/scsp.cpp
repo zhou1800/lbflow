@@ -54,34 +54,37 @@ void SCSP::Run(std::ostream &logProc)
     }
     else {
         initialize();
+        calcMacroVar();
+        bodyForce();
         output.Save(p.getTStart());
+        collision();
     }
     procLog.Log("Done!\t");
 
     for (size_t t = p.getTStart() + 1; t <= p.getTEnd(); ++t) {
+        bool converged = false;
         streaming(&f, &fOld, t);
         bounceBack(&f, fOld, ibS);
         //axisymmetric(&f);
         zouHeBoundary();
         calcMacroVar();
+        bodyForce();
         if (t % p.getTStep() == 0) {
             stringstream ss;
             ss << "Step " << t << " - ";
             procLog.Log(ss.str());
             output.Save(t);
-            if (report(logProc, dens, v)){
-                saveRst(t);
-                break;
-            }
+            converged = report(logProc, dens, v);
         }
         else if (t % p.getTRpt() == 0){
             stringstream ss;
             ss << "Step " << t << " - ";
             procLog.Log(ss.str());
-            report(logProc, dens, v);
+            converged = report(logProc, dens, v);
         }
         collision();
-        if (t % p.getTRst() == 0) saveRst(t);
+        if (converged || t % p.getTRst() == 0) saveRst(t);
+        if (converged) break;
     }
 }
 
@@ -89,13 +92,20 @@ void SCSP::initialize()
 {
     static const double rho = p.getDensity()[0];
     static const va_val_t iDist = wi * rho;
-    for (auto& idx : p.getIdx({IT::VD, IT::GV, IT::VB, IT::PB}))
+    for (auto& idx : p.getIdx({IT::VD, IT::GV, IT::VB, IT::PB})) {
+        const va_val_t force = forceForIndex(idx);
         for (size_t i : gIdx[idx]){
-            for (size_t q = 0; q < g.S.Q; ++q)
+            for (size_t q = 0; q < g.S.Q; ++q) {
                 f[q][i] = iDist[q];
+                double ef = 0.0;
+                for (size_t d = 0; d < g.S.D; ++d)
+                    ef += g.S.Qi[q][d] * force[d];
+                f[q][i] -= 1.5 * wi[q] * ef;
+            }
                 dens[i] = rho;
             // vel = 0 by default.
         }
+    }
 }
 
 void SCSP::calcMacroVar()
@@ -106,6 +116,8 @@ void SCSP::calcMacroVar()
             dens[i] = f[0][i];
             for (size_t q = 1; q < g.S.Q; ++q)
                 dens[i] += f[q][i];
+            if (!std::isfinite(dens[i]) || dens[i] <= 0.0)
+                throw runtime_error("Non-finite or non-positive fluid density.");
 
             for (size_t d = 0; d < g.S.D; ++d) {
                 v[d][i] = 0;
@@ -122,22 +134,30 @@ void SCSP::calcMacroVar()
     }
 }
 
-void SCSP::collision()
+void SCSP::bodyForce()
 {
-    // incorporate gravity
+    const double rhoRef = p.getDensity()[0];
     for (size_t idx : p.getIdx({IT::GV})) {
-        va_val_t fi = g.S.Qp[p.getIVal(idx).Dir]
-                * p.getRTime()[0] * p.getIVal(idx).Value;
+        const va_val_t fi = forceForIndex(idx) * 0.5;
         for (size_t d = 0; d < g.S.D; ++d)
             for (size_t i : gIdx[idx])
+#if ISCOMPRESSABLE
                 v[d][i] += fi[d] / dens[i];
+#else
+                v[d][i] += fi[d] / rhoRef;
+#endif
     }
+}
+
+void SCSP::collision()
+{
     static const EQUILFN equilfn = p.getEquilModel() == "SRT" ? SRT : MRT;
 
     switch (equilfn){
     case SRT:       equilSRT();  break;
     case MRT:       equilMRT();  break;
     }
+    validatePopulations(f);
 }
 
 void SCSP::zouHeBoundary()
@@ -234,6 +254,7 @@ void SCSP::loadRst(std::size_t t)
     // prepare filename
     ostringstream os;
     os << p.getOutPath() << "." << setw(10) << setfill('0') << t << ".rst";
+    validateRestart(os.str(), t, 1);
     FileRaw<double> file(os.str(), true);
 
     // load distribution functions.
@@ -246,11 +267,13 @@ void SCSP::saveRst(std::size_t t)
     // prepare filename
     ostringstream os;
     os << p.getOutPath() << "." << setw(10) << setfill('0') << t << ".rst";
+    prepareRestart(os.str());
     FileRaw<double> file(os.str(), true);
 
     // save distribution function.
     for (size_t q = 0,s=0; q < g.S.Q; ++q,s += g.LG.N)
         file.Save(g, f[q], t);
+    saveRestartMetadata(os.str(), t, 1);
 }
 
 bool SCSP::report(ostream &os, const va_val_t &dens, const vava_val_t &v)
@@ -295,14 +318,14 @@ bool SCSP::report(ostream &os, const va_val_t &dens, const vava_val_t &v)
         // 3. Calculate K.
         double dP = rhoS[0] / cntS[0] - rhoS[1] / cntS[1];
         double Q = velR / double(*fl.second - *fl.first + 1);
-        double K = kPar * Q / dP;
-        if (K == 0) return false;
-        double errK = abs(K - KOld) / K;
+        if (!std::isfinite(dP) || !std::isfinite(Q))
+            throw runtime_error("Non-finite single-phase report state.");
+        const bool hasPressureDrop = abs(dP) > 1e-14;
+        const double K = hasPressureDrop ? kPar * Q / dP : 0.0;
+        const double errK = hasPressureDrop ? abs(K - KOld) / std::max(abs(K), 1e-30) : 0.0;
+        if (!std::isfinite(K) || !std::isfinite(errK))
+            throw runtime_error("Non-finite apparent permeability.");
         KOld = K;
-
-        if (std::isnan(dP) || std::isnan(Q) ||
-            std::isnan(K)  || std::isnan(errK))
-            errK = 0;       // end simulation!
 
         // 4. Report.
         if (mpi().getId() == 0){
@@ -312,9 +335,11 @@ bool SCSP::report(ostream &os, const va_val_t &dens, const vava_val_t &v)
                << " - K = " << K << "(um^2), "
                << fixed << "errK = " << errK * 100.0 << "%" << endl;
         }
-        return abs(errK) < MaxErr;
+        if (!hasPressureDrop && mpi().getId() == 0)
+            os << " - pressure-based permeability unavailable: zero pressure drop" << endl;
+        return updateConvergence(v, !hasPressureDrop || errK < MaxErr, MaxErr, os);
     }
-    catch (exception& e) { os << e.what(); }
+    catch (exception& e) { os << e.what(); throw; }
     return false;
 }
 
@@ -328,11 +353,14 @@ void SCSP::equilSRT()
     static const double dens0 = p.getDensity()[0];
 
     for (size_t idx : p.getIdx({IT::VD, IT::GV, IT::VB, IT::PB})) {
+        const va_val_t force = forceForIndex(idx);
+        const bool forced = inner_product(begin(force), end(force), begin(force), 0.0) != 0.0;
         for (size_t i : gIdx[idx]) {     // array index
             double usq = 0;
             for (size_t d = 0; d < g.S.D; ++d)
                 usq += v[d][i] * v[d][i];
 
+            const va_val_t source = forced ? forceSource(i, v, force) : va_val_t(0.0, g.S.Q);
             for (size_t q = 0; q < g.S.Q; ++q) {
                 double ui = 0;
                 for (size_t d = 0; d < g.S.D; ++d)
@@ -345,6 +373,8 @@ void SCSP::equilSRT()
                      (dens[i] + dens0 * (c1*ui + c2*ui*ui- c3*usq));
 #endif
                 f[q][i] += (feq - f[q][i]) * omega;
+                if (forced)
+                    f[q][i] += (1.0 - 0.5 * omega) * source[q];
             }
         }
     }
@@ -365,8 +395,12 @@ void SCSP::equilMRT()
     static const va_val_t MInvS = MatMulDiag(MInv, S, Q);
     static const va_val_t MInvSM = MatMulMat(MInvS, M, Q, Q, Q);
     static const va_val_t MInvSMT = MatTranspose(MInvSM, Q, Q);
+    static const va_val_t forceMatrix = MatMulMat(
+            MatMulDiag(MInv, 1.0 - 0.5 * S, Q), M, Q, Q, Q);
 
     for (size_t idx : p.getIdx({IT::VD, IT::GV, IT::VB, IT::PB})) {
+        const va_val_t force = forceForIndex(idx);
+        const bool forced = inner_product(begin(force), end(force), begin(force), 0.0) != 0.0;
         for (size_t i : gIdx[idx]) {     // array index
 
             // 1. pre calculated MInvSM.
@@ -392,6 +426,11 @@ void SCSP::equilMRT()
             }
             for (size_t q = 0; q < g.S.Q; ++q)
                 f[q][i] += ff[q];
+            if (forced) {
+                const va_val_t correction = MatMulVec(forceMatrix, forceSource(i, v, force), Q, Q);
+                for (size_t q = 0; q < Q; ++q)
+                    f[q][i] += correction[q];
+            }
         }
     }
 }

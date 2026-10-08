@@ -66,7 +66,8 @@ int main(int argc, char* argv[])
     } catch (exception& e){
         cout << thisId << " Failed to excute: " << e.what() << endl;
         cout.flush();
-        return 0;
+        MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
     /* finish */
     return 0;

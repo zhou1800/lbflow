@@ -135,6 +135,7 @@
 #define DEFS_H
 
 #include "cfg.h"
+#include <cstdint>
 #include <valarray>
 #include <vector>
 #include <map>

@@ -1,0 +1,20 @@
+{
+  "status": "research draft for author review",
+  "author_name": "Yu Zhou",
+  "author_name_basis": "Explicit author confirmation, 2026-10-08",
+  "complete_author_list_confirmed": true,
+  "affiliation": "Independent Researcher",
+  "corresponding_email": "zhouyu@live.com",
+  "funding": null,
+  "competing_interests": null,
+  "code_ownership_confirmed": true,
+  "license_applied": true,
+  "public_source_release": null,
+  "candidate_publication_route": "Research software / verification; SoftwareX is a candidate, with journal template and release conditions to confirm before submission",
+  "journal_submission_made": false,
+  "ai_assistance": "OpenAI Codex and ChatGPT; source inspection, implementation, literature triage and drafting",
+  "validated_scope": "Equal reference densities, standard pressure weights, low speed, D2Q9/D3Q19, relaxation times 0.6--1.4; documented wall and interface cases",
+  "coauthors": [],
+  "software_license": "MIT",
+  "repository_url": "https://github.com/zhou1800/lbflow"
+}

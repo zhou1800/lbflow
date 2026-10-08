@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.16)
+project(LBFlow VERSION 0.3.0 LANGUAGES CXX)
+
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+    message(FATAL_ERROR "Use an out-of-tree build: cmake -S . -B build")
+endif()
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build configuration" FORCE)
+endif()
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
+
+find_package(MPI REQUIRED COMPONENTS CXX)
+include(CTest)
+add_subdirectory(solver)
+install(TARGETS LBFlow RUNTIME DESTINATION bin)

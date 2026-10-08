@@ -1,0 +1,16 @@
+Draft cover letter for author review; journal and final declarations to be confirmed.
+
+Dear Editor,
+
+Please consider "LBFlow: reproducible verification of an MPI color-gradient lattice Boltzmann solver" as a research software manuscript.
+
+The accompanying implementation and experiments make collision, forcing, interface and restart behavior inspectable. Reproducible counterexamples identify defects in a historical solver, including fixed first-phase MRT relaxation and incompatible momentum forcing. The corrected implementation recovers analytic acceleration and channel flow, while layered-flow and Laplace tests quantify its multiphase operating range. A wall-stencil ablation reports both contact-angle improvements and increased spurious flow in some cases.
+
+The contribution is a documented implementation and reproducible verification package. We do not claim a new multiphase-model family or universal wetting superiority. The manuscript identifies unvalidated regimes and discloses AI-assisted work.
+
+Before submission, public software access, an immutable release citation and required journal declarations must be verified. This draft does not attest originality, exclusive submission, authorship approval or publication rights on behalf of the author.
+
+Sincerely,
+Yu Zhou
+Independent Researcher
+zhouyu@live.com
