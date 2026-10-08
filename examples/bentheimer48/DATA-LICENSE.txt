@@ -1,0 +1,6 @@
+Bentheimer image data and the derived crops: Creative Commons Attribution 4.0.
+https://creativecommons.org/licenses/by/4.0/
+https://figshare.com/articles/dataset/Bentheimer_Sandstone/1200096
+DOI: 10.6084/m9.figshare.1200096.v1
+Data courtesy of Qatar Carbonates and Carbon Storage Research Centre, Imperial College London; dataset by Shah, Crawshaw and Boek.
+Changes: Centered crop, no removal of isolated pores, no filtering or segmentation changes; optional nearest-neighbor voxel subdivision.

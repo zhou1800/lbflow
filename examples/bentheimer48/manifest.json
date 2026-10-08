@@ -1,0 +1,97 @@
+{
+  "source": {
+    "title": "Bentheimer Sandstone",
+    "authors": [
+      "Saurabh M. Shah",
+      "John P. Crawshaw",
+      "Edo S. Boek"
+    ],
+    "doi": "10.6084/m9.figshare.1200096.v1",
+    "landing_page": "https://figshare.com/articles/dataset/Bentheimer_Sandstone/1200096",
+    "archive_url": "https://ndownloader.figshare.com/files/1712678",
+    "archive_sha256": "723f3734ae95978791148135ef8ac96b6d97d8f6b69cac83bd538ec9481a8a27",
+    "archive_bytes": 10918859,
+    "raw_file": "Benth_4.54.raw",
+    "raw_bytes": 190109375,
+    "raw_sha256": "7123e09e46119d23bd765ff6f2d5172d3387b3867b4dcd725f9b06ba494a76cd",
+    "shape_zyx": [
+      575,
+      575,
+      575
+    ],
+    "voxel_size_m": 4.54e-06,
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "attribution": "Data courtesy of Qatar Carbonates and Carbon Storage Research Centre, Imperial College London; dataset by Shah, Crawshaw and Boek.",
+    "labels": {
+      "pore": 0,
+      "grain": 255
+    },
+    "storage": "Unsigned 8-bit; x fastest, then y, then z; zero header offset."
+  },
+  "crop_origin_xyz": [
+    263,
+    263,
+    263
+  ],
+  "crop_size_xyz": [
+    48,
+    48,
+    48
+  ],
+  "refinement": 1,
+  "simulation_size_xyz": [
+    48,
+    48,
+    48
+  ],
+  "simulation_voxel_size_m": 4.54e-06,
+  "boundaries": "Periodic on all axes; halfway bounce-back on every pore/grain link.",
+  "processing": "Centered crop, no removal of isolated pores, no filtering or segmentation changes; optional nearest-neighbor voxel subdivision.",
+  "initial_phase_rule": "Phase 0 at periodic EDT >= 3 original voxels; phase 1 in remaining pores.",
+  "initial_phase0_pore_fraction": 0.2605243161094225,
+  "porosity": 0.23799189814814814,
+  "periodic_EDT_voxel_quantiles": {
+    "q10": 1.0,
+    "q50": 2.0,
+    "q90": 4.123105625617661,
+    "q99": 6.0
+  },
+  "connectivity": [
+    {
+      "components": 2,
+      "largest_component_fraction": 0.9999240121580547,
+      "neighborhood": 6,
+      "periodic": false
+    },
+    {
+      "components": 1,
+      "largest_component_fraction": 1.0,
+      "neighborhood": 6,
+      "periodic": true
+    },
+    {
+      "components": 2,
+      "largest_component_fraction": 0.9999240121580547,
+      "neighborhood": 18,
+      "periodic": false
+    },
+    {
+      "components": 1,
+      "largest_component_fraction": 1.0,
+      "neighborhood": 18,
+      "periodic": true
+    }
+  ],
+  "files": {
+    "single-phase.raw": {
+      "bytes": 110592,
+      "sha256": "46d8ff7d7fdc670a34dbaad5b37d76fa1ace1936905fbb4584616e978bb0da7b"
+    },
+    "two-phase.raw": {
+      "bytes": 110592,
+      "sha256": "2ee56c7f56e9a0a662a9fda1ce08a9641fa64e9ec9434749c98aede4433c0a84"
+    }
+  },
+  "scope": "A cropped periodically repeated numerical specimen, not a laboratory permeability reference or representative elementary volume. Refinement subdivides image voxels."
+}

@@ -1,0 +1,2 @@
+# Voxel inputs are byte-valued data; preserve bytes and avoid text diffs.
+*.raw binary

@@ -45,30 +45,44 @@ SCSP::SCSP(const FilePrm &prm)
 
 void SCSP::Run(std::ostream &logProc)
 {
+    const double runStart = MPI_Wtime();
+    double seconds[TIMING_CATEGORIES] = {};
+    size_t completedSteps = 0;
     Logger procLog(logProc);
     procLog.Reset(true);
 
     procLog.Log("Initializing...", false);
     if (p.getTStart() != 0){
+        const double begin = MPI_Wtime();
         loadRst(p.getTStart());
+        seconds[CHECKPOINT_TIME] += MPI_Wtime() - begin;
     }
     else {
+        double begin = MPI_Wtime();
         initialize();
         calcMacroVar();
         bodyForce();
+        seconds[INIT_TIME] += MPI_Wtime() - begin;
+        begin = MPI_Wtime();
         output.Save(p.getTStart());
+        seconds[FIELD_TIME] += MPI_Wtime() - begin;
+        begin = MPI_Wtime();
         collision();
+        seconds[INIT_TIME] += MPI_Wtime() - begin;
     }
     procLog.Log("Done!\t");
 
     for (size_t t = p.getTStart() + 1; t <= p.getTEnd(); ++t) {
         bool converged = false;
+        double begin = MPI_Wtime();
         streaming(&f, &fOld, t);
         bounceBack(&f, fOld, ibS);
         //axisymmetric(&f);
         zouHeBoundary();
         calcMacroVar();
         bodyForce();
+        seconds[NUMERICAL_TIME] += MPI_Wtime() - begin;
+        begin = MPI_Wtime();
         if (t % p.getTStep() == 0) {
             stringstream ss;
             ss << "Step " << t << " - ";
@@ -82,10 +96,19 @@ void SCSP::Run(std::ostream &logProc)
             procLog.Log(ss.str());
             converged = report(logProc, dens, v);
         }
+        seconds[FIELD_TIME] += MPI_Wtime() - begin;
+        begin = MPI_Wtime();
         collision();
-        if (converged || t % p.getTRst() == 0) saveRst(t);
+        seconds[NUMERICAL_TIME] += MPI_Wtime() - begin;
+        if (converged || t % p.getTRst() == 0) {
+            begin = MPI_Wtime();
+            saveRst(t);
+            seconds[CHECKPOINT_TIME] += MPI_Wtime() - begin;
+        }
+        ++completedSteps;
         if (converged) break;
     }
+    writeTiming(logProc, seconds, MPI_Wtime() - runStart, completedSteps);
 }
 
 void SCSP::initialize()

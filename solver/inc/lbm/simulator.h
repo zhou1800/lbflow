@@ -117,6 +117,15 @@ public:
     virtual void Run(ostream& logProc = cout) = 0;
 
 protected:
+    // MPI_Wtime categories reported separately from construction/process time.
+    // Initialization excludes initial field/checkpoint I/O; numerical work
+    // includes streaming, MPI exchange, boundaries, macro variables, collision
+    // and finite-state checks. Category maxima need not sum to the wall maximum.
+    enum TimingCategory { INIT_TIME, NUMERICAL_TIME, FIELD_TIME, CHECKPOINT_TIME,
+                          TIMING_CATEGORIES };
+    void writeTiming(ostream& log, const double* seconds, double wall,
+                     size_t completedSteps) const;
+
     ///\name Simulation steps.
     ///@{
     /*!

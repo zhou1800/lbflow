@@ -6,6 +6,7 @@
 #include "roi.h"
 #include <fstream>
 #include <iomanip>
+#include <sstream>
 
 namespace DRL {
 
@@ -33,6 +34,39 @@ Simulator::Simulator(const FilePrm &prm)
                 throw invalid_argument("Report slice is outside the selected axis.");
     }
     buildIb();
+}
+
+void Simulator::writeTiming(ostream& log, const double* seconds, double wall,
+                            size_t completedSteps) const
+{
+    double local[TIMING_CATEGORIES + 1], maximum[TIMING_CATEGORIES + 1];
+    for (size_t i = 0; i < TIMING_CATEGORIES; ++i) local[i] = seconds[i];
+    local[TIMING_CATEGORIES] = wall;
+    mpi().AllReduce(local, maximum, TIMING_CATEGORIES + 1, MPI_DOUBLE, MPI_MAX);
+    double fluidLocal = 0.0, fluidGlobal = 0.0;
+    const auto& active = p.getFluidModel() == "color"
+        ? p.getIdx({IT::VD, IT::GV, IT::VB, IT::PB, IT::HF})
+        : p.getIdx({IT::VD, IT::GV, IT::VB, IT::PB});
+    for (size_t idx : active) {
+        const auto found = gIdx.find(idx);
+        if (found != gIdx.end())
+            fluidLocal += static_cast<double>(found->second.size());
+    }
+    mpi().AllReduce(&fluidLocal, &fluidGlobal, 1, MPI_DOUBLE, MPI_SUM);
+    if (mpi().getId() != 0) return;
+    // Build in a private stream so the caller's numeric format is preserved.
+    ostringstream summary;
+    summary << setprecision(17)
+            << "LBFlowTiming {\"schema\":1,\"ranks\":" << mpi().getCnt()
+            << ",\"completed_steps\":" << completedSteps
+            << ",\"fluid_nodes\":" << fluidGlobal
+            << ",\"total_voxels\":" << g.N
+            << ",\"initialization_seconds_max\":" << maximum[INIT_TIME]
+            << ",\"numerical_seconds_max\":" << maximum[NUMERICAL_TIME]
+            << ",\"fields_diagnostics_seconds_max\":" << maximum[FIELD_TIME]
+            << ",\"checkpoint_seconds_max\":" << maximum[CHECKPOINT_TIME]
+            << ",\"run_seconds_max\":" << maximum[TIMING_CATEGORIES] << "}\n";
+    log << summary.str();
 }
 
 void Simulator::streaming(vava_val_t *f, vava_val_t *fOld, size_t tsp)

@@ -50,15 +50,37 @@ viscosity and wall-gradient reconstruction have separate measured tradeoffs.
 See the [numerical change log](research/drlab-publication/notes/numerical-changes.md).
 
 CTest exercises coefficients from the actual C++ implementation, 16 analytic
-force cases, single/two-rank and restarted field agreement, and invalid parameter
-and checkpoint failures. GitHub Actions builds with GCC and Clang and repeats
-these checks and both small examples.
+force cases, analytic phase fluxes in isolated pores, capillary-entry direction,
+single/two-rank and restarted field agreement, and invalid parameter/checkpoint
+failures. A GitHub Actions workflow is provided for GCC and Clang; its execution
+depends on the repository's Actions settings.
 
 The extended study has 24 analytic channel cases, 12 layered-flow cases and 30
 wall-drop configurations. Its completed quantitative scope is equal reference
 densities, standard pressure weights, low speed and relaxation times 0.6--1.4.
-Curved/3D wetting, moving contact lines and high density ratios need further
-validation. MPI is implemented; CUDA and OpenMP acceleration are future work.
+Curved-wall wetting accuracy, moving contact lines and high density ratios need
+further validation. MPI is implemented; CUDA and OpenMP acceleration are future work.
+
+## Pore-Scale Digital Rock
+
+The [Bentheimer example](examples/bentheimer48/README.md) includes small,
+checksum-pinned crops of a DOI-cited public sandstone image, with its separate
+CC BY 4.0 data license and full preparation manifest. Workflows measure
+single-phase permeability, phase-fraction-weighted advective Darcy flux,
+component mass, late field changes and MPI/restart agreement. The manuscript
+is being prepared for Computer Physics Communications around this application.
+
+```sh
+python3 scripts/porous_media.py bundle --solver build/bin/LBFlow --root results/pore-bundles
+python3 scripts/porous_media.py entry --solver build/bin/LBFlow --root results/capillary-entry
+python3 scripts/rock_workflow.py --solver build/bin/LBFlow --dataset examples/bentheimer48 --root results/rock-single --mode single --ranks 2
+python3 scripts/rock_workflow.py --solver build/bin/LBFlow --dataset examples/bentheimer48 --root results/rock-two --mode two --ranks 2
+```
+
+The small periodically repeated image is not a representative elementary
+volume. Many pores are comparable to the diffuse interface width. Transient
+phase flux is reported directly and is not treated as steady relative
+permeability. See the [study scope](research/drlab-publication/README.md).
 
 ## Reproduce The Study
 
@@ -83,6 +105,9 @@ draft and has not been submitted or accepted.
   reversed order: `z y x` for 3D, `y x` for 2D. Every voxel label must be defined.
 - The historical key is `rexlationTime` (spelling retained). `latticeSpeed 1`
   is required. `GV` specifies force density along a non-rest lattice direction.
+- SCSP reports reference-density velocity; ColorFluid uses local total density.
+  These coincide in the incompressible limit. Account for density when comparing
+  their pure-phase fields on a rock with a nonuniform pressure field.
 - `interfaceThickness` specifies recoloring beta, not the interface width in
   nodes. Solid `SD` label values specify contact angle through phase 1; the
   historical global `contactAngle` value is inactive.
@@ -99,9 +124,17 @@ draft and has not been submitted or accepted.
   Convergence history resets on load; native-double checkpoints are not a
   cross-platform interchange format.
 
+At completion, `LBFlowTiming` provides a JSON record of update counts, fluid
+nodes, numerical time (including MPI/finite checks), field/diagnostic time,
+checkpoint time and initialization. Durations are maxima across ranks; their
+sum need not equal the maximum run wall time. Construction and launcher costs
+are measured separately by the Python runner. Dedicated Linux timing scripts
+pin one logical CPU per MPI rank, discard warm-ups and repeat fixed workloads.
+
 ## Author And License
 
 Yu Zhou, Independent Researcher. Correspondence: [private contact omitted].
-LBFlow is licensed under the [MIT License](LICENSE). The archived cJSON source
-retains its upstream copyright and license notices. Use [CITATION.cff](CITATION.cff)
+LBFlow code is licensed under the [MIT License](LICENSE). The Bentheimer data
+retain CC BY 4.0, and the archived cJSON source retains its upstream copyright
+and license notices. Use [CITATION.cff](CITATION.cff)
 and record your exact simulation commit when citing the software.

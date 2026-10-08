@@ -37,7 +37,7 @@ def spec(name, nx=8, ny=8, nz=4, dimensions=3, model='color', eq='MRT',
 
 
 class Study:
-    def __init__(self, solver, root, mpiexec="mpiexec", numproc_flag="-n"):
+    def __init__(self, solver, root, mpiexec="mpiexec", numproc_flag="-n", launch_prefix=()):
         self.solver = Path(solver).resolve()
         self.root = Path(root).resolve()
         # Keep every run tied to an immutable executable even if another build occurs.
@@ -52,6 +52,7 @@ class Study:
         self.env = os.environ.copy()
         self.mpiexec = mpiexec
         self.numproc_flag = numproc_flag
+        self.launch_prefix = list(launch_prefix)
         for d in ('cases', 'results'): (self.root/d).mkdir(parents=True, exist_ok=True)
 
     def run(self, s, ranks=1, start=0, checkpoint=None):
@@ -60,8 +61,14 @@ class Study:
         folder.mkdir(parents=True, exist_ok=False)
         nx, ny, nz = s['size']
         raw = folder/'geometry.raw'
-        raw.write_bytes(bytes(s['label'](x,y,z) for z in range(nz)
-                              for y in range(ny) for x in range(nx)))
+        if s.get('geometry_file'):
+            source = Path(s['geometry_file'])
+            if source.stat().st_size != nx*ny*nz:
+                raise ValueError('Raw geometry size differs from the lattice dimensions')
+            shutil.copyfile(source, raw)
+        else:
+            raw.write_bytes(bytes(s['label'](x,y,z) for z in range(nz)
+                                  for y in range(ny) for x in range(nx)))
         dims = (ny,nx) if s['dimensions'] == 2 else (nz,ny,nx)
         params = dict(gridFile=f'"{raw}"', dimension=' '.join(map(str,dims)),
                       directions=9 if s['dimensions']==2 else 19, fileType='"uint8"',
@@ -85,7 +92,7 @@ class Study:
         if checkpoint:
             for suffix in ('.rst','.rst.meta'):
                 shutil.copyfile(str(checkpoint)+suffix, folder/f'field.{start:010d}{suffix}')
-        command = [str(self.solver), str(inp)]
+        command = self.launch_prefix+[str(self.solver), str(inp)]
         if ranks>1: command = [self.mpiexec,self.numproc_flag,str(ranks)]+command
         begun = time.monotonic()
         try:
@@ -109,11 +116,14 @@ class Study:
             code='timeout'
             if isinstance(transcript,bytes): transcript=transcript.decode(errors='replace')
         (folder/'run.log').write_text(transcript)
+        timing_lines = [line[len('LBFlowTiming '):] for line in transcript.splitlines()
+                        if line.startswith('LBFlowTiming ')]
         result=dict(name=name,exit=code,seconds=time.monotonic()-begun,
                     solver_sha256=self.solver_sha,input_sha256=sha(inp),geometry_sha256=sha(raw),
                     parameters={k:v for k,v in s.items() if k!='label'},ranks=ranks,start=start,
                     finished='Simulation finished!' in transcript,command=command,
-                    output_files=[str(f) for f in sorted(folder.glob('field.*.vti'))])
+                    output_files=[str(f) for f in sorted(folder.glob('field.*.vti'))],
+                    timing=json.loads(timing_lines[0]) if len(timing_lines)==1 else None)
         (self.root/'results'/f'{name}.json').write_text(json.dumps(result,indent=2))
         print(json.dumps({k:result[k] for k in ('name','exit','finished','seconds')}),flush=True)
         if code=='timeout': raise RuntimeError(f'{name}: timed out; inspect {folder/"run.log"}')

@@ -56,25 +56,38 @@ ColorFluid::ColorFluid(const FilePrm &prm)
 
 void ColorFluid::Run(std::ostream &logProc)
 {
+    const double runStart = MPI_Wtime();
+    double seconds[TIMING_CATEGORIES] = {};
+    size_t completedSteps = 0;
     Logger procLog(logProc);
     procLog.Reset(true);
 
     procLog.Log("Initializing...", false);
-    if (p.getTStart() != 0)
+    if (p.getTStart() != 0) {
+        const double begin = MPI_Wtime();
         loadRst(p.getTStart());
+        seconds[CHECKPOINT_TIME] += MPI_Wtime() - begin;
+    }
     else {
+        double begin = MPI_Wtime();
         initialize();
         // Construct the t=0 incoming state, then use the normal collision
         // kernel to obtain outgoing populations whose next action is stream.
         calcMacroVar(0);
         bodyForce();
+        seconds[INIT_TIME] += MPI_Wtime() - begin;
+        begin = MPI_Wtime();
         output.Save(p.getTStart());
+        seconds[FIELD_TIME] += MPI_Wtime() - begin;
+        begin = MPI_Wtime();
         collision();
+        seconds[INIT_TIME] += MPI_Wtime() - begin;
     }
     procLog.Log("Done!\t");
 
     for (size_t t = p.getTStart() + 1; t <= p.getTEnd(); ++t) {
         bool converged = false;
+        double begin = MPI_Wtime();
         // 1. Streaming.
         streaming(&(f[0]), &(fOld[0]),t);
         streaming(&(f[1]), &(fOld[1]),t);
@@ -94,6 +107,8 @@ void ColorFluid::Run(std::ostream &logProc)
         // 3. Calculate macroscopic variables.
         calcMacroVar(t);
         bodyForce();
+        seconds[NUMERICAL_TIME] += MPI_Wtime() - begin;
+        begin = MPI_Wtime();
 
         // 4. Saves macro variable.
         if (t % p.getTStep() == 0) {
@@ -111,16 +126,23 @@ void ColorFluid::Run(std::ostream &logProc)
         }
 
         // 5. Collosion.
+        seconds[FIELD_TIME] += MPI_Wtime() - begin;
+        begin = MPI_Wtime();
         collision();
+        seconds[NUMERICAL_TIME] += MPI_Wtime() - begin;
 
         // 6. Save f.
         if (converged || t % p.getTRst() == 0) {
+            begin = MPI_Wtime();
             //procLog.Pause();
             saveRst(t);
+            seconds[CHECKPOINT_TIME] += MPI_Wtime() - begin;
             //procLog.Continue();
         }
+        ++completedSteps;
         if (converged) break;
     }
+    writeTiming(logProc, seconds, MPI_Wtime() - runStart, completedSteps);
 }
 
 void ColorFluid::initialize()

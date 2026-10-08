@@ -10,7 +10,7 @@ The imported solver, numerical experiments, equations, source comparisons and ma
 - Source of truth for initial results: the preserved `drlab-assessment` artifacts from 2026-10-07.
 - Maintained implementation: repository-root `solver/`; numerical changes are documented individually.
 - Published measurement summaries and figures: `paper/data/` and `paper/figures/`. Raw outputs are generated in user-selected result directories and kept outside version control.
-- First manuscript scope: immiscible two-phase color-gradient flow and geometrical wetting within the parameter ranges actually validated.
+- Main application: pore-scale immiscible two-phase flow in porous media and micro-CT digital rock. The numerical scope remains bounded by completed validation.
 
 ## Numerical Outcomes
 
@@ -51,3 +51,15 @@ The supported build works out of tree without changing source files or downloadi
 The installation contains a working simulator with a documented generated small-volume example.
 CTest checks actual operator moments, physical forcing, two-rank agreement, restart continuity and invalid-state exits.
 GitHub Actions repeats these checks using system MPI and Python dependencies.
+
+## CPC And Porous-Media Extension
+
+The main paper explains the research use, algorithms, software structure and independently measured operating range, with a CPC program summary. Detailed historical repairs remain traceable but do not substitute for an application.
+
+1. Define Darcy velocity, phase-weighted advective flux, saturation and reference-viscosity conventions explicitly. Verify phase mobility against analytical isolated parallel pore channels at unequal phase viscosities and several resolutions before reporting it on a rock.
+2. Add a capillary pore-entry or displacement benchmark with stated wall location, contact angle convention, pressure/forcing, measured interface width and an analytical reference where available. Record failures and finite-interface sensitivity rather than fitting an assumed result.
+3. Use a publicly licensed, DOI-identified segmented digital rock. Preserve original metadata, file hashes, voxel size, crop coordinates, orientation, preprocessing and pore connectivity. Separate a finite cropped demonstration from a representative-volume or laboratory validation claim.
+4. Demonstrate single-phase permeability and two-phase pore redistribution or displacement, finite-state/mass checks, late-time changes and MPI/restart agreement on this geometry. Report relative permeability only to the extent independently validated; do not reuse legacy K as a phase permeability.
+5. Measure computation and I/O separately, with fixed inputs, repetitions, hardware/affinity/compiler/rank details and identical fields where relevant. A workstation timing experiment is not a cluster or GPU scaling result.
+6. Compare scope and conventions with directly relevant pore-scale software and publications, especially LBPM and current OpenLB. Do not claim a runtime comparison unless both implementations were actually measured with a defensible matched configuration.
+7. Rewrite the manuscript and supplement around the selected application; update references, figures, program metadata and packages from completed evidence. Funding, competing interests and affiliation country must come from the author.
