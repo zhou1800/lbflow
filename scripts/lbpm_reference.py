@@ -91,6 +91,7 @@ def main():
     parser.add_argument('--source-checkout', required=True)
     parser.add_argument('--dataset', required=True)
     parser.add_argument('--root', required=True)
+    parser.add_argument('--refined-dataset', help='Optional subdivision of the same original crop')
     args = parser.parse_args()
     checkout = Path(args.source_checkout).resolve()
     revision = subprocess.check_output(['git', '-C', str(checkout), 'rev-parse', 'HEAD'], text=True).strip()
@@ -133,6 +134,23 @@ def main():
                          'or runtime comparison. The three slit controls verify force, '
                          'viscosity and volume-average conventions first.',
         dataset=manifest, measurements=measurements)
+    if args.refined_dataset:
+        refined = Path(args.refined_dataset).resolve()
+        metadata = json.loads((refined/'manifest.json').read_text())
+        if any(metadata[key] != manifest[key] for key in ('crop_origin_xyz', 'crop_size_xyz')):
+            raise ValueError('Refined reference must use the same original crop')
+        path = refined/'single-phase.raw'
+        if sha(path) != metadata['files'][path.name]['sha256']:
+            raise ValueError('Refined image checksum mismatch')
+        nx, ny, nz = metadata['simulation_size_xyz']
+        pore = np.fromfile(path, dtype=np.uint8).reshape(nz, ny, nx) == 75
+        scale = metadata['refinement']
+        result = reference_case(binary, root/'lbpm-rock-refined', pore,
+            force=2e-6/scale**3, steps=6000*scale**2)
+        result.update(kind='rock-refined', K_m2=result['history'][-1]['K_lattice']*
+                      metadata['simulation_voxel_size_m']**2)
+        measurements.append(result)
+        summary['refined_dataset'] = metadata
     (root/'lbpm-reference.json').write_text(json.dumps(summary, indent=2)+'\n')
 
 

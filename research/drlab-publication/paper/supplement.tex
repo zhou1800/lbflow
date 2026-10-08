@@ -183,11 +183,147 @@ included with the source repository; raw VTI fields are not bundled. Scripts reg
 geometries and figures. No stochastic error bars or confidence intervals
 are inferred from these deterministic calculations.
 
+\section{Pore-flow and digital-rock protocols}
+Phase-fraction-weighted advective flux is averaged over the complete specimen,
+including solid voxels with zero velocity. Component mass is audited separately.
+The SCSP convention is $\rho_{\rm ref}\bm u_{\rm ref}=\sum_i\bm e_i f_i+
+\bm F/2$, with reference-density equilibrium. ColorFluid reconstructs
+$\rho\bm u=\sum_i\bm e_i(f_i^0+f_i^1)+\bm F/2$. At unit reference density a
+pure-phase velocity comparison uses $\bm u_{\rm ref}/\rho$. It is not expected
+to be raw-velocity equality in a nonuniform pressure field. The pressure
+report now displays $\Delta\rho/3$ as $\Delta p$; the previous factor three
+was included in the single-phase permeability prefactor. The reported
+permeability is algebraically unchanged at unit reference density. An
+independent pressure-driven slit checks both the displayed pressure and $K$.
+
+For a slit of $H$ fluid nodes with physical halfway walls, midpoint sampling
+gives
+\begin{equation}
+ \sum_{j=0}^{H-1}(j+\tfrac12)(H-j-\tfrac12)=H^3/6+H/12.
+\end{equation}
+Therefore a pore occupying a specimen of total height $N_y$ has
+$q=F(H^3/12+H/24)/(\nu N_y)$. Two isolated pores of widths $8s$ and $16s$
+occupy a specimen of height $36s$. Their single-phase baseline is
+$K_{\rm grid}=\sum_k(H_k^3/12+H_k/24)/(36s)$, and
+$k_{r,k}=\nu_kq_k/(FK_{\rm grid})$ equals each pore's fraction of this
+conductance. Three resolutions, two lattices and the two viscosity permutations
+give 18 executions including single-phase baselines. This normalization is
+verified in disconnected pure-component pores, not as a general
+relative-permeability curve with shared interfaces.
+
+The entry controls impose density $1+3\Delta p$ at the left boundary and 1
+at the right, with component 0 supplied on the left and component 1 on the
+right. The solid value is a prescribed 60-degree angle through component 1.
+The interior equivalent invasion length is
+$L_0=\sum_{\rm interior}\varphi_0/H^{d-1}$; boundary planes and solid rows
+are excluded. The late change in this quantity checks retreat below and
+advance above the selected sharp static reference. These are open systems;
+they are not included in the closed-mass audit.
+
+The hydraulic diagnostic uses $p_c^{app}=\Delta p-\bar u/C$.
+For a slit $C=(H^2+1/2)/(12\mu L)$ accounts for sampled Poiseuille flow;
+for a square tube the continuum coefficient is
+\begin{equation}
+ C=\frac{H^2}{12\mu L}
+ \left[1-\frac{192}{\pi^5}\sum_{n=1,3,\ldots}
+ \frac{\tanh(n\pi/2)}{n^5}\right].
+\end{equation}
+The series is evaluated through $n=399$. This inference does not remove
+contact-line resistance or voxel-corner effects. Its difference from a sharp
+static pressure is a diagnostic, not a measured dynamic contact angle or
+an error against a complete moving-meniscus solution. Twelve slit executions
+cover three diffusive resolutions, both gradients and both pressure ratios;
+four square-tube executions exercise the three-dimensional wall operator.
+
+The full Bentheimer source has SHA-256:\\
+\texttt{7123e09e46119d23bd765ff6f2d5172d3387b3867b4dcd725f9b06ba494a76cd}.
+Its exact source DOI, license, size, voxel order, crop coordinates and prepared
+file hashes are distributed in \texttt{examples/bentheimer48/manifest.json}.
+The central $48^3$ crop has 26320 pore voxels; phase 0 initially occupies
+6857 of them. Periodic Euclidean distance to grain centers is used only for
+initialization and resolution screening. Neither this distance nor a small
+periodic crop is a calibrated pore/throat measurement or a representative
+elementary volume.
+
+Subdivision repeats each original label twice along all three axes. It
+preserves voxel-box geometry and initial volumes and adds no imaging information.
+With refinement $s$, $\Delta x\sim s^{-1}$ and $\Delta t\sim s^{-2}$,
+while lattice viscosity remains fixed. Thus force scales as $s^{-3}$,
+surface tension as $s^{-1}$ and duration as $s^2$. Fine-grid velocity/flux
+is multiplied by $s$ when displayed in base units. Bulk Reynolds and capillary
+scaling is retained; emergent microscopic contact-line mobility is not
+independently matched. Planar controls at $\sigma=0.002$ and 0.001 both give
+$W_{0.9}=5.288525$ nodes at $\beta=0.7$.
+
+The coarse two-phase cases run for 16000 steps, with output every 4000.
+The subdivided comparison reaches the corresponding base time 8000 after
+32000 fine steps, with output every 8000. Late field changes use the actual
+last output interval on each grid; their different base intervals are not
+treated as identical temporal convergence criteria. The phase-section figures
+compare the two grids at base time 8000. The displayed fine section averages
+the two adjacent fine-grid planes centered on the same original-voxel plane,
+and retains its fine resolution in $x$ and $y$.
+
+The fine run uses a complete outgoing checkpoint at step 16000 to change
+from four to eight ranks. The initial process was deliberately stopped after
+the checkpoint; its nonzero exit is retained in the execution-segment record.
+The completed resumed trajectory, not the stopped parent, supplies the final
+result. Before continuation, one-update runs at four and eight ranks agree
+in all fields and in every outgoing population byte. The continuous/restarted
+coarse rock additionally has two bitwise field comparisons. A separate
+4000-step rock execution verifies that the static/dynamic standard-library
+build transition does not change its fields.
+
+LBPM v2026.04, unmodified source revision
+\texttt{6d686d354e5b8140841d3601e4c8c0e4e4b77e48}, supplies the independent
+single-phase reference. The CPU build disables CUDA, HDF5, SILO, NetCDF and
+optional profiling; MPI and zlib are linked. Exact periodic padded native
+\texttt{ID.00000} inputs contain the same mask. Three slit controls verify
+force, viscosity and averaging conventions before five coarse rock cases
+and one refined case are compared. Native velocity columns are printed to
+eight significant digits; $K$ is recalculated from exact porosity and viscosity,
+with the prepared voxel length for conversion to $\mathrm{m}^2$. Library
+converted-permeability columns and runtime rates are not used.
+The reference project remains GPL-3.0 and is not bundled or relicensed as MIT.
+
+\section{Dedicated workstation timing}
+The timing crop is the centered $96^3$ original-resolution specimen,
+starting at $(239,239,239)$, with the same preparation/label rule. The fixed
+workload has equal relaxation times 1, $\sigma=0.002$, $\beta=0.7$,
+prescribed 60-degree grain angle and force $2\times10^{-6}$ in $x$.
+Only the initial and final fields and final checkpoint are written.
+Every rank count has one discarded full warm-up and three measured
+repetitions; rank counts 1, 2, 4 and 8 are interleaved by repetition and
+executed sequentially. Logical CPU IDs 0--7 are used with one CPU per local
+rank. Frequency governors and system load are recorded but not controlled.
+Functional runs with concurrent simulations are excluded.
+
+Numerical time is the sum of streaming/exchange, boundary/macro/force work
+and collision/finite checks within each rank, followed by a maximum across
+ranks. The initial collision belongs to initialization. Initial/final VTI
+and diagnostics have a separate category; checkpoint read/write has another.
+Category maxima are not added to infer a global wall time. The Python
+process timer includes MPI/launcher overhead, input/model construction and
+the run, but excludes geometry preparation before launch. Fluid MLUPS uses
+the exact fluid count and completed update count; dense solid storage still
+incurs work. Linux child-process peak RSS is measured per rank. Repetition
+ranges are observed variability, not confidence intervals.
+
+\input{data/performance-table.tex}
+
+The included \texttt{data/porous-media.json} contains all these measured
+histories, matching-field results, hardware/frequency/load records, input
+geometry identities and program hashes. \texttt{permeability-comparison.json}
+retains the independent comparisons. The new figures and generated text
+numbers can be rebuilt from these summaries alone; raw populations/VTI are
+regenerated by the supplied scripts. No cluster or GPU scaling claim is made.
+
 \section{Scientific limits and publication status}
 Only equal-density, low-speed flow in the documented parameter range is
 verified. Curved-wall and three-dimensional wetting accuracy, contact-line
 dynamics, hysteresis, high density ratio, arbitrary pressure weights, and
-phase-specific Darcy permeability are not established. The two viscosity
+steady rock phase-specific Darcy permeability are not established. The
+isolated-pore normalization is independently verified within its stated geometry. The two viscosity
 rules represent alternative finite-interface closures. The geometrical
 projection and weighted linear reconstruction are established ideas;
 the ablation does not demonstrate superiority over all published wetting

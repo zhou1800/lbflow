@@ -9,6 +9,7 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor
 import json
 import math
+import re
 from pathlib import Path
 
 import numpy as np
@@ -226,9 +227,61 @@ def entry_study(study, jobs=1, scales=(1, 2, 4), walls=('legacy', 'renormalized'
     return summary
 
 
+def planar_study(study):
+    measurements = []
+    for sigma in (.002, .001):
+        case = spec(f'rock-planar-sigma{sigma}', nx=128, ny=8, nz=4,
+            tau=(1., 1.), sigma=sigma, steps=4000, write=2000,
+            label=lambda x, y, z: 0 if x < 64 else 100,
+            indices=['0 "VD" "N/A" "N/A" "0"', '100 "VD" "N/A" "N/A" "1"'])
+        result = study.run(case)
+        _, _, chi, _ = geometry_fields(result)
+        line = chi[0, 0, 32:96]
+        positions = []
+        for level in (.9, -.9):
+            crossings = np.flatnonzero((line[:-1] >= level) & (line[1:] < level))
+            if len(crossings) != 1:
+                raise AssertionError('Planar color profile has multiple contour crossings')
+            i = int(crossings[0])
+            positions.append(i+(level-line[i])/(line[i+1]-line[i]))
+        measurements.append(dict(name=result['name'], sigma=sigma, beta=.7,
+            width_09=float(positions[1]-positions[0]), solver_sha256=result['solver_sha256'],
+            **closed_history(result)))
+    summary = dict(protocol='Periodic D3Q19 planar interfaces at the two rock-study surface '
+                            'tensions; width from interpolated chi=+/-0.9 crossings.',
+                   measurements=measurements)
+    (study.root/'bulk-interface.json').write_text(json.dumps(summary, indent=2)+'\n')
+    return summary
+
+
+def pressure_study(study):
+    h, nx, nz, dp = 16, 65, 4, 1e-5
+    case = spec('pressure-channel-report', nx=nx, ny=h+2, nz=nz,
+        model='scsp', tau=(1.,), steps=6000, write=2000, report_dir=1, stop_error=1e-12,
+        label=lambda x, y, z:255 if y in (0, h+1) else 50 if x==0 else 200 if x==nx-1 else 75,
+        overrides={'latticeLen':1e-6}, indices=[f'50 "PB" "{1+3*dp:.17g}" "1" "0"',
+            '200 "PB" "1" "2" "0"', '75 "VD" "N/A" "N/A" "0"',
+            '255 "SD" "90" "N/A" "N/A"'])
+    result = study.run(case)
+    transcript = (Path(result['output_files'][-1]).parent/'run.log').read_text()
+    reported_pressure = float(re.findall(r' - dP = ([\deE+.-]+)', transcript)[-1])
+    reported_k = float(re.findall(r' - K = ([\deE+.-]+)', transcript)[-1])
+    expected_pressure = dp*(nx-3)/(nx-1)
+    expected_k = (h**3/12+h/24)/(h+2)  # latticeLen=1 micron => same value in micron^2
+    if abs(reported_pressure/expected_pressure-1) > 2e-4 or abs(reported_k/expected_k-1) > 2e-4:
+        raise AssertionError('Pressure units or reported single-phase K disagree with the analytic slit')
+    summary = dict(name=result['name'], prescribed_pressure_drop=dp,
+        report_slice_pressure_drop=reported_pressure, expected_report_slice_pressure=expected_pressure,
+        reported_K_um2=reported_k, expected_K_um2=expected_k,
+        relative_pressure_error=abs(reported_pressure/expected_pressure-1),
+        relative_K_error=abs(reported_k/expected_k-1), solver_sha256=result['solver_sha256'])
+    (study.root/'pressure-report.json').write_text(json.dumps(summary, indent=2)+'\n')
+    return summary
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('study', choices=('bundle', 'entry'))
+    parser.add_argument('study', choices=('bundle', 'entry', 'planar', 'pressure'))
     parser.add_argument('--solver', required=True)
     parser.add_argument('--root', required=True)
     parser.add_argument('--jobs', type=int, default=1)
@@ -240,8 +293,12 @@ def main():
     study = Study(args.solver, args.root)
     if args.study == 'bundle':
         bundle_study(study, args.jobs, args.scales or (1, 2, 3), args.dimensions or (2, 3))
-    else:
+    elif args.study == 'entry':
         entry_study(study, args.jobs, args.scales or (1, 2, 4), args.walls, args.dimensions or (2,))
+    elif args.study == 'planar':
+        planar_study(study)
+    else:
+        pressure_study(study)
 
 
 if __name__ == '__main__':

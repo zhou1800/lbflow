@@ -1,0 +1,5 @@
+Coupling contracts are checked before interpreting digital-rock transport.
+Analytic pore controls separate phase flux, viscosity and capillary behavior.
+A licensed Bentheimer crop supports reproducible MPI and restart experiments.
+Interface resolution and transient phase flux limit rock-property inference.
+Repeated workstation measurements separate numerical work from output costs.

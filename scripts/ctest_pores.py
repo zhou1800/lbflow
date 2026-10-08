@@ -5,7 +5,7 @@ from pathlib import Path
 import uuid
 
 from benchmarks import Study
-from porous_media import bundle_study, entry_study
+from porous_media import bundle_study, entry_study, pressure_study
 
 
 def main():
@@ -16,6 +16,7 @@ def main():
     study = Study(args.solver, Path(args.root)/('pores-'+uuid.uuid4().hex[:10]))
     bundle_study(study, scales=(1,), dimensions=(2,))
     entry_study(study, scales=(1,), walls=('legacy',))
+    pressure_study(study)
     print('Passed analytic phase flux/viscosity and capillary-entry direction checks.')
 
 

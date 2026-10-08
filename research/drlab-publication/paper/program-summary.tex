@@ -1,0 +1,28 @@
+\section*{Program summary}
+\noindent\textbf{Program title:} LBFlow.\\
+\textbf{CPC Library link to program files:} to be assigned on actual program
+archive deposition; no archive DOI is claimed in this research draft.\\
+\textbf{Developer's repository link:} \url{https://github.com/zhou1800/lbflow}.\\
+\textbf{Licensing provisions:} MIT for code; CC BY 4.0 for the attributed
+Bentheimer image derivatives. The preserved cJSON source retains its notices.\\
+\textbf{Programming language:} C++11; Python 3.10 or later for reproduction.\\
+\textbf{External routines/libraries:} MPI; CMake 3.16 or later for building;
+NumPy for verification, SciPy for image preparation, Matplotlib for figures.\\
+\textbf{Tested operating system:} Linux, x86-64, double precision.\\
+\textbf{Nature of problem:} Pore-scale single-phase and immiscible two-phase
+flow on segmented voxel images, with independently checked force, viscosity,
+capillary and phase-flux conventions.\\
+\textbf{Solution method:} D2Q9/D3Q19 lattice Boltzmann streaming, SRT or
+raw-moment MRT, Guo forcing, color-gradient perturbation and recoloring,
+geometrical wetting, halfway solid-link bounce-back and MPI domain exchange.\\
+\textbf{Restrictions:} Quantitative evidence is bounded to equal reference
+densities, standard pressure weights, low speed and the documented cases.
+Curved-wall wetting accuracy, steady rock relative permeability, high density
+ratio, moving contact-line laws and GPU execution are not established.
+The executable runs one configuration per MPI job.\\
+\textbf{Running time and memory:} measured workload, repetitions, numerical
+and I/O times, per-rank peak RSS and hardware are supplied in the performance
+section and supplementary table; they are workload dependent.\\
+\textbf{Supplementary material:} Operator derivations, analytic controls,
+recorded numerical summaries, licensed small voxel inputs, preparation and
+reproduction scripts, run-identity metadata and figure-generation code.

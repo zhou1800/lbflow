@@ -23,3 +23,24 @@ The sidecar does not identify every physical parameter. Run receipts contain the
 The executable workflow uses one configuration per MPI process lifetime; reuse of its historical function-static caches across multiple simulator objects is unverified.
 
 Completed quantitative coverage is equal density, standard pressure weights, low speed and relaxation times 0.6--1.4. Wider density ratios, arbitrary EOS, curved/3D wetting, hysteresis, film boundaries and dynamic contact lines require additional work before new claims.
+
+## CPC Application And Pressure Reporting
+
+The CPC extension adds independent pore-flux and pressure-entry controls,
+public Bentheimer preparation, explicit phase advective flux, closed-mass and
+late-field audits, and workstation profiling. Original archive files remain
+unchanged. A density-normalized pure-phase comparison preserves SCSP's
+reference-density velocity convention instead of treating it as an error.
+
+SCSP now displays the standard pressure difference, Delta rho / 3, in its
+pressure log. Previously the factor three was folded into the K prefactor
+while the density difference was labelled pressure. The K formula is
+algebraically unchanged at unit reference density. The pressure-driven slit
+regression gives 19.00215 micron^2 against the independently sampled analytic
+19.0 micron^2 (relative discrepancy 1.13e-4); its pressure discrepancy is
+9.85e-5. No collision, force or wetting operator was changed by this log fix.
+
+Profiling reports numerical work, initialization, fields/diagnostics and
+checkpoint I/O separately, along with completed updates and physical fluid
+voxel counts. Numerical work includes communication and finite checks.
+Category maxima across ranks are not added to infer a wall duration.

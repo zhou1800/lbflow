@@ -2,7 +2,7 @@
 \usepackage{amsmath,amssymb,bm,booktabs,graphicx,hyperref}
 \usepackage[margin=25mm]{geometry}
 \graphicspath{{figures/}}
-\journal{LBFlow research manuscript}
+\journal{Computer Physics Communications}
 \makeatletter
 \def\ps@pprintTitle{%
   \let\@oddhead\@empty\let\@evenhead\@empty
@@ -11,35 +11,39 @@
 \makeatother
 \emergencystretch=3em
 \newcommand{\vct}[1]{\bm{#1}}
+\input{data/cpc-numbers.tex}
 \begin{document}
 \begin{frontmatter}
-\title{LBFlow: reproducible verification of an MPI color-gradient lattice Boltzmann solver}
+\title{LBFlow: verification-guided MPI simulation of two-phase flow in digital rock}
 \author{Yu Zhou\corref{cor1}}
 \address{Independent Researcher}
 \ead{[private contact omitted]}
 \cortext[cor1]{Corresponding author.}
 \begin{abstract}
-LBFlow, is a C++ lattice Boltzmann
-solver for single-component and immiscible
-two-component flow on D2Q9 and D3Q19 lattices. Its voxel input, geometrical
-wetting treatment and MPI decomposition support a compact workflow for
-numerical experiments. We reconstruct the implemented operators and develop
-a reproducible verification package around the historical solver. Decisive
-counterexamples identify incorrect second-phase MRT relaxation, an
-incompatible shifted-equilibrium force treatment, and premature termination
-based on saturation. Local moment relaxation, consistent forcing, explicit
-restart timing and field-based stopping restore the expected behavior.
-Uniform acceleration agrees with its analytic reference to roundoff;
-halfway-wall MRT channel profiles agree to approximately $10^{-8}$ relative
-error at the tested stopping times. Laplace tests quantify finite-interface
-pressure errors in two and three dimensions. Layered flow distinguishes
-interpolation bias from collision error. A wall-stencil ablation finds that
-renormalization improves several contact-angle measurements but can increase
-spurious velocity. The contribution is the inspectable implementation and
-verification evidence, rather than a new class of multiphase model.
+LBFlow is a C++/MPI lattice Boltzmann program for pore-scale single-phase and
+immiscible two-phase flow on segmented digital-rock images. It combines D2Q9/D3Q19 color-gradient operators, geometrical
+wetting, voxel input and explicit population checkpoints. We present a
+verification-guided workflow in which force integration, local moment
+relaxation, surface tension, velocity conventions and phase flux are checked
+before interpreting porous-medium transport. Counterexamples expose
+incorrect second-phase relaxation and force integration in the historical
+implementation; consistent local collision and forcing recover analytic
+behavior. Isolated pore bundles verify phase advective flux at viscosity
+ratio 9:1, while layered flow and Laplace tests distinguish constitutive
+and finite-interface errors. Slit and square-tube displacement controls
+exercise capillary entry and reveal wetting-dependent deviations. An
+attributed public Bentheimer crop demonstrates mass monitoring, phase
+redistribution and bitwise MPI/restart agreement. Independent single-phase
+LBPM calculations differ by at most \RockReferenceDifference\ percent in
+the matched cases. Voxel subdivision and zero-force controls expose the
+limits of interpreting transient two-phase flux when pores are comparable
+to the diffuse interface. Repeated workstation timings distinguish numerical
+work from I/O. The contribution is an inspectable program and a reproducible
+set of physical and computational checks for digital-rock research within
+the measured operating range.
 \end{abstract}
 \begin{keyword}
-lattice Boltzmann \sep color gradient \sep verification \sep MPI \sep wetting \sep reproducibility
+lattice Boltzmann \sep two-phase flow \sep digital rock \sep porous media \sep MPI \sep verification
 \end{keyword}
 \end{frontmatter}
 
@@ -49,12 +53,24 @@ is licensed under MIT and has been prepared for release in the LBFlow
 repository. Public availability and an immutable release citation must be
 verified before submission.
 
+\input{program-summary.tex}
+
 \section{Motivation and significance}
+Pore-scale two-phase calculations connect the arrangement of immiscible
+fluids in a rock image with its flow response. Segmentation, wetting,
+interface resolution and the definitions used to average velocity all affect
+this connection. Image-based flow benchmarks emphasize the need to compare
+the actual computational domain and observable, not only a material name
+\cite{saxena2017}. A simulator intended for digital-rock research therefore
+needs a reproducible chain from a labelled image to independently checked
+flux and interface measurements.
+
 Long-lived numerical software can continue producing finite fields after
 changes in physical configuration expose an implementation defect. In
 multiphase lattice Boltzmann calculations, conservation alone does not verify
-force integration, viscosity, surface tension or wetting. DRLab provides a
-useful case in which these contracts can be inspected separately.
+force integration, viscosity, surface tension or wetting. The restored
+reference solver implementation provides a case in which these contracts can be
+inspected separately and then exercised on a public porous specimen.
 
 The historical implementation combines color-gradient perturbation and
 recoloring with geometrical wall treatment. These mechanisms belong to the
@@ -72,6 +88,16 @@ preserved; repairs, inputs, run receipts and analysis are maintained in a
 maintained LBFlow implementation. Dates in commit messages establish source
 history but are not treated as evidence of scientific priority.
 
+LBPM already supplies extensive digital-rock multiphase protocols, including
+morphological preparation and capillary/relative-permeability workflows
+\cite{mcclure2021}. OpenLB offers a broader LBM framework \cite{krause2021};
+its current releases include vectorized CPU and GPU execution
+\cite{openlb2025}. LBFlow's scope is narrower: a compact voxel program with
+few runtime dependencies, inspectable D2Q9/D3Q19 operators and a verification
+corpus that connects implementation failures with pore-scale measurements.
+It does not claim the first digital-rock LBM implementation, performance
+superiority over these frameworks, or a new bulk multiphase theory.
+
 \section{Software description}
 \subsection{Architecture and workflow}
 The code separates lattice/grid geometry, MPI exchange, parameter and field
@@ -79,7 +105,8 @@ I/O, and fluid collision operators. A byte-valued voxel file assigns initial
 phases and solid or boundary labels. A parameter file selects the lattice,
 relaxation operator, relaxation times, forcing and wetting. D2Q9 and D3Q19,
 SRT and raw-moment MRT, and the single-component and color-fluid executables
-are exercised here. The Shan--Chen placeholder is rejected explicitly.
+are exercised here as configurations of the same executable. The Shan--Chen
+placeholder is rejected explicitly.
 
 Directional populations reside in arrays; streaming exchanges the required
 neighbor data between MPI subdomains. Macroscopic fields are written as VTI
@@ -94,6 +121,10 @@ The reproducibility scripts generate every geometry, record inputs and
 executable hashes, preserve raw output and calculate independent reference
 solutions. Each study uses a frozen executable so a later build cannot alter
 an ongoing batch. Algebraic checks are available through CTest.
+The public-rock preparation additionally pins the source DOI, data license,
+checksums, crop coordinates, voxel scale and periodic connectivity. Numerical
+timers include exchange and finite checks, while field/diagnostic output and
+checkpoint I/O are counted separately.
 
 \subsection{Recovered and corrected operators}
 In lattice units, the component densities and color field are
@@ -172,10 +203,32 @@ translating phase field. Periodic acceleration benchmarks disable steady
 stopping; undefined pressure-based permeability is identified separately
 from invalid numerical state.
 
+\subsection{Pore-scale observables}
+For $N$ total voxels, $N_f$ pore voxels, and $\varphi_0=\rho_0/\rho$,
+$\varphi_1=1-\varphi_0$ in the fluid, the analysis defines
+\begin{equation}
+ S_k=\frac{1}{N_f}\sum_{fluid}\varphi_k,\qquad
+ q_k=\frac{1}{N}\sum_{fluid}\varphi_k u_x,\qquad q=q_0+q_1.
+\end{equation}
+These are phase-fraction-weighted \emph{advective} Darcy fluxes of the common
+mixture velocity. They do not include the component segregation momentum
+introduced by recoloring. Component masses $\sum\rho_k$ are monitored
+separately; in a weakly compressible closed domain, fixed mass does not make
+the volume-fraction saturation exactly constant.
+
+At unit reference density, the single-phase body-force estimate is
+$K=\nu_{ref}q_{ref}/F_x$, and a phase normalization is
+$k_{r,k}=\nu_kq_k/(F_xK)$. The latter is independently verified only for the
+isolated pure-phase pore bundle below. The SCSP output $\vct u_{ref}$ uses
+reference-density momentum and equilibrium, whereas color flow divides
+momentum by local total density. A pure-phase comparison consequently uses
+$\vct u_{ref}/\rho$ at unit reference density. The rock comparison retains
+this convention and its small finite-density differences explicitly.
+
 \section{Illustrative verification}
 All runs use double precision, GCC 13.3, CMake 3.28.3 and Open MPI 4.1.6 on
-Linux. Parallel execution timings are not presented as scaling results.
-The tested physical range is low-speed flow at equal reference density,
+Linux. Dedicated workstation timings are described separately below.
+The tested physical range is low-speed flow at unit, equal reference density,
 $\tau_k\in\{0.6,0.8,1,1.4\}$ and prescribed $\sigma=0.005$ for droplet cases.
 The supplement supplies derivations, measurement protocols and run identities.
 
@@ -267,35 +320,172 @@ Size and interface-width sequences use fixed lattice surface tension and are
 not labelled a matched-physics spatial convergence study.}
 \label{fig:wetting}\end{figure}
 
+\section{Pore-scale application and computational evidence}
+\subsection{Analytic pore flux and capillary entry}
+Two parallel, isolated slit pores have widths $H_0=8s$ and $H_1=16s$,
+with total specimen height $36s$, for $s=1,2,3$. Each pore contains a pure
+component; separate solid walls prevent a fluid-fluid interface. Periodic
+flow is driven by $F_x=10^{-6}s^{-3}$ with both permutations of
+$(\tau_0,\tau_1)=(0.6,1.4)$. The independently sampled Poiseuille reference is
+\begin{equation}
+ q_k=\frac{F_x}{\nu_k(36s)}\left(\frac{H_k^3}{12}+\frac{H_k}{24}\right).
+\end{equation}
+The second term accounts for midpoint sampling of the analytic velocity.
+Single-phase runs on the same geometry supply $K$ for normalization. Across
+both D2Q9 and extruded D3Q19, the maximum phase-flux discrepancy is
+$\BundleFluxError$ (Fig.~\ref{fig:pores}), consistent with the remaining
+transient at the selected duration and roundoff. This verifies phase attribution and
+viscosity normalization in a controlled pore system; it is not evidence for
+general relative-permeability curves in connected rock pores.
+
+Pressure boundaries then drive phase 0 into an initially phase-1-filled
+60-degree slit. Its sharp static reference is
+$p_c=2\sigma\cos\theta/H$. At pressure drops $0.5p_c$ and $1.5p_c$, the
+late interface respectively retreats and advances. Diffusive refinement uses
+$H=16s$, $\sigma=0.005/s$ and duration $8000s^2$, for $s=1,2,4$.
+Four D3Q19 square-tube controls at $H=16$ use the force-balance reference
+$p_c=4\sigma\cos\theta/H$. Both gradient variants give the expected late
+direction in these controls. In the square tube, however, inferring an
+entry pressure from a developed-flow hydraulic resistance gives deviations
+of approximately 17--25\% for the clipped stencil and 9--16\% for
+renormalization. Contact-line dissipation, voxel corners and diffuse wetting
+are not removed by this diagnostic. The result checks the direction of
+displacement and quantifies limitations; it does not calibrate a static
+capillary-pressure curve or a dynamic contact-angle law.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\linewidth]{pore-controls.pdf}
+\caption{Independent slit-bundle phase-flux checks and pressure-driven
+capillary-entry controls. Hydraulic pressure differences are diagnostic
+deviations from a sharp static reference, not a calibrated contact-line model.}
+\label{fig:pores}\end{figure}
+
+\subsection{Public Bentheimer specimen}
+The segmented 4.54~$\mu$m Bentheimer image of Shah, Crawshaw and Boek
+\cite{shah2014} supplies a public, CC BY 4.0 input. A centered
+$48^3$ crop starts at $(263,263,263)$ in the original $575^3$ array.
+Its porosity is $\RockPorosity$, and all pores belong to one connected
+component after periodic face connections. No pore removal, filtering or
+segmentation change is performed. Phase 0 initially occupies pores whose
+periodic distance to the grain-center mask is at least three original
+voxels; phase 1 occupies the remaining pore space. This deterministic
+morphological rule specifies an initial state and does not prescribe an
+experimental drainage history.
+
+Single-phase MRT flow at $\tau=1$ yields
+$K=\RockK\ \mathrm{m}^2$. Halving and doubling the force give a relative
+spread of $\RockForceSpread$. Independent LBPM v2026.04 calculations first
+pass three analytic slit controls, then use the same exact periodically
+padded mask, force, viscosity and averaging volume. Across five matched
+rock cases, the largest permeability difference is
+\RockReferenceDifference\ percent. Both solvers retain small finite-density
+convention differences; converted library permeability columns are not used.
+Pure-phase color-flow reductions agree with density-normalized SCSP velocity
+within $10^{-11}$ in the tested cases. These are numerical crosschecks on
+the specified periodically repeated specimen, not a comparison with
+laboratory sandstone permeability.
+
+Each original voxel is also divided into eight voxels, preserving the
+binary box geometry and initial phase volumes. Force, surface tension and
+duration are scaled diffusively. The resulting single-phase permeability
+decreases by \RefinedKChange\ percent. The independent refined LBPM reference
+reproduces this shift. This is a discretization sensitivity
+on a fixed segmented specimen; two resolutions do not establish an
+asymptotic convergence rate, and subdivision adds no imaging information.
+
+Closed two-phase runs at prescribed angles 60 and 120 degrees retain
+component masses to a maximum relative drift of $\RockMassDrift$.
+The zero-force control also evolves, so its motion cannot be attributed to
+the imposed body force. Physical interface relaxation and possible numerical
+currents have not been separated in this geometry. In the forced 60-degree case, the color
+field has RMS change \RockLateColor\ over the last 4000 steps of a
+16000-step run. The subdivided case is compared at the matched base time
+8000, not equated with the longer coarse endpoint. Planar controls at the
+two rock-study surface tensions measure a bulk interface width of 5.289
+lattice nodes, while the original crop's median periodic
+distance to grain centers is only two voxels. These lengths are not a
+calibrated throat-radius measurement, but they expose inadequate scale
+separation in many pores. Transient phase fluxes in Fig.~\ref{fig:rock} are
+therefore retained as measured observables and are not promoted to steady
+relative permeability or experimental wetting predictions.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\linewidth]{digital-rock.pdf}
+\caption{Actual phase fields and advective flux histories on the attributed
+Bentheimer crop. Grain voxels are masked. The zero-force control and
+late field changes distinguish evolving unforced motion from a steady
+transport measurement. The refined curve is scaled to the original
+diffusive units and is compared at matching times.}
+\label{fig:rock}\end{figure}
+
+Two additional full-field comparisons on this rock are bitwise identical:
+one versus two MPI ranks, and uninterrupted versus a one-to-two-rank restart.
+These extend the homogeneous/droplet replay checks to an irregular pore mask.
+
+\subsection{Workstation performance}
+A separate $96^3$ crop provides a fixed two-phase timing workload with
+\PerfFluidNodes\ fluid nodes. The actual D3Q19/MRT numerical path is timed
+for \PerfSteps\ updates at one, two, four and eight MPI ranks on an
+Intel Core Ultra 9 285K workstation. One full warm-up per rank count is
+discarded; three sequential measured repetitions interleave rank counts.
+Each local rank is pinned to one of the recorded logical CPUs. Frequency
+is governed by the operating system, not fixed by the experiment.
+All reconstructed fields agree bitwise across ranks and repetitions.
+
+The numerical timer includes streaming, MPI exchange, boundaries,
+macroscopic reconstruction, collision and finite-state checks. Initial
+collision is initialization, not an extra counted update. Separate timers
+cover field/diagnostic output and population checkpoints; construction and
+launcher overhead belong to the process duration. Each timer is a maximum
+across ranks, so category maxima need not sum to the maximum run wall time.
+Throughput counts fluid-node updates, although dense solid arrays also incur
+streaming and memory costs. Fig.~\ref{fig:performance} reports median and
+observed range, with exact counts and per-rank memory in the supplement.
+These are local CPU/MPI measurements; they establish neither cluster
+scaling nor GPU performance, and no runtime comparison with LBPM is inferred.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\linewidth]{workstation-performance.pdf}
+\caption{Repeated, fixed-affinity workstation timing. Error bars show the
+observed minimum and maximum of three runs. Numerical work and I/O are
+reported separately; the speedup denominator is the same measured workload
+at one rank.}
+\label{fig:performance}\end{figure}
+
 \section{Impact and limitations}
 The package enables users to reproduce numerical contracts before extending
 the solver or porting kernels. It makes source provenance, executable
 identity, termination and restart stage inspectable, and provides both
-positive results and counterexamples. Prospective applications include
-controlled voxel-flow studies and implementation research; current external
+positive results and counterexamples. Demonstrated applications include
+controlled pore-flow checks and a public digital-rock workflow; current external
 adoption or cluster performance is not inferred from source history.
 
 The validation covers equal density, standard pressure weights and the
 reported viscosity range. Higher density contrast, moving contact lines,
-curved three-dimensional walls, material-junction pinning and thermodynamic
+curved three-dimensional wetting accuracy, material-junction pinning and thermodynamic
 consistency remain unvalidated. Enhanced equilibria and central-moment
 developments address wider-density and Galilean-invariance issues
 \cite{lafarge2021,saito2023}. Those results cannot be transferred to this
 recovered equilibrium without additional changes and tests. Pressure-derived
 legacy permeability diagnostics use a reference viscosity and are not used
-as validated phase-specific permeabilities in this study. Restart histories
+as validated phase-specific permeabilities in the rock application. The
+pore-bundle normalization is verified only in its isolated pure-phase geometry. Restart histories
 reset conservatively and the native population format is not claimed to be
 portable across unlike machine representations.
 
 \section{Conclusions}
-DRLab's corrected, inspectable implementation recovers analytic force and
+LBFlow's corrected, inspectable implementation recovers analytic force and
 viscosity behavior, conserves component mass in closed domains and supports
 consistent restart. Laplace and layered-flow tests bound the multiphase
 claims. Wall-stencil renormalization has a clear linear-field rationale and
 measurable contact-angle benefits, but also exposes unresolved spurious-flow
-and wall-location effects. The verification evidence supports a research
-software manuscript within this bounded scope; a claim of a new multiphase
-model or universal wetting method is not supported.
+and wall-location effects. The public-rock application adds independently
+checked single-phase flow, explicit phase observables and repeatable MPI
+execution. Its transient two-phase behavior and resolution sensitivity also
+demonstrate why mass conservation alone is insufficient to interpret rock
+transport. The program and evidence support further digital-rock research
+within this bounded scope; a new bulk multiphase model or universal wetting
+method is not claimed.
 
 \clearpage
 \section*{Declarations --- author confirmation required}
@@ -303,6 +493,8 @@ model or universal wetting method is not supported.
 reproduction scripts and measurement summaries are prepared in
 \url{https://github.com/zhou1800/lbflow}. Public access and an immutable release
 identifier will be verified before submission.
+The Bentheimer image and derived crops retain CC BY 4.0; data courtesy of
+Qatar Carbonates and Carbon Storage Research Centre, Imperial College London.
 \textbf{Funding and competing interests:} not yet supplied by the author.
 \textbf{AI assistance:} OpenAI Codex and ChatGPT assisted source inspection,
 implementation, literature triage and drafting. Numerical claims are tied to

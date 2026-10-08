@@ -1,0 +1,56 @@
+[
+  {
+    "name": "lbpm-rock-tau1.0-F1e-06",
+    "refinement": 1,
+    "tau": 1.0,
+    "force": 1e-06,
+    "LBFlow_K_m2": 1.6076504140855725e-12,
+    "LBPM_K_m2": 1.6075465230206351e-12,
+    "relative_difference": 6.462709691423818e-05
+  },
+  {
+    "name": "lbpm-rock-tau1.0-F2e-06",
+    "refinement": 1,
+    "tau": 1.0,
+    "force": 2e-06,
+    "LBFlow_K_m2": 1.6076503601018252e-12,
+    "LBPM_K_m2": 1.607569169588715e-12,
+    "relative_difference": 5.050514444171483e-05
+  },
+  {
+    "name": "lbpm-rock-tau1.0-F4e-06",
+    "refinement": 1,
+    "tau": 1.0,
+    "force": 4e-06,
+    "LBFlow_K_m2": 1.6076502512724627e-12,
+    "LBPM_K_m2": 1.6076145036031558e-12,
+    "relative_difference": 2.223646852339556e-05
+  },
+  {
+    "name": "lbpm-rock-tau0.6-F2e-06",
+    "refinement": 1,
+    "tau": 0.6,
+    "force": 2e-06,
+    "LBFlow_K_m2": 1.6076473013684659e-12,
+    "LBPM_K_m2": 1.6076671139517453e-12,
+    "relative_difference": -1.2323809517211792e-05
+  },
+  {
+    "name": "lbpm-rock-tau1.4-F2e-06",
+    "refinement": 1,
+    "tau": 1.4,
+    "force": 2e-06,
+    "LBFlow_K_m2": 1.6076507302568961e-12,
+    "LBPM_K_m2": 1.607468510907777e-12,
+    "relative_difference": 0.00011335795872979837
+  },
+  {
+    "name": "lbpm-rock-refined",
+    "refinement": 2,
+    "tau": 1.0,
+    "force": 2.5e-07,
+    "LBFlow_K_m2": 1.3578851621863907e-12,
+    "LBPM_K_m2": 1.3578957436607445e-12,
+    "relative_difference": -7.792552854768431e-06
+  }
+]

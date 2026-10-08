@@ -317,7 +317,7 @@ bool SCSP::report(ostream &os, const va_val_t &dens, const vava_val_t &v)
             getElemCount(lclSlice[1])};
 
         static const double MaxErr = p.getStopError();
-        static const double kPar = 3.0 * getKPar(d);
+        static const double kPar = getKPar(d);
         static double KOld = 0;                // Permeability of last step.
 
         // 1. Accumulate total velocity of range.
@@ -339,7 +339,9 @@ bool SCSP::report(ostream &os, const va_val_t &dens, const vava_val_t &v)
         }
 
         // 3. Calculate K.
-        double dP = rhoS[0] / cntS[0] - rhoS[1] / cntS[1];
+        // Standard lattice pressure is rho/3. Previously the factor three
+        // was folded into K while a density difference was labelled dP.
+        double dP = (rhoS[0] / cntS[0] - rhoS[1] / cntS[1]) / 3.0;
         double Q = velR / double(*fl.second - *fl.first + 1);
         if (!std::isfinite(dP) || !std::isfinite(Q))
             throw runtime_error("Non-finite single-phase report state.");

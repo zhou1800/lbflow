@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-08",
+  "original_archive_files_unchanged": 82,
+  "legacy_prototype_files_unchanged": 66,
+  "local_ctest_groups": [
+    "numerical_moments",
+    "simulator_contracts",
+    "pore_flow"
+  ],
+  "ctest_passed": true,
+  "benchmark_solver_sha256": "5d11ceff95bab7a9c1532cb8b0b47a8f7fff5d99982b7223f7ecbf4a83563142",
+  "analytic_pore_cases": 18,
+  "capillary_entry_cases": 16,
+  "independent_reference_cases": 9,
+  "timing_cases": 16,
+  "timing_bitwise_comparisons": 15,
+  "original_rock_bitwise_comparisons": 2,
+  "refined_rank_change_populations_identical": true,
+  "source_build_transition_fields_identical": true,
+  "regenerated_figures_byte_identical": {
+    "pore-controls": "464f88b8d3b56709aed5d191139c4896b9267ced7350937fbcba0de3d5a68d77",
+    "digital-rock": "187f96f601846e26e8528c38c2ce18e63a2d29cd111e3f790d334736c8491ea3",
+    "workstation-performance": "6de6123071f2ac192d8a3ad96ced7fd435f20dd2dafb1eaabb16997b0d535962"
+  },
+  "PDFs": {
+    "main": {
+      "pages": 15,
+      "undefined_citations": 0
+    },
+    "supplement": {
+      "pages": 7,
+      "undefined_citations": 0
+    }
+  },
+  "release_scope": "Author-review draft. No submission, public source release or program-archive DOI claimed."
+}
