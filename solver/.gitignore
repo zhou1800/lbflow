@@ -1,0 +1,5 @@
+3rdparty/
+bin/
+*.user.*
+*.un~
+*.raw

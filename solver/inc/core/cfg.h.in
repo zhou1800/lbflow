@@ -1,0 +1,12 @@
+/*! \file cfg.h
+ *
+ * Configure file incorporating with CMake.
+ *
+ * \author Yu Zhou
+ */
+
+/*!
+ * \brief Weather the complier is Microsoft Visual C++.
+ */
+#define IS_MSVC @IS_MSVC@
+
