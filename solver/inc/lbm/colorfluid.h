@@ -30,6 +30,7 @@ namespace LBM {
  */
 class ColorFluid : public Simulator
 {
+    friend class NumericalAudit; // Inspect actual lattice operators in the verification executable.
 private:
     /// \name Constants
     ///@{
@@ -96,6 +97,8 @@ private:
     ///@{
     vava_val_t TibNorm;    //!< Rotate matrix for axisX to BD norm.
     vava_val_t TibNormInv; //!< Invert rotate matrix for axisX to BD norm.
+    vava_val_t wallGradientInv;
+    void calcWallGradientInverse();
 
     ///@}
 

@@ -152,6 +152,7 @@ private:
      *  \Delta \boldsymbol{u} = \frac{\tau \boldsymbol{f}}{\rho} \f]
      */
     void collision();
+    void bodyForce();
 
     /*!
      * \brief Apply Zou & He boundary conditions.

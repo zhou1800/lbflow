@@ -194,6 +194,11 @@ public:
      */
     virtual void Open(const string& filename) override;
 
+    // Validate simulation parameters before constructing or indexing a grid.
+    void ValidateSimulation() const;
+    string getWallGradient() const;
+    string getViscosityInterpolation() const;
+
     /// \name Get functions for #grid mesh
     ///@{
     /*!

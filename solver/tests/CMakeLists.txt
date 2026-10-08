@@ -1,19 +1,19 @@
-#add debugger
-add_library(ldebugger debugger)
-target_link_libraries(ldebugger grid)
-include_directories(./)
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+execute_process(COMMAND "${Python3_EXECUTABLE}" -c "import numpy"
+    RESULT_VARIABLE numpy_status OUTPUT_QUIET ERROR_QUIET)
+if(NOT numpy_status EQUAL 0)
+    message(FATAL_ERROR "Tests need NumPy: python3 -m pip install -r requirements-test.txt; or configure -DBUILD_TESTING=OFF")
+endif()
 
-#add tests
-set(TESTS tgrid tfile talg)
+add_executable(NumericalAudit numerical_audit.cpp)
+target_link_libraries(NumericalAudit PRIVATE lbm)
 
-foreach(test ${TESTS})
-    # library
-    aux_source_directory(${test} ltest_files)
-    add_library(l${test} ${ltest_files})
-    unset(ltest_files)
-    #include
-    include_directories(${test}/)
-    #exes
-    add_executable(${test} ${test}_run.cpp)
-    target_link_libraries(${test} l${test} ldebugger)
-endforeach(test)
+add_test(NAME numerical_moments
+    COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/ctest_moments.py"
+        --driver $<TARGET_FILE:NumericalAudit> --root "${PROJECT_BINARY_DIR}/verification")
+add_test(NAME simulator_contracts
+    COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/ci_smoke.py"
+        --solver $<TARGET_FILE:LBFlow> --root "${PROJECT_BINARY_DIR}/verification"
+        --mpiexec "${MPIEXEC_EXECUTABLE}" --numproc-flag=${MPIEXEC_NUMPROC_FLAG})
+set_tests_properties(numerical_moments simulator_contracts PROPERTIES TIMEOUT 180)
+set_tests_properties(simulator_contracts PROPERTIES PROCESSORS 2)

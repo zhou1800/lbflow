@@ -7,6 +7,9 @@
 #include <sstream>
 #include <cstring>
 #include <numeric>
+#include <cmath>
+#include <limits>
+#include <algorithm>
 
 namespace DRL {
 
@@ -38,6 +41,106 @@ void FilePrm::Open(const string &filename)
     File::Open(filename);
     clear();
     load();
+}
+
+string FilePrm::getWallGradient() const
+{
+    const auto value = iPrm.find("wallGradient");
+    if (value == iPrm.end()) return "legacy";
+    string result;
+    if (!parse(value->second, &result))
+        throw invalid_argument("wallGradient must be a quoted string.");
+    return result;
+}
+
+string FilePrm::getViscosityInterpolation() const
+{
+    const auto value = iPrm.find("viscosityInterpolation");
+    if (value == iPrm.end()) return "arithmetic";
+    string result;
+    if (!parse(value->second, &result))
+        throw invalid_argument("viscosityInterpolation must be a quoted string.");
+    return result;
+}
+
+void FilePrm::ValidateSimulation() const
+{
+    const size_t ndim = dimension.size();
+    const size_t q = getQ();
+    if (!((ndim == 2 && q == 9) || (ndim == 3 && q == 19)))
+        throw invalid_argument("Only D2Q9 and D3Q19 are validated for simulation.");
+    size_t count = 1;
+    for (size_t n : dimension) {
+        if (n == 0 || n > numeric_limits<size_t>::max() / count)
+            throw invalid_argument("Invalid grid dimensions.");
+        count *= n;
+    }
+    if (getFileType() != "uint8")
+        throw invalid_argument("Simulation geometry must use uint8 labels.");
+    if (getTEnd() < getTStart() || getTEnd() == numeric_limits<size_t>::max() ||
+        getTStep() == 0 || getTRpt() == 0 || getTRst() == 0)
+        throw invalid_argument("Invalid time range or zero output/report/restart interval.");
+    if (!isfinite(getStopError()) || getStopError() <= 0.0 ||
+        !isfinite(getLatticeLen()) || getLatticeLen() <= 0.0)
+        throw invalid_argument("Invalid convergence tolerance or lattice length.");
+    if (getLSpeed() != 1.0)
+        throw invalid_argument("This research implementation requires latticeSpeed=1.");
+    const string& model = getFluidModel();
+    if (model != "scsp" && model != "color")
+        throw invalid_argument("Only scsp and color fluid models are implemented.");
+    if (getEquilModel() != "SRT" && getEquilModel() != "MRT")
+        throw invalid_argument("Equilibrium model must be SRT or MRT.");
+    const size_t phases = model == "color" ? 2 : 1;
+    if (rexlationTime.size() != phases || density.size() != phases)
+        throw invalid_argument("Density and relaxation-time counts must match the fluid model.");
+    for (size_t k = 0; k < phases; ++k)
+        if (!isfinite(rexlationTime[k]) || rexlationTime[k] <= 0.5 ||
+            !isfinite(density[k]) || density[k] <= 0.0)
+            throw invalid_argument("Densities must be positive; relaxation times must exceed 0.5.");
+    if (model == "color") {
+        if (getViscosityInterpolation() != "arithmetic" && getViscosityInterpolation() != "harmonic")
+            throw invalid_argument("viscosityInterpolation must be arithmetic or harmonic.");
+        if (getWallGradient() != "legacy" && getWallGradient() != "renormalized")
+            throw invalid_argument("wallGradient must be legacy or renormalized.");
+        const double a0 = getAlpha0();
+        const double a1 = 1.0 - density[0] / density[1] * (1.0 - a0);
+        if (!isfinite(a0) || a0 < 0.0 || a0 >= 1.0 ||
+            !isfinite(a1) || a1 < 0.0 || a1 >= 1.0 ||
+            !isfinite(getSTension()) || getSTension() < 0.0 ||
+            !isfinite(getIThickness()) || getIThickness() < 0.0 || getIThickness() > 1.0)
+            throw invalid_argument("Invalid phase weights, surface tension, or recoloring beta.");
+    }
+    if (getReportDir() >= q)
+        throw invalid_argument("Report direction is outside the lattice.");
+    if (getReportDir() != 0) {
+        if (reportSlice.size() < 2)
+            throw invalid_argument("At least two report slices are required.");
+        // Validate against the selected axis after GridSpace maps the direction.
+        if (*max_element(reportSlice.begin(), reportSlice.end()) >=
+            *max_element(begin(dimension), end(dimension)))
+            throw invalid_argument("Report slice is outside the grid.");
+    }
+    for (const auto& item : idx) {
+        if (item.first > 255)
+            throw invalid_argument("Geometry labels must fit in uint8.");
+        const IDXVAL& v = *item.second;
+        if (!isfinite(v.Value))
+            throw invalid_argument("Non-finite boundary value.");
+        if ((v.Type == IT::VD || v.Type == IT::GV || v.Type == IT::PB ||
+             v.Type == IT::VB || v.Type == IT::HF) && v.Phase >= phases)
+            throw invalid_argument("Boundary phase is outside the configured fluid model.");
+        if ((v.Type == IT::GV || v.Type == IT::PB || v.Type == IT::VB) &&
+            (v.Dir == 0 || v.Dir >= q))
+            throw invalid_argument("Boundary direction must be a non-rest lattice direction.");
+        if (v.Type == IT::PB && v.Value <= 0.0)
+            throw invalid_argument("Pressure-boundary density must be positive.");
+        if ((v.Type == IT::PB || v.Type == IT::VB) && v.Dir > 2 * ndim)
+            throw invalid_argument("Pressure and velocity boundaries require an axial direction.");
+        if (v.Type == IT::SD && (v.Value < 0.0 || v.Value > 180.0))
+            throw invalid_argument("Solid contact angle must be between 0 and 180 degrees.");
+        if (v.Type == IT::AB)
+            throw invalid_argument("Axisymmetric AB boundary handling is not implemented.");
+    }
 }
 
 void FilePrm::load()
@@ -167,6 +270,12 @@ void FilePrm::parseAll()
             parse(a.second, &cAngle);
         else if (a.first == "surfaceTension")
             parse(a.second, &sTension);
+        else if (a.first == "wallGradient") {
+            // Optional research selector is read directly from iPrm.
+        }
+        else if (a.first == "viscosityInterpolation") {
+            // Optional interpolation selector is read directly from iPrm.
+        }
         else if (a.first == "interfaceThickness")
             parse(a.second, &iThickness);
         // #property (S/C)

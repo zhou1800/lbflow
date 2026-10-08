@@ -1,0 +1,43 @@
+name: Build and verify
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  numerical-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [g++, clang++]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Install MPI and test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake libopenmpi-dev openmpi-bin python3-numpy
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DPython3_EXECUTABLE=/usr/bin/python3
+      - name: Build
+        run: cmake --build build --parallel 2
+      - name: Test moments, forcing, MPI and restart
+        env:
+          OMPI_MCA_rmaps_base_oversubscribe: "1"
+        run: ctest --test-dir build --output-on-failure
+      - name: Run generated small examples
+        run: |
+          python3 examples/generate.py channel --output results/channel
+          (cd results/channel && mpiexec -n 2 ../../build/bin/LBFlow input.prm)
+          python3 examples/generate.py drop --output results/drop
+          (cd results/drop && ../../build/bin/LBFlow input.prm)
+      - name: Verify installation
+        run: |
+          cmake --install build --prefix "$RUNNER_TEMP/lbflow-install"
+          test -x "$RUNNER_TEMP/lbflow-install/bin/LBFlow"

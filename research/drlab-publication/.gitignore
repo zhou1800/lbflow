@@ -1,0 +1,13 @@
+solver/
+scripts/
+*.zip
+package-manifest.json
+paper/*.pdf
+paper/*.zip
+paper/*.log
+paper/*.blg
+paper/*.aux
+paper/*.out
+paper/bibliography-metadata.json
+__pycache__/
+*.pyc

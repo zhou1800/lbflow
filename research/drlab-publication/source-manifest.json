@@ -1,0 +1,425 @@
+{
+  "schema_version": 1,
+  "source": "Reference solver source snapshot",
+  "head": "1bef9bbe7047ca74280f5870f4787be4df12fe20",
+  "files": [
+    {
+      "path": "CMakeLists.txt",
+      "sha256": "eb2b5a3202370054db34ca47ecbd8a9321c692d33ed9a425c1df2a8228358a9f",
+      "bytes": 821
+    },
+    {
+      "path": "CMakeLists.txt.user",
+      "sha256": "511ff5aa292464b32ed571ebefcbec74a6fcd0ac9ff7162ac011a65b3395d9d6",
+      "bytes": 18270
+    },
+    {
+      "path": "README.md",
+      "sha256": "9449e2477aa2b787b49f45c8514a496cb48762a379f35a5a2e1fd04585bdbed5",
+      "bytes": 44
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "cf3fc42dee0179fa0f19df43acfc40217f5fada10cfba655e8c74fe5336d90ce",
+      "bytes": 41
+    },
+    {
+      "path": "apps/CMakeLists.txt",
+      "sha256": "e63406edbae2f381107d8d1b2ca67fcbd50da405f9aff709138d564adf9d6179",
+      "bytes": 393
+    },
+    {
+      "path": "doc/3Dmodel.png",
+      "sha256": "cd01ddcb5109a7d009fba759105b8a0dd50bad51f829e0706567456c459dc4ab",
+      "bytes": 8780
+    },
+    {
+      "path": "doc/Doxyfile",
+      "sha256": "fa3e799b5b5a75d3df0a4c848e468955be3af4009c8966f9b7d72a38acaccdae",
+      "bytes": 110410
+    },
+    {
+      "path": "doc/2Dmodel.png",
+      "sha256": "bf01f9db976a2ac802c9ec7b961ef47a0043af6240a068eeb15eaffdc2ab4024",
+      "bytes": 18819
+    },
+    {
+      "path": "tests/CMakeLists.txt",
+      "sha256": "20bd9b5df1c9cf329b1afcff6df7d1c3c1cf3cd67e7ea0acfefbe9345971b7cb",
+      "bytes": 487
+    },
+    {
+      "path": "tests/tgrid_run.cpp",
+      "sha256": "0661e4977b6e11f6d724a7b71cb8cb22b7c56b26bdf34de6992567e9272ede38",
+      "bytes": 2016
+    },
+    {
+      "path": "tests/debugger.cpp",
+      "sha256": "3b42522a656a243df17c2973bde42480065abb70e08541970f1d44a18bb21894",
+      "bytes": 3718
+    },
+    {
+      "path": "tests/tfile_run.cpp",
+      "sha256": "a3b8744abe114a383f2a00a5e81dafd8e32bc9e7635e0e63f17073befd85cc91",
+      "bytes": 1928
+    },
+    {
+      "path": "tests/talg_run.cpp",
+      "sha256": "257f70db190caca226c7317559e5da8adecd0ea1ad597669a78f0aa41957c9ef",
+      "bytes": 155
+    },
+    {
+      "path": "tests/debugger.h",
+      "sha256": "e721f81ac269af3055a09d024b1aff2474936ecff129cfebbdc6c3a8d79bdfdd",
+      "bytes": 10758
+    },
+    {
+      "path": "src/CMakeLists.txt",
+      "sha256": "64b0b193ce8c984d9d0c1bef24276267579bbd0298b71ace7c82309f58ea4d52",
+      "bytes": 509
+    },
+    {
+      "path": "helper/vti2tif.py",
+      "sha256": "2346dc6323b336f5a32fa5060e13e6cde8daa164a0f5e1829dd6a5dceb2c5681",
+      "bytes": 3076
+    },
+    {
+      "path": "helper/csv2LB.py",
+      "sha256": "1986a46d54b71e1885cfe02bf9dee22d6f7fa4cec60640649d3c51a5e788ecac",
+      "bytes": 956
+    },
+    {
+      "path": "helper/logTot2csv.py",
+      "sha256": "fefb980cc24a1993d0335a9538025891210cea7190d5e06342215d2ea066f066",
+      "bytes": 553
+    },
+    {
+      "path": "inc/CMakeLists.txt",
+      "sha256": "a1cd6bfdd32851c805618425249c2478cf09c2e6d2955c02876e5632a99d965c",
+      "bytes": 111
+    },
+    {
+      "path": "apps/Connected/connected.cpp",
+      "sha256": "fe51eaf10b8fe47e44f327d7fd2a0d6d8bf36664879acbb64b0181997b6deaca",
+      "bytes": 119
+    },
+    {
+      "path": "apps/LBSim/lbsim.cpp",
+      "sha256": "79ebc0cae7e51e79d3219101d85f5cc48b125c9600244fc011e7a1c338a44396",
+      "bytes": 2019
+    },
+    {
+      "path": "apps/MarkEdge/markedge.cpp",
+      "sha256": "2b75ba2fae178645412c2aeb067ed862e2cc36e200a0cb6cfaff2e8ec97e3367",
+      "bytes": 2409
+    },
+    {
+      "path": "apps/Histogram/histogram.cpp",
+      "sha256": "eaecabb5325e93a85856bc94dde9469781774f10f706cccec12e658273f515d6",
+      "bytes": 2255
+    },
+    {
+      "path": "samples/HalfFilm/23x12y40z.raw",
+      "sha256": "fb6b0c8678ac2df1f13a0c89a71024ef09c41f2519f84ceefae889e088fcdc42",
+      "bytes": 11040
+    },
+    {
+      "path": "samples/HalfFilm/HalfFilm.h",
+      "sha256": "2ea024e010f3127c5241b3e5f1279c5610c525ecda01b8fe7500075d19ef1e92",
+      "bytes": 1784
+    },
+    {
+      "path": "samples/HalfFilm/.HalfFilm.h.un~",
+      "sha256": "f457c985f5b540d45e6745739cfb69b68dfb6e7f0e3dd5de0c29f50576111e15",
+      "bytes": 73951
+    },
+    {
+      "path": "samples/Bera/Bera-102z102y122x.raw",
+      "sha256": "6c20acfa14dd154ba9a90483dd2af833abad96fb6a16c1b09c4b3fc10c5422b2",
+      "bytes": 1269288
+    },
+    {
+      "path": "samples/Bera/Bera-102z102y122x.h",
+      "sha256": "2575c7f59b5fa93a539c4e553a30d6f0b2812fb6115d0c60db9edf95d3de246c",
+      "bytes": 8118
+    },
+    {
+      "path": "tests/talg/talg.h",
+      "sha256": "b9d757b8b08e7a83f8d08500291ef693671e51430278bd54e2ec270094adba11",
+      "bytes": 123
+    },
+    {
+      "path": "tests/talg/tfn.cpp",
+      "sha256": "2345d02f183537de93311d16ee683a1c698c1c3c2eb8a6aa9df311ae5b9e3c4a",
+      "bytes": 13959
+    },
+    {
+      "path": "tests/tfile/tfile.cpp",
+      "sha256": "caff26fda10ba4432d726b28241a2d9b472de6e40202ddf72cb1a25ee825b805",
+      "bytes": 252
+    },
+    {
+      "path": "tests/tfile/tfileprm.cpp",
+      "sha256": "8dd16819c654c24264d8304d9720034b7f7cf8b0f052a634bc258101e5b86650",
+      "bytes": 3279
+    },
+    {
+      "path": "tests/tfile/tfilevti.cpp",
+      "sha256": "06d0f934742798f85a5d83b4928d7953f525d7fa3baf49e88a9ade85cefa8be2",
+      "bytes": 1022
+    },
+    {
+      "path": "tests/tfile/tfileraw.cpp",
+      "sha256": "fd176836d5788622b43885b3c29203a5179d3d31a4a4685c5047961a9e7aba3c",
+      "bytes": 22
+    },
+    {
+      "path": "tests/tfile/tfile.h",
+      "sha256": "b375b819571afea5177d0ab6b7c213cfc4a0a7de8377d5cc0d4046309c5c0e56",
+      "bytes": 2868
+    },
+    {
+      "path": "tests/tgrid/tgridspace.cpp",
+      "sha256": "8373cf89e268186c5c56c65eee922e8dcecc128318bdc95088f600a52d852709",
+      "bytes": 595
+    },
+    {
+      "path": "tests/tgrid/tgrid.cpp",
+      "sha256": "f217c4f110f0062098746323c89526a85c99cc32372f469f5d89066414c8be90",
+      "bytes": 483
+    },
+    {
+      "path": "tests/tgrid/tgrid.h",
+      "sha256": "7ec8a3e4ced42057d1ff2b3f19b98186a13a025e699f01de9a6739a98d817d2e",
+      "bytes": 749
+    },
+    {
+      "path": "tests/tgrid/tgridmc.cpp",
+      "sha256": "bb79b6a6d2b2ed85c740890d029cc4011585c97d075a58ce317772c49a92ffd0",
+      "bytes": 997
+    },
+    {
+      "path": "tests/tgrid/tgridgho.cpp",
+      "sha256": "2867cef4136f2178607e875a13ba73ad1a957d6407111668408ce8fa9397a133",
+      "bytes": 507
+    },
+    {
+      "path": "tests/tgrid/troi.cpp",
+      "sha256": "0b85c07aee588e4bea2c58aaafbd16db93864bd16c228b5ba5690df51ee446fd",
+      "bytes": 1517
+    },
+    {
+      "path": "src/lbm/simulator.cpp",
+      "sha256": "43708d2948b1fce8accab2c79daec125076d4d1d5d8ee346bbf0084d329725f1",
+      "bytes": 8895
+    },
+    {
+      "path": "src/lbm/colorfluid.cpp",
+      "sha256": "1866f798f982200531dc808662e21bf2ba1d08504fd7944b11608aa28ba7b0b0",
+      "bytes": 24295
+    },
+    {
+      "path": "src/lbm/scsp.cpp",
+      "sha256": "b6d88b930770ca0048f94412c8c212c53d2a43822694db0a429aa4aed4a45a57",
+      "bytes": 13043
+    },
+    {
+      "path": "src/lbm/shanchen.cpp",
+      "sha256": "50a9a122eecfecb17ed0c595c87a1c8d151250c1e2042f250fec12cfb89285d8",
+      "bytes": 329
+    },
+    {
+      "path": "src/grid/gridmc.cpp",
+      "sha256": "f1dc600e939e8867d34379cda9189eab5813cae4f5f42e1d7102fd70fe21daef",
+      "bytes": 2671
+    },
+    {
+      "path": "src/grid/roi.cpp",
+      "sha256": "1e7ec6a1460ea5871f204c9f6d6fbfd41507102220ab8b99dc78966cec40952d",
+      "bytes": 6021
+    },
+    {
+      "path": "src/grid/gridspace.cpp",
+      "sha256": "0dfcbf76b8d702abf16f7c4481098afe3023fd61bb7c90449a835a920f62f868",
+      "bytes": 9942
+    },
+    {
+      "path": "src/grid/gridgho.cpp",
+      "sha256": "585629fb4614a40d3bc094f5dd9f2928e0e8121dca9cf20fbd4b971596f71bb3",
+      "bytes": 606
+    },
+    {
+      "path": "src/grid/grid.cpp",
+      "sha256": "ee0bc047c0b385163d588bb8e0efc4c907d46a7c790fcaf6f468348443091cae",
+      "bytes": 743
+    },
+    {
+      "path": "src/parallel/thread.cpp",
+      "sha256": "08a6a60d3f9e6fc4fa4735984a50d9f9d9a009d986868db217312a8dc361838d",
+      "bytes": 3340
+    },
+    {
+      "path": "src/file/file.cpp",
+      "sha256": "7bd6d4d7d1b16739a36049e0137cf3e94d7147a91de030a07e872fab502a9887",
+      "bytes": 466
+    },
+    {
+      "path": "src/file/fileprm.cpp",
+      "sha256": "1951980911642331b74446388d7d319ae9eadc7fae94d79c456e89a7d548798f",
+      "bytes": 11730
+    },
+    {
+      "path": "src/file/filevti.cpp",
+      "sha256": "c8f4b7b85ab3a685191647a16d57c000fd10386930ff25a6950a46f10ec3c603",
+      "bytes": 5604
+    },
+    {
+      "path": "src/helper/logger.cpp",
+      "sha256": "e588cfd674a76ac5d08c72352e686ce5c9a0852d6d118e66dc463d834c9c547f",
+      "bytes": 1799
+    },
+    {
+      "path": "src/algorithm/fn.cpp",
+      "sha256": "e1c876676d1e89fc2facf5fe68c560e155fb732a5766c14673377522a6fb44dc",
+      "bytes": 4235
+    },
+    {
+      "path": "src/pipt/imgproc.cpp",
+      "sha256": "39e24eb0beaefbcb1c5ab3e6b236fb8c721f07081bd34b649469ab1753f17a20",
+      "bytes": 433
+    },
+    {
+      "path": "src/pipt/histogram.cpp",
+      "sha256": "84c834873f688df95ff66164fae127ec921e1a99769d96bf498e01f5acc38369",
+      "bytes": 1155
+    },
+    {
+      "path": "src/pipt/markedge.cpp",
+      "sha256": "bbe8861027d938faacef8fdc4b4c79a308c4123f6020b30da64dc6e37a53fe10",
+      "bytes": 377
+    },
+    {
+      "path": "inc/lbm/lbcfg.h",
+      "sha256": "5939e0d33de23e583c61aea5c344935dd8b130dbd5409937b0527977be5d8f75",
+      "bytes": 194
+    },
+    {
+      "path": "inc/lbm/scsp.h",
+      "sha256": "645cb88c6b53434cb99426c55eaa83bdd69f5a82cf7fc4430edffdfbcd1a90fb",
+      "bytes": 16547
+    },
+    {
+      "path": "inc/lbm/simulator.h",
+      "sha256": "384deb2e3cce96d521cc2e9fee950c91443d345545611f029cafe9b8c0abeb26",
+      "bytes": 7422
+    },
+    {
+      "path": "inc/lbm/colorfluid.h",
+      "sha256": "70832e9d41d9489ede490e8515782c7d12796605ef1e971f5ebbae78ff1078fe",
+      "bytes": 19865
+    },
+    {
+      "path": "inc/lbm/shanchen.h",
+      "sha256": "08d361f9b2bcd7f433674e6e51450ceda17716cb30c37ef407fdc4159e3f9805",
+      "bytes": 415
+    },
+    {
+      "path": "inc/grid/grid.h",
+      "sha256": "7e276db4078dabf6c7fe2bde96c93d6959ab5836a3f6485392b040479338a38e",
+      "bytes": 5503
+    },
+    {
+      "path": "inc/grid/gridgho.h",
+      "sha256": "7be44f810b305641922307f75a25af2350fc2c6ca2d0fb3f056875d1afea448a",
+      "bytes": 4753
+    },
+    {
+      "path": "inc/grid/gridspace.h",
+      "sha256": "407b2303319c7a5669d08c46528e48fa5442b9d065ee489340a964823b5b2f91",
+      "bytes": 4873
+    },
+    {
+      "path": "inc/grid/gridmc.h",
+      "sha256": "71e80564a31da3cff530732398015040eff2b5dfbd104b2a65c78a092e24bc83",
+      "bytes": 6965
+    },
+    {
+      "path": "inc/grid/roi.h",
+      "sha256": "b9c80cca28a823b02dfd91c45cb3fdfba4fdaeb88a4da87e2ef1cd88f7e0cb13",
+      "bytes": 9730
+    },
+    {
+      "path": "inc/parallel/thread.h",
+      "sha256": "c1962dbb03a60f9a90052020ca94d08558981ee40b29d00332ddf81e58f6c4f8",
+      "bytes": 14817
+    },
+    {
+      "path": "inc/file/file.h",
+      "sha256": "18b2a839c194ceaada71e240f8b42f5297f7b8b2fbb00de4f4d9feb82da9173a",
+      "bytes": 1001
+    },
+    {
+      "path": "inc/file/filevti.h",
+      "sha256": "840352dc205455f4cb76c79b0843d99d3aded1bdeb6945b2c97fde01bd5cefa1",
+      "bytes": 4685
+    },
+    {
+      "path": "inc/file/fileraw.h",
+      "sha256": "65ba1a95ab82719b41ebbccf9263a06872a815ee8de7435bada56f0de94a30cd",
+      "bytes": 18883
+    },
+    {
+      "path": "inc/file/fileprm.h",
+      "sha256": "de3df97f39da9d4763c863ee8ef2e757bf3a04fcbad74dec948e311e11d70a97",
+      "bytes": 21354
+    },
+    {
+      "path": "inc/helper/logger.h",
+      "sha256": "37da907690dc980b1e5df1d5fd771e39a169ad325f1316bad2d8cc664478644c",
+      "bytes": 1852
+    },
+    {
+      "path": "inc/algorithm/fn.h",
+      "sha256": "b40ed8661f1c108ba83d4b34d1005af560bb874300a6a0d9f40e7b8a8e781487",
+      "bytes": 3600
+    },
+    {
+      "path": "inc/pipt/markedge.h",
+      "sha256": "96fb1f82f83840565d3e30266826c7d67c838beffe696862e41814b8ca8f9202",
+      "bytes": 4319
+    },
+    {
+      "path": "inc/pipt/histogram.h",
+      "sha256": "096d14a6a348d6d06d58bf9d1753e0faa6261e1033c40a06336af5c11fd13da3",
+      "bytes": 3498
+    },
+    {
+      "path": "inc/pipt/imgproc.h",
+      "sha256": "ad92aa26729f586f59c4e4b1549055697db1766432531ea74cf81a46f7672cc4",
+      "bytes": 2085
+    },
+    {
+      "path": "inc/core/cfg.h.in",
+      "sha256": "82a7cfb301555827dd6d1bfa127931159f8eb1d70d14a1abd825398e378c413b",
+      "bytes": 211
+    },
+    {
+      "path": "inc/core/cfg.h",
+      "sha256": "bccb7f13b04ff8b8e6c5c62b52445320c8006c76cbcf48d4ad21ae0363b3f771",
+      "bytes": 203
+    },
+    {
+      "path": "inc/core/defs.h",
+      "sha256": "78443ac9055830a494f2d4093dc03acd92acb64885db7cba826609eb8862f4de",
+      "bytes": 6674
+    }
+  ],
+  "note": "Current working-copy content preserved; pre-existing dirty files are not discarded.",
+  "maintained_solver": "../../solver",
+  "excluded_from_import": [
+    "CMakeLists.txt.user",
+    "editor undo files",
+    "large raw sample geometries",
+    "generated inc/core/cfg.h"
+  ]
+}

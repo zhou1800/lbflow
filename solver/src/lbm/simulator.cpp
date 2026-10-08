@@ -4,6 +4,8 @@
 #include "simulator.h"
 #include "fileraw.h"
 #include "roi.h"
+#include <fstream>
+#include <iomanip>
 
 namespace DRL {
 
@@ -12,7 +14,7 @@ namespace LBM {
 using namespace std;
 
 Simulator::Simulator(const FilePrm &prm)
-    : p(prm)
+    : p((prm.ValidateSimulation(), prm))
     , g(p.getD(), p.getQ())
     , raw(FileRaw<uint8_t>(p.getGFile()).Load(g))
     , gIdx(ROI::getRawIdx(raw))
@@ -23,6 +25,13 @@ Simulator::Simulator(const FilePrm &prm)
     , wi(getWi())
     , wiT(wi * 6.0 / p.getLSpeed())
 {
+    for (size_t value : raw) p.getIVal(value);
+    if (p.getReportDir() != 0) {
+        const size_t axis = g.S.Qaxis[p.getReportDir()];
+        for (size_t value : p.getReportSlice())
+            if (value >= g.Sz[axis])
+                throw invalid_argument("Report slice is outside the selected axis.");
+    }
     buildIb();
 }
 
@@ -152,16 +161,160 @@ va_val_t Simulator::getMRTM()
     return va_val_t();
 }
 
-va_val_t Simulator::getMRTS()
+va_val_t Simulator::getMRTS(double relaxationTime)
 {
-    static const double su = 1.0 / p.getRTime()[0]; // relaxtion frequency.
-    static const double sq = 8.0 * (2.0 - su) / (8.0 - su);
+    const double rt = relaxationTime == 0.0 ? p.getRTime()[0] : relaxationTime;
+    if (!std::isfinite(rt) || rt <= 0.5)
+        throw invalid_argument("Relaxation time must be finite and greater than 0.5.");
+    const double su = 1.0 / rt;
+    const double sq = 8.0 * (2.0 - su) / (8.0 - su);
     if (g.S.Q == 9)
-        return va_val_t({1, su, su, 1, sq, 1, sq, su, su});
+        return va_val_t({0, su, su, 0, sq, 0, sq, su, su});
     else if (g.S.Q == 19)
         return va_val_t({ 0, su, su, 0, sq, 0, sq, 0, sq, su, su, su, su,
                            su, su, su, sq, sq, sq });
     return va_val_t();
+}
+
+va_val_t Simulator::forceForIndex(size_t idx) const
+{
+    if (p.getIVal(idx).Type != IT::GV)
+        return va_val_t(0.0, g.S.D);
+    const auto& condition = p.getIVal(idx);
+    if (condition.Dir >= g.S.Q || !std::isfinite(condition.Value))
+        throw invalid_argument("Invalid body-force direction or magnitude.");
+    if (p.getLSpeed() != 1.0)
+        throw invalid_argument("The validated force scheme requires latticeSpeed=1.");
+    return g.S.Qp[condition.Dir] * condition.Value;
+}
+
+va_val_t Simulator::forceSource(size_t i, const vava_val_t& velocity,
+                                const va_val_t& force) const
+{
+    va_val_t source(0.0, g.S.Q);
+    double uf = 0.0;
+    for (size_t d = 0; d < g.S.D; ++d)
+        uf += velocity[d][i] * force[d];
+    for (size_t q = 0; q < g.S.Q; ++q) {
+        double eu = 0.0, ef = 0.0;
+        for (size_t d = 0; d < g.S.D; ++d) {
+            eu += g.S.Qi[q][d] * velocity[d][i];
+            ef += g.S.Qi[q][d] * force[d];
+        }
+        source[q] = wi[q] * (3.0 * (ef - uf) + 9.0 * eu * ef);
+    }
+    return source;
+}
+
+bool Simulator::updateConvergence(const vava_val_t& velocity, bool scalarsStable,
+                                  double tolerance, ostream& os,
+                                  const va_val_t* phaseIndicator)
+{
+    if (!hasReportVelocity) {
+        previousReportVelocity = velocity;
+        if (phaseIndicator) previousPhaseIndicator = *phaseIndicator;
+        hasReportVelocity = true;
+        stableReports = 0;
+        return false;
+    }
+    double local[3] = {0.0, 0.0, 0.0};
+    for (size_t d = 0; d < velocity.size(); ++d)
+        for (size_t i = 0; i < velocity[d].size(); ++i) {
+            const double value = velocity[d][i];
+            if (!std::isfinite(value))
+                throw runtime_error("Non-finite velocity in convergence report.");
+            const double delta = value - previousReportVelocity[d][i];
+            local[0] += delta * delta;
+            local[1] += value * value;
+            local[2] += 1.0;
+        }
+    double global[3];
+    mpi().AllReduce(local, global, 3, MPI_DOUBLE, MPI_SUM);
+    if (!std::isfinite(global[0]) || !std::isfinite(global[1]) || global[2] <= 0.0)
+        throw runtime_error("Invalid global velocity residual.");
+    const double rmsChange = sqrt(global[0] / global[2]);
+    const double residual = global[1] > 0.0 ? sqrt(global[0] / global[1]) : 0.0;
+    const bool velocityStable = rmsChange <= 1e-12 || residual < tolerance;
+    double phaseChange = 0.0;
+    if (phaseIndicator) {
+        if (phaseIndicator->size() != previousPhaseIndicator.size())
+            throw runtime_error("Phase-indicator convergence history has the wrong size.");
+        double localChange = 0.0;
+        for (size_t i = 0; i < phaseIndicator->size(); ++i) {
+            if (!std::isfinite((*phaseIndicator)[i]))
+                throw runtime_error("Non-finite phase indicator in convergence report.");
+            localChange = max(localChange, abs((*phaseIndicator)[i] - previousPhaseIndicator[i]));
+        }
+        mpi().AllReduce(&localChange, &phaseChange, 1, MPI_DOUBLE, MPI_MAX);
+        previousPhaseIndicator = *phaseIndicator;
+    }
+    previousReportVelocity = velocity;
+    stableReports = scalarsStable && velocityStable && phaseChange < tolerance ? stableReports + 1 : 0;
+    if (mpi().getId() == 0)
+        os << " - velocityResidual = " << residual
+           << ", velocityRmsChange = " << rmsChange
+           << ", maxPhaseChange = " << phaseChange
+           << ", stableReports = " << stableReports << "/3" << endl;
+    return stableReports >= 3;
+}
+
+void Simulator::validatePopulations(const vava_val_t& populations) const
+{
+    for (const auto& direction : populations)
+        for (double value : direction)
+            if (!std::isfinite(value))
+                throw runtime_error("Non-finite post-collision population; no restart will be written.");
+}
+
+void Simulator::prepareRestart(const string& path)
+{
+    if (mpi().getId() == 0) {
+        ofstream data(path, ios::binary | ios::trunc);
+        if (!data) throw runtime_error("Cannot create restart population file.");
+        std::remove((path + ".meta").c_str());
+    }
+    mpi().Barrier();
+}
+
+void Simulator::saveRestartMetadata(const string& path, size_t time, size_t phases)
+{
+    mpi().Barrier();
+    if (mpi().getId() == 0) {
+        ofstream out(path + ".meta", ios::trunc);
+        out << "DRLAB_OUTGOING_V1\n" << time << ' ' << phases << ' '
+            << g.S.D << ' ' << g.S.Q << '\n';
+        for (size_t n : g.Sz) out << n << ' ';
+        out << '\n' << "NEXT_STREAM " << time + 1 << '\n'
+            << "INITIAL_COLLISION_INCLUDED " << time + 1 << '\n'
+            << "CONVERGENCE_HISTORY_RESET_ON_LOAD\n";
+        if (!out) throw runtime_error("Cannot write restart metadata.");
+    }
+    mpi().Barrier();
+}
+
+void Simulator::validateRestart(const string& path, size_t time, size_t phases)
+{
+    if (mpi().getId() == 0) {
+        ifstream in(path + ".meta");
+        string format;
+        size_t storedTime = 0, storedPhases = 0, storedD = 0, storedQ = 0;
+        in >> format >> storedTime >> storedPhases >> storedD >> storedQ;
+        if (!in || format != "DRLAB_OUTGOING_V1" || storedTime != time ||
+            storedPhases != phases || storedD != g.S.D || storedQ != g.S.Q)
+            throw runtime_error("Missing or incompatible restart metadata; historical unlabeled checkpoints are not accepted.");
+        for (size_t n : g.Sz) {
+            size_t storedN = 0;
+            in >> storedN;
+            if (!in || n != storedN) throw runtime_error("Restart grid dimensions differ.");
+        }
+        ifstream data(path, ios::binary | ios::ate);
+        const size_t expected = g.N * g.S.Q * phases * sizeof(double);
+        if (!data || data.tellg() != static_cast<streamoff>(expected))
+            throw runtime_error("Restart population file has an invalid length.");
+    }
+    mpi().Barrier();
+    hasReportVelocity = false;
+    stableReports = 0;
 }
 
 void Simulator::buildIb()
@@ -201,8 +354,8 @@ void Simulator::buildIb()
                     ibF[phs][q].push_back(i);
                 }
             }
-            ca /= nCA;
             if (isIB) {
+                ca /= nCA;
                 ibI[i] = c;  // ib
                 ibNorm[c] = move(norm);
                 ibSinCA[c] = sin(ca / 180.0 * pi) ;

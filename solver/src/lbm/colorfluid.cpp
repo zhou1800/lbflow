@@ -28,6 +28,7 @@ ColorFluid::ColorFluid(const FilePrm &prm)
     , densT(0.0, g.LG.N)
     , tau(0.0, g.LG.N)
     , TibNorm(ibNorm.size()), TibNormInv(ibNorm.size())
+    , wallGradientInv(ibNorm.size())
     , ai{va_val_t(0.0, g.S.Q), va_val_t(0.0, g.S.Q)}
 {
     if (g.S.Q != 9 && g.S.Q != 19)
@@ -44,6 +45,7 @@ ColorFluid::ColorFluid(const FilePrm &prm)
 
     initPhi();
     calcTibNorm();
+    calcWallGradientInverse();
 
     output.AddScalar("r0", &dens[0]);
     output.AddScalar("r1", &dens[1]);
@@ -62,11 +64,17 @@ void ColorFluid::Run(std::ostream &logProc)
         loadRst(p.getTStart());
     else {
         initialize();
+        // Construct the t=0 incoming state, then use the normal collision
+        // kernel to obtain outgoing populations whose next action is stream.
+        calcMacroVar(0);
+        bodyForce();
         output.Save(p.getTStart());
+        collision();
     }
     procLog.Log("Done!\t");
 
     for (size_t t = p.getTStart() + 1; t <= p.getTEnd(); ++t) {
+        bool converged = false;
         // 1. Streaming.
         streaming(&(f[0]), &(fOld[0]),t);
         streaming(&(f[1]), &(fOld[1]),t);
@@ -85,6 +93,7 @@ void ColorFluid::Run(std::ostream &logProc)
 
         // 3. Calculate macroscopic variables.
         calcMacroVar(t);
+        bodyForce();
 
         // 4. Saves macro variable.
         if (t % p.getTStep() == 0) {
@@ -92,28 +101,25 @@ void ColorFluid::Run(std::ostream &logProc)
             ss << "Step " << t << " - ";
             procLog.Log(ss.str());
             output.Save(t);
-            if (report(logProc, dens[0], dens[1], v)){
-                saveRst(t);
-                break;
-            }
+            converged = report(logProc, dens[0], dens[1], v);
         }
         else if (t % p.getTRpt() == 0){
             stringstream ss;
             ss << "Step " << t << " - ";
             procLog.Log(ss.str());
-            report(logProc, dens[0], dens[1], v);
+            converged = report(logProc, dens[0], dens[1], v);
         }
 
         // 5. Collosion.
-        bodyForce();
         collision();
 
         // 6. Save f.
-        if (t % p.getTRst() == 0) {
+        if (converged || t % p.getTRst() == 0) {
             //procLog.Pause();
             saveRst(t);
             //procLog.Continue();
         }
+        if (converged) break;
     }
 }
 
@@ -126,9 +132,15 @@ void ColorFluid::initialize()
     for (const auto& idx : p.getIdx({IT::VD, IT::GV, IT::PB, IT::VB, IT::AB,
                                      IT::HF})) {
         size_t phs = p.getIVal(idx).Phase;
+        const va_val_t force = forceForIndex(idx);
         for (size_t i : gIdx[idx]){
-            for (size_t q = 0; q < g.S.Q; ++q)
+            for (size_t q = 0; q < g.S.Q; ++q) {
                 f[phs][q][i] = dist[phs][q];
+                double ef = 0.0;
+                for (size_t d = 0; d < g.S.D; ++d)
+                    ef += g.S.Qi[q][d] * force[d];
+                f[phs][q][i] -= 1.5 * wi[q] * ef;
+            }
             densT[i] = dens[phs][i] = rho[phs];
             densN[i2f[i]] = phs == 0 ? 1 : -1;  // (rho0 - rho1) / (rho0 + rho1)
         }
@@ -140,6 +152,7 @@ void ColorFluid::calcMacroVar(size_t t)
     static const va_idx_t& i2f {g.LG.getI2fMap()};
     static const double relaxTime[NP] {p.getRTime()[0]/2.0,
                                        p.getRTime()[1]/2.0};
+    static const bool harmonic = p.getViscosityInterpolation() == "harmonic";
     for (size_t idx : p.getIdx({IT::VD, IT::GV, IT::PB, IT::VB, IT::HF}))
         for (size_t i : gIdx[idx]){
             // 1. calculate density
@@ -151,9 +164,22 @@ void ColorFluid::calcMacroVar(size_t t)
             }
 
             densT[i] = dens[0][i] + dens[1][i];
+            if (!std::isfinite(dens[0][i]) || !std::isfinite(dens[1][i]) ||
+                !std::isfinite(densT[i]) || densT[i] <= 0.0)
+                throw runtime_error("Non-finite or non-positive total fluid density.");
+            if (dens[0][i] < -1e-10 * densT[i] || dens[1][i] < -1e-10 * densT[i])
+                throw runtime_error("Negative component density outside roundoff tolerance.");
             densN[i2f[i]] = (dens[0][i] - dens[1][i]) / densT[i];
             tau[i] = (1 + densN[i2f[i]]) * relaxTime[0] +
                      (1 - densN[i2f[i]]) * relaxTime[1];
+            if (harmonic) {
+                const double phi = dens[0][i] / densT[i];
+                const double nu0 = (p.getRTime()[0] - 0.5) / 3.0;
+                const double nu1 = (p.getRTime()[1] - 0.5) / 3.0;
+                tau[i] = 0.5 + 3.0 / (phi / nu0 + (1.0 - phi) / nu1);
+            }
+            if (!std::isfinite(tau[i]) || tau[i] <= 0.5)
+                throw runtime_error("Invalid local relaxation time.");
 
             // 2. calculate velocity.
             for (size_t d = 0; d < g.S.D; ++d) {
@@ -165,6 +191,8 @@ void ColorFluid::calcMacroVar(size_t t)
                         v[d][i] -= f[0][q][i] + f[1][q][i];
                 // compressible for all.
                 v[d][i] /= densT[i];
+                if (!std::isfinite(v[d][i]))
+                    throw runtime_error("Non-finite fluid velocity.");
             }
         }
 
@@ -190,17 +218,21 @@ void ColorFluid::collision()
     //static const double cAngle = cos(p.getCAngle() / 180.0 * pi) ;
     //static const double sAngle = sin(p.getCAngle() / 180.0 * pi) ;
     static const double beta = p.getIThickness();
+    static const bool renormalizedWall = p.getWallGradient() == "renormalized";
 
     // MRT
     static const EQUILFN equilfn = p.getEquilModel() == "SRT" ? SRT : MRT;
     static const va_val_t M {getMRTM()};
     static const va_val_t MInv = InvOrthoRow(M, Q, Q);
-    static const va_val_t S {getMRTS()};
-    static const va_val_t MInvS = MatMulDiag(MInv, S, Q);
-    static const va_val_t MInvSM = MatMulMat(MInvS, M, Q, Q, Q);
-    static const va_val_t MInvSMT = MatTranspose(MInvSM, Q, Q);
-
-    for (size_t idx : p.getIdx({IT::VD, IT::GV, IT::VB, IT::PB, IT::HF}))
+    static const bool uniformTau = p.getRTime()[0] == p.getRTime()[1];
+    static const va_val_t uniformRates = getMRTS(p.getRTime()[0]);
+    static const va_val_t uniformCollision = MatMulMat(
+        MatMulDiag(MInv, uniformRates, Q), M, Q, Q, Q);
+    static const va_val_t uniformForce = MatMulMat(
+        MatMulDiag(MInv, 1.0 - 0.5 * uniformRates, Q), M, Q, Q, Q);
+    for (size_t idx : p.getIdx({IT::VD, IT::GV, IT::VB, IT::PB, IT::HF})) {
+        const va_val_t force = forceForIndex(idx);
+        const bool forced = inner_product(begin(force), end(force), begin(force), 0.0) != 0.0;
         for (size_t i : gIdx[idx]) {     // array index
             // 2. B-G-K collision.
             double usq = 0;
@@ -209,6 +241,8 @@ void ColorFluid::collision()
 
             va_val_t feq_u0 (g.S.Q);       // save for later use;
             va_val_t fT (g.S.Q);           // f_total = f_r + f_b
+            const va_val_t source = forced ? forceSource(i, v, force)
+                                           : va_val_t(0.0, Q);
 
             if (equilfn == SRT){
                 for (size_t q = 0; q < g.S.Q; ++q) {
@@ -222,11 +256,12 @@ void ColorFluid::collision()
                             + densT[i] * wi[q] * (c1*ui + c2*ui*ui - c3*usq);
 
                     fT[q] += (feq - fT[q]) / tau[i];
+                    if (forced)
+                        fT[q] += (1.0 - 0.5 / tau[i]) * source[q];
                 }
             }
             else {
-                va_val_t ff(0.0, Q);
-                auto im = begin(MInvSMT);
+                va_val_t residual(0.0, Q);
                 for (size_t q = 0; q < g.S.Q; ++q) {
                     fT[q] = f[0][q][i] + f[1][q][i];
                     double ui = 0;
@@ -237,11 +272,21 @@ void ColorFluid::collision()
                     double feq = feq_u0[q]
                             + densT[i] * wi[q] * (c1*ui + c2*ui*ui - c3*usq);
 
-                    for (size_t qq = 0; qq < Q; ++qq)
-                        ff[qq] += *im++ * (feq - fT[q]);
+                    residual[q] = feq - fT[q];
+                }
+                va_val_t correction(0.0, Q);
+                if (uniformTau) {
+                    correction = MatMulVec(uniformCollision, residual, Q, Q);
+                    if (forced) correction += MatMulVec(uniformForce, source, Q, Q);
+                } else {
+                    const va_val_t rates = getMRTS(tau[i]);
+                    correction = MatMulVec(M, residual, Q, Q) * rates;
+                    if (forced)
+                        correction += MatMulVec(M, source, Q, Q) * (1.0 - 0.5 * rates);
+                    correction = MatMulVec(MInv, correction, Q, Q);
                 }
                 for (size_t q = 0; q < g.S.Q; ++q)
-                    fT[q] += ff[q];
+                    fT[q] += correction[q];
             }
 
             // 3. perturbation.
@@ -281,6 +326,13 @@ void ColorFluid::collision()
 
                 double cAngle = ibCosCA[ibI[i]];
                 double sAngle = ibSinCA[ibI[i]];
+                if (renormalizedWall) {
+                    // gDens currently contains 3*b from the clipped stencil.
+                    gDens = MatMulVec(wallGradientInv[ibI[i]], gDens,
+                                      g.S.D, g.S.D) / 3.0;
+                    norm = sqrt(inner_product(begin(gDens), end(gDens),
+                                               begin(gDens), 0.0));
+                }
                 if (g.S.D == 3) {
                     va_val_t gDensNorm = MatMulMat(TibNorm[ibI[i]], gDens,
                                                     3, 3, 1);
@@ -329,6 +381,9 @@ void ColorFluid::collision()
                 }
             }
         }
+    }
+    validatePopulations(f[0]);
+    validatePopulations(f[1]);
 }
 
 void ColorFluid::zouHeBoundary()
@@ -433,8 +488,7 @@ void ColorFluid::bodyForce()
 {
     for (size_t idx : p.getIdx({IT::GV}))
         for (size_t i : gIdx[idx]) {
-            va_val_t fi = g.S.Qp[p.getIVal(idx).Dir]
-                    * tau[i]* p.getIVal(idx).Value;
+            const va_val_t fi = forceForIndex(idx) * 0.5;
             for (size_t d = 0; d < g.S.D; ++d)
                 v[d][i] += fi[d] / densT[i];
         }
@@ -461,6 +515,7 @@ void ColorFluid::loadRst(std::size_t t)
     // prepare filename and load data.
     ostringstream os;
     os << p.getOutPath() << "." << setw(10) << setfill('0') << t << ".rst";
+    validateRestart(os.str(), t, NP);
     FileRaw<double> file(os.str(), true);
 
     // load distribution functions.
@@ -481,12 +536,14 @@ void ColorFluid::saveRst(std::size_t t)
     // prepare filename
     ostringstream os;
     os << p.getOutPath() << "." << setw(10) << setfill('0') << t << ".rst";
+    prepareRestart(os.str());
     FileRaw<double> file(os.str(), true);
 
     // save distribution function.
     for (size_t ph = 0; ph < NP; ++ph)
         for (size_t q = 0; q < g.S.Q; ++q)
             file.Save(g, f[ph][q], t);
+    saveRestartMetadata(os.str(), t, NP);
 
     //// 2.prepare data
     //va_val_t data(g.S.Q * g.LG.N * NP);
@@ -519,9 +576,10 @@ bool ColorFluid::report(ostream &os, const va_val_t &r0, const va_val_t &r1,
 
         static const auto dens0 = p.getDensity();
         static const double MaxErr = p.getStopError();
-        static const double kPar = 3.0 * getKPar(d);
-        static const double r2p[] = {(1.0 - ai[0][0]) / 2.0,
-                                      (1.0 - ai[1][0]) / 2.0};
+        static const double kPar = getKPar(d);
+        static const double pressureFactor = g.S.Q == 9 ? 3.0 / 5.0 : 1.0 / 2.0;
+        static const double r2p[] = {(1.0 - ai[0][0]) * pressureFactor,
+                                      (1.0 - ai[1][0]) * pressureFactor};
         static va_val_t SOld = {0.0, 0.0};    // Saturation of last step.
         static double KOld = 0;                // Permeability of last step.
 
@@ -563,16 +621,16 @@ bool ColorFluid::report(ostream &os, const va_val_t &r0, const va_val_t &r1,
         double dP = (rhoS[0][0] * r2p[0] + rhoS[0][1] * r2p[1]) / cntS[0] -
                     (rhoS[1][0] * r2p[0] + rhoS[1][1] * r2p[1]) / cntS[1];
         double Q = velR / double(*fl.second - *fl.first + 1);
-        double K = kPar * Q / dP;
-        if (K == 0) return false;
-        double errK = abs(K - KOld) / K;
+        if (!std::isfinite(S[0]) || !std::isfinite(S[1]) ||
+            !std::isfinite(errS[0]) || !std::isfinite(errS[1]) ||
+            !std::isfinite(dP) || !std::isfinite(Q))
+            throw runtime_error("Non-finite two-phase report state.");
+        const bool hasPressureDrop = abs(dP) > 1e-14;
+        const double K = hasPressureDrop ? kPar * Q / dP : 0.0;
+        const double errK = hasPressureDrop ? abs(K - KOld) / std::max(abs(K), 1e-30) : 0.0;
+        if (!std::isfinite(K) || !std::isfinite(errK))
+            throw runtime_error("Non-finite apparent permeability.");
         KOld = K;
-
-        if (std::isnan(S[0])    || std::isnan(S[1])    ||
-            std::isnan(errS[0]) || std::isnan(errS[1]) ||
-            std::isnan(dP)      || std::isnan(Q)       ||
-            std::isnan(K)       || std::isnan(errK))
-            errS[0] = 0;       // end simulation! Something went wrong.
 
         // 4. Report.
         if (mpi().getId() == 0){
@@ -587,10 +645,59 @@ bool ColorFluid::report(ostream &os, const va_val_t &r0, const va_val_t &r1,
                << " - K = " << K << "(um^2), "
                << fixed << "errK = " << errK * 100.0 << "%" << endl;
         }
-        return abs(errS[0]) < MaxErr;
+        if (!hasPressureDrop && mpi().getId() == 0)
+            os << " - pressure-based permeability unavailable: zero pressure drop" << endl;
+        const bool scalarsStable = std::max(errS[0], errS[1]) < MaxErr &&
+                (!hasPressureDrop || errK < MaxErr);
+        va_val_t indicator(0.0, r0.size());
+        for (size_t i = 0; i < r0.size(); ++i)
+            if (r0[i] + r1[i] > 0.0) indicator[i] = (r0[i] - r1[i]) / (r0[i] + r1[i]);
+        return updateConvergence(v, scalarsStable, MaxErr, os, &indicator);
     }
-    catch (exception& e) { os << e.what(); }
+    catch (exception& e) { os << e.what(); throw; }
     return false;
+}
+
+void ColorFluid::calcWallGradientInverse()
+{
+    if (p.getWallGradient() != "renormalized") return;
+    const auto& i2f = g.LG.getI2fMap();
+    const auto& adj = g.LG.FG.getAdjI();
+    va_u8_t extended(g.LG.FG.N);
+    for (size_t i = 0; i < g.LG.N; ++i) extended[i2f[i]] = raw[i];
+    syncBorder(&extended, 0);
+    const size_t D = g.S.D;
+    for (size_t i = 0; i < g.LG.N; ++i) {
+        if (!ibI[i]) continue;
+        double augmented[3][6] = {};
+        for (size_t q = 1; q < g.S.Q; ++q) {
+            const auto type = p.getIVal(extended[adj[i2f[i]][q]]).Type;
+            if (type == IT::SD || type == IT::BB) continue;
+            for (size_t a = 0; a < D; ++a)
+                for (size_t b = 0; b < D; ++b)
+                    augmented[a][b] += wi[q] * g.S.Qi[q][a] * g.S.Qi[q][b];
+        }
+        for (size_t a = 0; a < D; ++a) augmented[a][D+a] = 1.0;
+        for (size_t col = 0; col < D; ++col) {
+            size_t pivot = col;
+            for (size_t row = col+1; row < D; ++row)
+                if (abs(augmented[row][col]) > abs(augmented[pivot][col])) pivot = row;
+            if (abs(augmented[pivot][col]) < 1e-12)
+                throw runtime_error("Rank-deficient fluid wall stencil; renormalized gradient is unsupported here.");
+            for (size_t k = 0; k < 2*D; ++k) swap(augmented[col][k],augmented[pivot][k]);
+            const double diagonal = augmented[col][col];
+            for (size_t k = 0; k < 2*D; ++k) augmented[col][k] /= diagonal;
+            for (size_t row = 0; row < D; ++row) {
+                if (row == col) continue;
+                const double scale = augmented[row][col];
+                for (size_t k = 0; k < 2*D; ++k) augmented[row][k] -= scale*augmented[col][k];
+            }
+        }
+        va_val_t inverse(0.0,D*D);
+        for (size_t a = 0; a < D; ++a)
+            for (size_t b = 0; b < D; ++b) inverse[a*D+b] = augmented[a][D+b];
+        wallGradientInv[ibI[i]] = inverse;
+    }
 }
 
 void ColorFluid::calcTibNorm()
@@ -649,6 +756,7 @@ va_val_t ColorFluid::getBi()
     else if (g.S.Q == 19)
         return va_val_t({b0, b1, b1, b1, b1, b1, b1,
                           b7, b7, b7, b7, b7, b7, b7, b7, b7, b7, b7, b7});
+    throw invalid_argument("No capillary perturbation weights for this lattice.");
 }
 
 } // LBM

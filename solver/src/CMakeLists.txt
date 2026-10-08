@@ -1,17 +1,12 @@
-#add libraries
-set(MODS algorithm file grid helper lbm parallel pipt)
-foreach(mod ${MODS})
-    aux_source_directory(${mod} mod_files)
-    add_library(${mod} ${mod_files})
-    unset(mod_files)
-endforeach(mod)
+foreach(module algorithm file grid helper lbm parallel pipt)
+    aux_source_directory("${module}" module_sources)
+    add_library(${module} STATIC ${module_sources})
+    unset(module_sources)
+endforeach()
 
-#linkage
-target_link_libraries(parallel ${MPI_CXX_LIBRARIES})
-
-target_link_libraries(grid helper)
-target_link_libraries(grid algorithm)
-target_link_libraries(file parallel)
-target_link_libraries(helper file)
-target_link_libraries(lbm grid file)
-target_link_libraries(pipt grid file)
+target_link_libraries(parallel PUBLIC MPI::MPI_CXX)
+target_link_libraries(grid PUBLIC helper algorithm)
+target_link_libraries(file PUBLIC parallel)
+target_link_libraries(helper PUBLIC file)
+target_link_libraries(lbm PUBLIC grid file)
+target_link_libraries(pipt PUBLIC grid file)
