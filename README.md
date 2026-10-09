@@ -138,6 +138,22 @@ draft and has not been submitted or accepted.
 - `curvatureStencil "gradient"` is an optional CSF discretization of the same
   continuum force; `"normal"` remains the default. The gradient form lowers
   neutral residual speed but worsens the tested bulk Laplace pressure error.
+- `phaseBoundary "flux"` selects a conservative relative-phase transfer at
+  flat D2Q9 walls; `"bounce"` remains the default. It restores the complete
+  neutral bulk phase recurrence and preserves pure-phase no-slip reflection.
+  It requires `wallRecoloring "legacy"`, equal reference densities, standard
+  weights, closed VD/GV flow and a supported reconstructed wall gradient.
+  Transport consistency alone does not improve nonneutral pressure accuracy.
+- `wallGradient "tangent"` preserves the central wall-tangent derivative;
+  `"halfway"` extrapolates the inward normal component to the physical wall;
+  `"ghost"` uses the published flat-wall virtual-color formula of Liu et al.
+  (2015), DOI 10.1103/PhysRevE.92.033306, without a second angle rotation.
+  These experimental controls require complete flat D2Q9 stencils and
+  nonsingular angles; halfway/ghost also require an interior fluid layer.
+  The ghost option retains LBFlow's other operators, so it is not the full
+  published model. Measured pressure improvement retains nonneutral flow
+  and two-step oscillations. Curved digital-rock walls and reservoirs are
+  unsupported for these options.
 - `reportDir 0` requests a prescribed run duration. Automatic convergence
   requires three stable velocity/color reports and applicable scalar diagnostics,
   including changes from the adjacent time step. Even reporting intervals

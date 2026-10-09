@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 
 from benchmarks import Study,geometry_fields,sha
+from capillary_response import bulk_pressure
 
 
 def measure(original,resumed):
@@ -27,7 +28,7 @@ def measure(original,resumed):
             a.append(amplitude);f.append(float(len(component)*amplitude**2/energy) if energy else 0.)
         amplitudes.append(a);fractions.append(f)
     pair=(v0+v1)/2
-    return dict(name=original['name'],parameters=original['parameters'],
+    result=dict(name=original['name'],parameters=original['parameters'],
                 raw_speed=float(np.linalg.norm(v0[fluid],axis=-1).max()),
                 adjacent_pair_average_speed=float(np.linalg.norm(pair[fluid],axis=-1).max()),
                 adjacent_velocity_rms=float(np.sqrt(np.mean((v1[fluid]-v0[fluid])**2))),
@@ -39,6 +40,15 @@ def measure(original,resumed):
                 solver_sha256=resumed['solver_sha256'],seed_solver_sha256=original['solver_sha256'],
                 checkpoint_sha256=resumed['checkpoint_sha256'],
                 scope='Adjacent-step averages and staggered projections are diagnostics; the raw solver fields are retained and not filtered.')
+    cfg=original['parameters']
+    if cfg.get('height') and cfg.get('sigma'):
+        pressures=[]
+        for rho,chi in [(rho0,chi0),(rho1,chi1),(rho2,chi2)]:
+            if cfg.get('axis')=='y':rho,chi=rho.transpose(0,2,1),chi.transpose(0,2,1)
+            pressures.append(bulk_pressure(rho,chi,cfg['height'],transverse_margin=cfg['height']//4)['pressure_jump'])
+        result['adjacent_pressure_jumps']=pressures
+        result['adjacent_pressure_coefficient_changes']=[(value-pressures[0])*cfg['height']/2/cfg['sigma'] for value in pressures[1:]]
+    return result
 
 
 def main():

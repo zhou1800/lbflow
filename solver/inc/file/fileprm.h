@@ -201,6 +201,7 @@ public:
     string getCapillaryModel() const;
     string getWallRecoloring() const;
     string getCurvatureStencil() const;
+    string getPhaseBoundary() const;
 
     /// \name Get functions for #grid mesh
     ///@{

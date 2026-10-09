@@ -98,6 +98,7 @@ def measure(result):
     return dict(name=result['name'],height=height,angle=angle,wall_gradient=p['wall_gradient'],
                 capillary_model=p.get('capillary_model','perturbation'),
                 wall_recoloring=p.get('wall_recoloring','legacy'),
+                phase_boundary=p.get('phase_boundary','bounce'),
                 curvature_stencil=p.get('curvature_stencil','normal'),
                 beta=p['beta'],sigma=sigma,steps=p['steps'],ranks=result['ranks'],
                 reference_pressure_jump=reference,reference_pressure_coefficient=math.cos(math.radians(angle)),
@@ -115,7 +116,8 @@ def main():
     parser.add_argument('--root',required=True)
     parser.add_argument('--heights',nargs='+',type=int,default=[16,32,48])
     parser.add_argument('--angles',nargs='+',type=float,default=[60,90,120])
-    parser.add_argument('--walls',nargs='+',choices=['legacy','renormalized','tanh'],default=['legacy','renormalized'])
+    parser.add_argument('--walls',nargs='+',choices=['legacy','renormalized','tanh','tangent','halfway','ghost'],default=['legacy','renormalized'])
+    parser.add_argument('--phase-boundaries',nargs='+',choices=['bounce','flux'],default=['bounce'])
     parser.add_argument('--beta',type=float,default=.7)
     parser.add_argument('--capillary-models',nargs='+',choices=['perturbation','csf'],default=['perturbation'])
     parser.add_argument('--jobs',type=int,default=2)
@@ -123,8 +125,15 @@ def main():
     args=parser.parse_args()
     if any(h<16 or h%16 for h in args.heights): parser.error('Heights must be positive multiples of 16')
     study=Study(args.solver,args.root)
+    configs=[]
+    for cfg in cases(args.heights,args.angles,args.walls,args.beta,args.capillary_models):
+        for boundary in args.phase_boundaries:
+            item=dict(cfg,phase_boundary=boundary)
+            if boundary!='bounce':item['name']+='-'+boundary
+            configs.append(item)
     with ThreadPoolExecutor(max_workers=args.jobs) as pool:
-        receipts=list(pool.map(lambda p:study.run(p,args.ranks),cases(args.heights,args.angles,args.walls,args.beta,args.capillary_models)))
+        receipts=list(pool.map(lambda p:study.run(p,args.ranks),configs))
+    (study.root/'receipts.json').write_text(json.dumps(receipts,indent=2)+'\n')
     measurements=[measure(r) for r in receipts]
     summary=dict(protocol='Closed periodic slit with two menisci, no body force, halfway walls and contact angle through phase 1.',
                  scope='Direct finite-time pressure and field measurements; static Young-Laplace controls. No entry-pressure, hysteresis or curved-wall accuracy claim.',

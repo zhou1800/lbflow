@@ -32,10 +32,19 @@ class ColorFluid : public Simulator
 {
     friend class NumericalAudit; // Inspect actual lattice operators in the verification executable.
 private:
-    const bool renormalizedWall, tanhWall, tangentialRecoloring;
+    const bool renormalizedWall, tanhWall, tangentialRecoloring, tangentWall, phaseFlux, halfwayWall, ghostWall;
     const bool gradientCurvature;
     va_idx_t wallTangent;
     double wallRecolorFactor;
+    vava_val_t wallOutgoing0, wallOutgoingTotal;
+    va_val_t wallFraction;
+    vava_idx_t wallMirror;
+    va_idx_t wallInterior;
+    vava_val_t wallBulkGradient;
+    va_val_t wallGhostColor;
+    void prepareWallGradient(size_t t);
+    void prepareWallPhaseFlux(size_t t);
+    void applyWallPhaseFlux();
     void calcWallRecoloring();
     vava_val_t capillaryForce, capillaryGradient, capillaryField;
     va_val_t colorGradient(size_t i, double& norm) const;

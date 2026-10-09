@@ -122,8 +122,9 @@ The three new figures can also be rebuilt from included data alone:
 python3 scripts/make_porous_figures.py --paper results/regenerated-cpc
 ```
 
-Together with `make_figures.py` and `make_transport_figure.py`, this regenerates
-all eight manuscript figures.
+Together with `make_figures.py`, `make_transport_figure.py`,
+`make_capillary_figure.py`, `make_wall_figure.py` and `make_wall_flux_figure.py`,
+this regenerates all eleven manuscript figures.
 Text numbers and the timing table are generated from measured JSON. The raw
 VTI and populations are regenerated rather than bundled. Rock results are
 numerical crosschecks and transient observations, not an experimental
@@ -191,6 +192,27 @@ The continued wall study adds `paper/data/wall-consistency.json` and
 neutral fixed points, rotation/parity and adjacent-step controls, matched
 bulk drops and retained nonneutral failures. The neutral correction is
 experimental; nonneutral and digital-rock wall accuracy are not established.
+
+The subsequent `paper/data/wall-flux.json` separates complete neutral phase
+transport from physical contact-angle location. Conservative phase transfer
+removes resolved neutral-plane flow without filtering. Tangent, halfway
+normal and published scalar ghost controls retain nonneutral failures,
+bulk/contour sensitivity and adjacent-step oscillations. Closed flat D2Q9
+pressure improvement does not validate reservoirs or curved rock wetting.
+
+```sh
+python3 scripts/phase_wall_flux.py --output results/phase-wall-flux.json
+python3 scripts/capillary_response.py --solver build/bin/LBFlow --root results/wall-flux --heights 16 32 48 --angles 60 --walls renormalized halfway ghost --capillary-models csf --phase-boundaries bounce flux
+python3 scripts/continue_menisci.py --solver build/bin/LBFlow --initial-roots results/wall-flux --root results/wall-flux-hold --walls renormalized halfway ghost --angles 60 --factor 4
+python3 scripts/make_wall_flux_figure.py --data research/drlab-publication/paper/data/wall-flux.json --paper results/regenerated-paper
+```
+
+Use `wall_flux_checks.py --solver build/bin/LBFlow --audit-driver
+build/bin/NumericalAudit --root results/contracts` for independent transient,
+virtual-gradient, pure-phase, MPI and restart checks. Six CTest groups include
+this suite. The two new source-kernel manifests pin the frozen wall-flux/
+location and ghost-comparison executables to their exact pre-patch revision;
+the source patches must be applied to that revision in a separate copy.
 
 ```sh
 python3 scripts/phase_recurrence.py --output results/phase-recurrence.json

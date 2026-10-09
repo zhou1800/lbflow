@@ -22,9 +22,20 @@ ColorFluid::ColorFluid(const FilePrm &prm)
     , renormalizedWall(p.getWallGradient()=="renormalized")
     , tanhWall(p.getWallGradient()=="tanh")
     , tangentialRecoloring(p.getWallRecoloring()=="tangential")
+    , tangentWall(p.getWallGradient()=="tangent")
+    , phaseFlux(p.getPhaseBoundary()=="flux")
+    , halfwayWall(p.getWallGradient()=="halfway")
+    , ghostWall(p.getWallGradient()=="ghost")
     , gradientCurvature(p.getCurvatureStencil()=="gradient")
-    , wallTangent(size_t(0),tangentialRecoloring ? g.LG.N : 0)
+    , wallTangent(size_t(0),(tangentialRecoloring || tangentWall || phaseFlux || halfwayWall || ghostWall) ? g.LG.N : 0)
     , wallRecolorFactor(1.0)
+    , wallOutgoing0(phaseFlux ? g.S.Q : 0)
+    , wallOutgoingTotal(wallOutgoing0.size())
+    , wallFraction(0.0,phaseFlux ? g.LG.FG.N : 0)
+    , wallMirror(phaseFlux ? g.S.D : 0)
+    , wallInterior(size_t(0),(halfwayWall || ghostWall) ? g.LG.N : 0)
+    , wallBulkGradient((halfwayWall || ghostWall) ? g.S.D : 0)
+    , wallGhostColor(0.0,ghostWall ? g.LG.FG.N : 0)
     , capillaryForce(p.getCapillaryModel()=="csf" ? g.S.D : 0)
     , capillaryGradient(capillaryForce.size())
     , capillaryField(capillaryForce.size())
@@ -60,6 +71,25 @@ ColorFluid::ColorFluid(const FilePrm &prm)
     calcTibNorm();
     calcWallGradientInverse();
     calcWallRecoloring();
+    for (size_t d=0;d<wallBulkGradient.size();++d)
+        wallBulkGradient[d]=va_val_t(0.0,g.LG.FG.N);
+    if (phaseFlux) {
+        for (size_t axis=0;axis<g.S.D;++axis) {
+            wallMirror[axis]=va_idx_t(size_t(0),g.S.Q);
+            for (size_t q=0;q<g.S.Q;++q) {
+                // Qi is signed; compare components rather than negating an index array.
+                for (size_t r=0;r<g.S.Q;++r) {
+                    bool match=true;
+                    for (size_t d=0;d<g.S.D;++d)
+                        match=match && g.S.Qi[r][d]==(d==axis ? -g.S.Qi[q][d] : g.S.Qi[q][d]);
+                    if (match) wallMirror[axis][q]=r;
+                }
+            }
+        }
+        for (size_t q=1;q<g.S.Q;++q)
+            if (g.S.Qnorm[q]>1.0)
+                wallOutgoing0[q]=wallOutgoingTotal[q]=va_val_t(0.0,g.LG.FG.N);
+    }
 
     output.AddScalar("r0", &dens[0]);
     output.AddScalar("r1", &dens[1]);
@@ -104,12 +134,14 @@ void ColorFluid::Run(std::ostream &logProc)
         bool converged = false;
         double begin = MPI_Wtime();
         // 1. Streaming.
+        if (phaseFlux) prepareWallPhaseFlux(t);
         streaming(&(f[0]), &(fOld[0]),t);
         streaming(&(f[1]), &(fOld[1]),t);
 
         // 2. Apply doundary condition.
         bounceBack(&f[0], fOld[0], ibS);
         bounceBack(&f[1], fOld[1], ibS);
+        if (phaseFlux) applyWallPhaseFlux();
 
         // Halfpass film boundary condition.
         bounceBack(&f[0], fOld[0], ibF[1]);
@@ -240,6 +272,7 @@ void ColorFluid::calcMacroVar(size_t t)
         }
 
     syncBorder(&densN, t);
+    if (halfwayWall || ghostWall) prepareWallGradient(t);
 }
 
 void ColorFluid::collision()
@@ -412,8 +445,15 @@ va_val_t ColorFluid::colorGradient(size_t i, double& norm) const
             for (size_t q : g.S.QrelD[d]){
                 double densN0 = densN[i2f[i]];
                 double densNQ = densN[adjI[i2f[i]][q]];
-                if (densNQ == SOLID_DENS_N)
-                    continue;   // skip solid boundary.
+                if (densNQ == SOLID_DENS_N) {
+                    if (!ghostWall) continue;
+                    const size_t tangent=wallTangent[i];
+                    const size_t axis=g.S.Qi[tangent][0]==0 ? 1 : 0;
+                    const int offset=g.S.Qi[q][axis];
+                    const size_t source=offset==0 ? i2f[i] :
+                        adjI[i2f[i]][offset>0 ? tangent : g.S.Qop[tangent]];
+                    densNQ=wallGhostColor[source];
+                }
                 if (g.S.Qi[q][d] == 1)
                     gDens[d] += wi[q] * (densNQ - densN0);
                 else// if (g.S.Qi[q][d] == -1)
@@ -425,6 +465,9 @@ va_val_t ColorFluid::colorGradient(size_t i, double& norm) const
                     begin(gDens), end(gDens), begin(gDens),
                                static_cast<double>(0.0)));
 
+        // Published virtual-color continuation imposes the angle at the wall.
+        // A second rotation would instead impose it at the first fluid node.
+        if (ghostWall) return gDens;
         double cAngle = ibCosCA[ibI[i]];
         double sAngle = ibSinCA[ibI[i]];
         if (renormalizedWall) {
@@ -463,13 +506,32 @@ va_val_t ColorFluid::colorGradient(size_t i, double& norm) const
             norm = sqrt(inner_product(begin(gDens), end(gDens),
                                        begin(gDens), 0.0));
         }
-        if (tangentialRecoloring && abs(cAngle)<1e-14) {
+        if ((tangentialRecoloring || phaseFlux) && abs(cAngle)<1e-14) {
             // A nonlinear tangent profile creates a false normal derivative
             // in a clipped stencil, including at zero-tangent extrema.
             // Preserve the bulk tangent magnitude and its active mask.
             for (size_t d=0;d<g.S.D;++d)
                 if (g.S.Qi[wallTangent[i]][d]==0) gDens[d]=0.0;
             norm=sqrt(inner_product(begin(gDens),end(gDens),begin(gDens),0.0));
+        }
+        if (tangentWall || halfwayWall) {
+            const size_t q=wallTangent[i];
+            double tangent=.5*(densN[adjI[i2f[i]][q]]-densN[adjI[i2f[i]][g.S.Qop[q]]]);
+            if (halfwayWall) {
+                const size_t axis=g.S.Qi[q][0]==0 ? 0 : 1;
+                double neighborNorm2=0.0;
+                for (size_t d=0;d<g.S.D;++d)
+                    neighborNorm2+=wallBulkGradient[d][wallInterior[i]]*wallBulkGradient[d][wallInterior[i]];
+                const double sign=ibNorm[ibI[i]][axis]>0.0 ? 1.0 : -1.0;
+                const double neighborCos=neighborNorm2>1e-18 ?
+                    sign*wallBulkGradient[axis][wallInterior[i]]/sqrt(neighborNorm2) : cAngle;
+                cAngle=(2.0*cAngle+neighborCos)/3.0;
+                sAngle=sqrt(max(0.0,1.0-cAngle*cAngle));
+                if (sAngle<1e-8) throw runtime_error("Singular reconstructed halfway contact angle.");
+            }
+            for (size_t d=0;d<g.S.D;++d)
+                gDens[d]=g.S.Qi[q][d] ? tangent : 0.0;
+            norm=abs(tangent)/sAngle;
         }
         if (g.S.D == 3) {
             va_val_t gDensNorm = MatMulMat(TibNorm[ibI[i]], gDens,
@@ -883,31 +945,125 @@ void ColorFluid::calcWallGradientInverse()
 
 void ColorFluid::calcWallRecoloring()
 {
-    if (!tangentialRecoloring) return;
+    if (!tangentialRecoloring && !tangentWall && !phaseFlux && !halfwayWall && !ghostWall) return;
     const auto& i2f=g.LG.getI2fMap();
     const auto& adjacent=g.LG.FG.getAdjI();
     va_u8_t extended(g.LG.FG.N);
     for (size_t i=0; i<g.LG.N; ++i) extended[i2f[i]]=raw[i];
     syncBorder(&extended,0);
+    va_u8_t extendedWall((halfwayWall || ghostWall) ? g.LG.FG.N : 0);
+    if (halfwayWall || ghostWall) {
+        for (size_t i=0;i<g.LG.N;++i) extendedWall[i2f[i]]=ibI[i] ? 1 : 0;
+        syncBorder(&extendedWall,0);
+    }
     const double a=ai[0][1],b=ai[0][5];
     wallRecolorFactor=((a+b)*(a+sqrt(2.0)*b)/(a+2*b)-b/sqrt(2.0))/a;
     for (size_t i=0; i<g.LG.N; ++i) {
         if (!ibI[i]) continue;
+        if ((tangentWall || halfwayWall || ghostWall) && abs(ibSinCA[ibI[i]])<1e-8)
+            throw runtime_error("Tangent wall reconstruction requires a nonsingular contact angle.");
         const auto& normal=ibNorm[ibI[i]];
         size_t axis;
         if (abs(normal[0])>0 && normal[1]==0) axis=0;
         else if (abs(normal[1])>0 && normal[0]==0) axis=1;
-        else throw runtime_error("Tangential wall recoloring requires a flat Cartesian wall; corners and staircase stencils are unsupported.");
+        else throw runtime_error("Wall phase/gradient correction requires a flat Cartesian wall; corners and staircase stencils are unsupported.");
         const double sign=normal[axis]>0 ? 1.0 : -1.0;
         for (size_t q=1; q<g.S.Q; ++q) {
             const auto type=p.getIVal(extended[adjacent[i2f[i]][q]]).Type;
             const bool solid=type==IT::SD || type==IT::BB;
             if (solid!=(g.S.Qi[q][axis]*sign<0))
-                throw runtime_error("Tangential wall recoloring requires a complete flat-wall stencil.");
+                throw runtime_error("Wall phase/gradient correction requires a complete flat-wall stencil.");
             if (g.S.Qnorm[q]==1.0 && g.S.Qi[q][axis]==0 &&
                 g.S.Qi[q][1-axis]==1) wallTangent[i]=q;
+            if ((halfwayWall || ghostWall) && g.S.Qnorm[q]==1.0 && g.S.Qi[q][axis]==sign) {
+                wallInterior[i]=adjacent[i2f[i]][q];
+                if (extendedWall[wallInterior[i]])
+                    throw runtime_error("Halfway wall gradient requires an interior fluid layer.");
+            }
         }
         if (!wallTangent[i]) throw runtime_error("No tangential coordinate link at wall.");
+    }
+}
+
+void ColorFluid::prepareWallGradient(size_t t)
+{
+    const auto& i2f=g.LG.getI2fMap();
+    const auto& adjacent=g.LG.FG.getAdjI();
+    for (size_t idx : p.getIdx({IT::VD,IT::GV}))
+        for (size_t i : gIdx[idx]) {
+            if (ibI[i] && !ghostWall) continue;
+            for (size_t d=0;d<g.S.D;++d) {
+                double value=0.0;
+                if (ghostWall) {
+                    if (!ibI[i] || g.S.Qi[wallTangent[i]][d]!=0)
+                        for (size_t q=1;q<g.S.Q;++q)
+                            if (g.S.Qnorm[q]==1.0 && g.S.Qi[q][d]==1)
+                                value=.5*(densN[adjacent[i2f[i]][q]]-densN[adjacent[i2f[i]][g.S.Qop[q]]]);
+                    wallBulkGradient[d][i2f[i]]=value;
+                    continue;
+                }
+                for (size_t q : g.S.QrelD[d])
+                    value+=g.S.Qi[q][d]*wi[q]*densN[adjacent[i2f[i]][q]];
+                wallBulkGradient[d][i2f[i]]=3.0*value;
+            }
+        }
+    for (size_t d=0;d<g.S.D;++d) syncBorder(&wallBulkGradient[d],t);
+    if (ghostWall) {
+        for (size_t i=0;i<g.LG.N;++i) {
+            if (!ibI[i]) continue;
+            const size_t tangentAxis=g.S.Qi[wallTangent[i]][0]==0 ? 1 : 0;
+            const double tangent=1.5*wallBulkGradient[tangentAxis][i2f[i]]
+                -.5*wallBulkGradient[tangentAxis][wallInterior[i]];
+            wallGhostColor[i2f[i]]=densN[i2f[i]]
+                -ibCosCA[ibI[i]]/ibSinCA[ibI[i]]*abs(tangent);
+        }
+        syncBorder(&wallGhostColor,t);
+    }
+}
+
+void ColorFluid::prepareWallPhaseFlux(size_t t)
+{
+    const auto& i2f=g.LG.getI2fMap();
+    for (size_t idx : p.getIdx({IT::VD,IT::GV}))
+        for (size_t i : gIdx[idx]) {
+            double rho0=0.0,rho1=0.0;
+            for (size_t q=0;q<g.S.Q;++q) {rho0+=f[0][q][i];rho1+=f[1][q][i];}
+            if (!isfinite(rho0+rho1) || rho0+rho1<=0.0)
+                throw runtime_error("Invalid outgoing density in wall phase flux.");
+            wallFraction[i2f[i]]=rho0/(rho0+rho1);
+        }
+    syncBorder(&wallFraction,t);
+    for (size_t q=1;q<g.S.Q;++q) {
+        if (g.S.Qnorm[q]<=1.0) continue;
+        for (size_t i=0;i<g.LG.N;++i) {
+            wallOutgoing0[q][i2f[i]]=f[0][q][i];
+            wallOutgoingTotal[q][i2f[i]]=f[0][q][i]+f[1][q][i];
+        }
+        syncBorder(&wallOutgoing0[q],t);
+        syncBorder(&wallOutgoingTotal[q],t);
+    }
+}
+
+void ColorFluid::applyWallPhaseFlux()
+{
+    const auto& i2f=g.LG.getI2fMap();
+    const auto& adj=g.LG.FG.getAdjI();
+    for (size_t i=0;i<g.LG.N;++i) {
+        if (!ibI[i]) continue;
+        const size_t tangent=wallTangent[i];
+        const size_t normalAxis=g.S.Qi[tangent][0]==0 ? 0 : 1;
+        for (size_t q=1;q<g.S.Q;++q) {
+            if (g.S.Qnorm[q]<=1.0 || g.S.Qi[q][normalAxis]*ibNorm[ibI[i]][normalAxis]<=0.0) continue;
+            const size_t tangentNeighbor=g.S.Qi[q][1-normalAxis]>0 ? g.S.Qop[tangent] : tangent;
+            const size_t j=adj[i2f[i]][tangentNeighbor],opposite=g.S.Qop[q];
+            const size_t mirror=wallMirror[normalAxis][q];
+            const double fraction=.5*(wallFraction[i2f[i]]+wallFraction[j]);
+            const double transfer=wallOutgoing0[mirror][j]-wallOutgoing0[opposite][i2f[i]]
+                -fraction*(wallOutgoingTotal[mirror][j]-wallOutgoingTotal[opposite][i2f[i]]);
+            const double total=f[0][q][i]+f[1][q][i];
+            f[0][q][i]+=transfer;
+            f[1][q][i]=total-f[0][q][i];
+        }
     }
 }
 

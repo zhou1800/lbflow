@@ -12,6 +12,7 @@
 \emergencystretch=3em
 \newcommand{\vct}[1]{\bm{#1}}
 \input{data/cpc-numbers.tex}
+\input{data/wall-flux-numbers.tex}
 \begin{document}
 \begin{frontmatter}
 \title{Finite-interface transport and wetting effects in pore-scale lattice Boltzmann simulations with LBFlow}
@@ -39,7 +40,12 @@ reduce parasitic flow. Slit and square-tube displacement controls connect
 these concerns to capillary entry. A discrete phase recurrence identifies
 a neutral-wall segregation imbalance and gives a parameter-free correction
 that preserves a bulk planar fixed point. Adjacent-step checks distinguish
-remaining period-two velocity from stationary flow. On a public Bentheimer specimen,
+remaining period-two velocity from stationary flow. A conservative wall
+phase transfer restores the complete neutral transient and avoids resolved
+flow in that control. Separating phase transfer from contact-angle location,
+and comparing a published ghost-color formula, reduces the tested
+60-degree pressure discrepancies while retaining nonneutral parasitic flow.
+On a public Bentheimer specimen,
 independent single-phase LBPM comparisons differ by at most
 \RockReferenceDifference\ percent, while voxel subdivision changes
 permeability by \RefinedKChange\ percent. Closed two-phase rock calculations
@@ -120,6 +126,13 @@ precedents \cite{ginzburg2015}, and color-gradient wetting has been designed
 to eliminate interfacial force at a contact line \cite{yu2018}.
 Our wall correction is consequently assessed as a specific discrete
 fixed-point condition, rather than a new boundary-layer concept.
+Color-conserving wetting closures also predate this work
+\cite{hollis2011,liu2015,yu2018}. We compare the published flat-wall
+ghost-color formula independently of phase reflection. Complex and
+three-dimensional curved wetting, including dynamic and trapping tests,
+already have dedicated color-gradient developments
+\cite{wang2024complex,wang2024curved}. The present flat-wall controls do
+not reproduce their full algorithms or establish comparable scope.
 Recent phase-field calculations also compare discretizations of
 continuously equivalent surface forces \cite{sugimoto2026}; rewriting a
 curvature expression does not establish a new force theory.
@@ -694,6 +707,92 @@ no filtering is applied to solver fields. Corrected neutral results use
 the reconstructed tangent magnitude and normal-curvature CSF.}
 \label{fig:wallbalance}\end{figure}
 
+\subsection{Wall transport and physical contact-angle location}
+Matching a stationary segregation ratio does not match transient transport.
+For two adjacent wall fluid nodes $L,R$, let $p,m$ denote the outgoing
+diagonals directed into the solid with opposite tangent components.
+Writing $f_T=f_0+f_1$ and $\varphi=\sum_i f_{0i}/\sum_i f_{Ti}$, define
+\begin{equation}\label{eq:wallphaseflux}
+ J_{LR}=f_{0p}(L)-f_{0m}(R)
+       -\frac{\varphi_L+\varphi_R}{2}[f_{Tp}(L)-f_{Tm}(R)].
+\end{equation}
+Add $J_{LR}$ to the corresponding incoming diagonal at $R$ and subtract
+it from its partner at $L$ after local bounce-back. The second phase is
+complementary to each original bounce-back total. Face transfers conserve
+each component globally and leave total-fluid reflection unchanged.
+Pure phases give $J_{LR}=0$, including nonuniform total populations.
+The face fraction is an explicit numerical closure, not a thermodynamic
+or general moving-contact-line law.
+
+At unit density and rest, the total-population difference vanishes and
+the rule reduces to established nonlocal specular-forward scalar transport
+\cite{ginzburg2015}. The additional neutral phase update is
+$b\Delta_x\varphi+\beta b(J_{j-1}-J_{j+1})/\sqrt{2}$, restoring both
+$A$ and $B$ in Eq.~\eqref{eq:phaserecurrence}. Independently generated
+scalar trajectories match the bulk recurrence throughout relaxation;
+six full-solver early trajectories match it within \FluxTransientBound.
+Nonzero-sigma neutral runs retain unfiltered maximum speed below
+\FluxNeutralSpeedBound, including SRT/MRT and odd periodic lengths.
+This avoids excitation of the observed plane-control oscillation; the
+undamped lattice eigenmode still exists and no damping was added.
+
+Nonneutral pressure requires a separate location control. The original
+rotation specifies the normal at the first fluid center, whereas the
+physical wall lies half a lattice spacing away. For a sharp circular
+meniscus, imposing the same angle on the first/last centers can replace
+the physical spacing $H$ by $H-1$, giving the geometric estimate
+$1/(H-1)$ for relative pressure bias. This is a mechanism to test, not
+a fitted effective width. A halfway control instead sets the first-row
+inward-normal cosine to $c_1=(2\cos\theta+c_2)/3$, so
+$1.5c_1-0.5c_2=\cos\theta$, and preserves the central tangent derivative.
+
+A second control uses the published scalar ghost continuation
+\cite{liu2015}, with the sign converted to this code's angle convention:
+$\chi_g=\chi_1-\cot\theta|1.5g_{t1}-0.5g_{t2}|$.
+The full color stencil then includes the virtual values and receives no
+subsequent center-angle rotation. This reproduces that ghost formula under
+LBFlow's remaining operators; its segregation weights and MRT spectrum
+are not the complete published model. An independent outgoing-state
+gradient calculation verifies the implementation.
+
+All three-width 60-degree comparisons in Fig.~\ref{fig:wallflux} use four
+initial durations, fixed $\beta=0.7$, common input surface tension and the
+same physical wall spacing. With ordinary rotation, phase transfer alone
+worsens pressure. With ghost reconstruction, transferred-phase discrepancies
+are \FluxGhostPressureSixteen\%, \FluxGhostPressureThirtyTwo\% and
+\FluxGhostPressureFortyEight\% at $H=16,32,48$. Yet nonneutral currents remain,
+and the H16 controls (seven angles at $\beta=0.7$, three beta values at
+60/90/120 degrees) do not show uniform improvement
+in pressure, shape and velocity. A small H16 halfway/bounce-back pressure
+error also fails to remain small under refinement; it is not a general
+accuracy result. Circle-exclusion and bulk-sampling sensitivity are retained.
+For ghost/transfer, the H16 circle-extrapolated angles span 57.49--59.14
+degrees over the specified exclusions, versus 59.60--59.61 degrees at H48;
+they are not direct contact-angle measurements at the wall.
+Adjacent fields still show nonneutral two-step oscillations: in the H16
+ghost/transfer control, one-step maximum color change is approximately
+$6.65\times10^{-7}$ despite much smaller even-time differences.
+The tested pressure-coefficient change over adjacent steps remains below
+$6\times10^{-9}$. Stable pressure therefore does not establish a stationary
+phase/velocity field, and temporal averaging does not eliminate the
+nonneutral circulation. Relative component/total mass drift over the
+recorded trajectories remains below $10^{-11}$.
+These controls distinguish transport and location defects without
+establishing dynamic or curved-wall wetting accuracy.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.98\linewidth]{wall-flux.pdf}
+\caption{Separate wall-transport and location controls. (a) Independent
+phase-only transient discrepancy from the bulk recurrence. (b) Raw neutral
+CSF velocity with the same ghost gradient and different phase reflection.
+(c) Signed 60-degree pressure discrepancies after four initial durations;
+the grey curve is the first-center geometric estimate, not a fit.
+(d) Corresponding nonneutral residual capillary numbers.
+Input surface tension is common and has no fitted multiplier. The
+phase-only plot floors exact zeros at $10^{-17}$ for display. Neutral
+equilibrium preservation does not imply negligible nonneutral flow.}
+\label{fig:wallflux}\end{figure}
+
 \section{Pore-scale application and computational evidence}
 \subsection{Analytic pore flux and capillary entry}
 Two parallel, isolated slit pores have widths $H_0=8s$ and $H_1=16s$,
@@ -845,7 +944,10 @@ together. The experimental CSF branch improves residual flow in its measured
 scope but retains pressure bias and wall-color distortion before the
 phase-boundary correction. The derived neutral fixed point removes that
 phase defect in its tested geometry, while revealing period-two velocity
-and failing to establish nonneutral accuracy. This established
+and failing to establish nonneutral accuracy. Complete-transient phase
+reflection avoids that plane-control excitation; separating the contact-angle
+location further improves measured slit pressure, while nonneutral
+currents and contour sensitivity remain. This established
 force formulation is not evidence for a new bulk theory.
 
 Extending these findings to capillary trapping requires a different test.
@@ -889,7 +991,10 @@ specific issue; measured contact-angle improvement does not establish
 uniformly improved parasitic flow or dynamic capillary response. The
 neutral-wall phase recurrence supplies a parameter-free fixed-point
 correction; adjacent-step tests keep undamped lattice modes separate from
-stationary flow. Neither result supplies a general contact-line law. The
+stationary flow. Conservative phase transfer additionally restores the
+complete neutral recurrence. A physical-wall location and published
+ghost-color comparison show that this transport condition alone does not
+establish nonneutral pressure accuracy. None supplies a general contact-line law. The
 public-rock application adds an independently checked geometric flow
 baseline and exposes inadequate interface separation and continued
 two-phase evolution. It supports neither a steady relative-permeability

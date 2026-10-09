@@ -17,6 +17,8 @@ def main():
     parser.add_argument('--heights',nargs='+',type=int,default=[16,32,48])
     parser.add_argument('--angles',nargs='+',type=float,default=[60])
     parser.add_argument('--walls',nargs='+',default=['renormalized'])
+    parser.add_argument('--betas',nargs='+',type=float)
+    parser.add_argument('--phase-boundaries',nargs='+',choices=['bounce','flux'],default=['bounce','flux'])
     parser.add_argument('--factor',type=int,default=2)
     parser.add_argument('--jobs',type=int,default=2)
     args=parser.parse_args()
@@ -26,10 +28,15 @@ def main():
     for root in args.initial_roots:
         for path in sorted((Path(root)/'results').glob('*.json')):
             receipt=json.loads(path.read_text())
+            if 'parameters' not in receipt:continue  # Separate measurement JSON is not a run receipt.
             p=receipt['parameters']
             if p.get('height') not in args.heights or p.get('angle') not in args.angles or p.get('wall_gradient') not in args.walls:
                 continue
-            identity=(p['height'],p['angle'],p['wall_gradient'],p.get('capillary_model','perturbation'))
+            if args.betas is not None and p['beta'] not in args.betas:continue
+            if p.get('phase_boundary','bounce') not in args.phase_boundaries:continue
+            identity=(p['height'],p['angle'],p['wall_gradient'],p.get('capillary_model','perturbation'),
+                      p['beta'],p.get('phase_boundary','bounce'),p.get('wall_recoloring','legacy'),
+                      p.get('curvature_stencil','normal'),p['eq'],tuple(p['tau']),tuple(p['size']),p['sigma'])
             if identity in identities:raise ValueError('Duplicate seed configuration')
             if receipt['exit']!=0 or not receipt['finished']:raise ValueError('Incomplete seed')
             identities.add(identity)

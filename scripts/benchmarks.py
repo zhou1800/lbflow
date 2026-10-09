@@ -90,6 +90,8 @@ class Study:
             params['wallRecoloring']=f'"{s["wall_recoloring"]}"'
         if 'curvature_stencil' in s:
             params['curvatureStencil']=f'"{s["curvature_stencil"]}"'
+        if 'phase_boundary' in s:
+            params['phaseBoundary']=f'"{s["phase_boundary"]}"'
         params.update(s.get('overrides',{}))
         text = '\n'.join(f'{key} {val};' for key,val in params.items())
         text += '\n'+'\n'.join(s['indices'])+'\n'

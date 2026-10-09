@@ -273,3 +273,97 @@ checkerboard seed cannot falsely stop under even reports in SCSP and color,
 SRT and MRT, while stationary controls still stop. This changes early-stop
 decisions; fixed-duration collision, streaming and force arithmetic remain
 unchanged.
+
+### Conservative Wall Phase Flux
+
+The next stage must distinguish a stationary-profile correction from a
+transport boundary condition. Independently compare bounce-back with the
+established nonlocal specular-forward scalar reflection (Ginzburg et al.,
+2015). In a unit-density, zero-velocity neutral plane, the latter restores
+the complete bulk tangential recurrence, not only its stationary ratio.
+
+An optional `phaseBoundary "flux"` redistributes phase populations between
+neighboring flat-wall fluid nodes. For a face joining wall nodes L and R,
+let p/m be outgoing diagonal links with positive/negative tangent and normal
+directed into the solid. Use
+`J = f0_p(L)-f0_m(R) - [(phi(L)+phi(R))/2]*(fT_p(L)-fT_m(R))`.
+Add J to the incoming diagonal at R and subtract J from its partner at L.
+The second phase remains complementary to the original bounce-back total
+population. Each face transfers zero net component mass; the total fluid
+keeps its no-slip reflection. Pure phases produce J=0 even with nonuniform
+total populations. At rest with constant total weights this is exactly
+specular-forward scalar transport. The arithmetic face fraction is an
+explicit numerical closure, not a derived general contact-line law.
+
+Prepare outgoing phase/total population halos and their phase fraction
+before streaming, including the rest population. This avoids relying on
+the streaming buffer's stale rest direction or an uninitialized restart
+macrostate. Initially support only closed equal-reference-density,
+standard-weight, unit-speed D2Q9 on complete Cartesian flat-wall stencils.
+Require `wallRecoloring "legacy"` so the flux correction does not also apply
+the older multiplier. The neutral projection retains the true tangent
+mask. Reject corners, staircase walls, selective films and reservoirs.
+
+Also compare the established geometric tangent-based wall reconstruction
+through `wallGradient "tangent"`: retain the central tangent derivative and
+set the inward-normal derivative to `abs(g_t)*cot(theta)`. This differs from
+rotating the full clipped magnitude. Flat D2Q9 stencils and nonsingular
+angles are required; neither reconstruction is claimed as new. Related
+color-conserving wetting closures of Hollis et al. (2011), Liu et al. (2015)
+and Yu et al. (2018) require direct comparison before novelty claims.
+
+Acceptance: independent face conservation and pure-phase tests; identical
+one-dimensional neutral transient recurrence; full-solver zero/nonzero-sigma
+neutral starts; signed nonneutral slit pressures and longer holds; actual
+adjacent fields, component mass, both collision operators, rotation,
+MPI/restart and unchanged defaults. Promote a general wetting claim only
+if pressure, angle and velocity improve together across controlled widths.
+Preserve failures. Dynamic reservoir/throat tests depend on these results.
+
+### Contact-angle Location Control
+
+The actual bounce-back wall is halfway between fluid and solid nodes, while
+the current rotation imposes the desired normal at the first fluid center.
+For a sharp circular meniscus this can replace H by H-1 and cause a leading
+pressure shift of 1/(H-1); this is a testable geometric hypothesis, not a
+surface-tension adjustment or an established explanation of every error.
+
+Compare `wallGradient "halfway"` on flat D2Q9 walls. Extrapolate the unit
+normal to the physical wall: `n_w=1.5*n_1-0.5*n_2` in its inward-normal
+component. Set `c_1=(2*cos(theta)+c_2)/3`, use
+`s_1=sqrt(1-c_1*c_1)` and preserve the first-row central tangent gradient
+through `|g_1|=|g_t1|/s_1`. Obtain c_2 from the unprojected interior color
+gradient. Where that interior gradient is below the established cutoff,
+continue the target normal explicitly; reject singular reconstructed angles.
+An interior fluid layer is required. Exchange the prepared bulk gradients
+so a neighbor across an MPI boundary does not need a second halo layer.
+
+This is a standard boundary-location/extrapolation control, related to the
+halfway ghost treatments in existing geometric wetting work. It is not an
+exact implementation of Liu et al. (2015). Check pressures, shape, actual
+angle at the wall, neutral equilibrium, phase mass and MPI/restart against
+the same physical spacing H. Do not fit an effective width to the results.
+
+### Published Ghost-gradient Comparison
+
+Implement `wallGradient "ghost"` as a direct comparison with the flat-wall
+color continuation in Liu et al. (2015), equations 24--25. With this code's
+phase/angle convention, set the virtual solid-node color to
+`chi_ghost=chi_1-cot(theta)*abs(1.5*g_t1-0.5*g_t2)`.
+Each row's tangent derivative uses a central difference. Exchange those
+prepared derivatives and virtual colors at their associated fluid nodes,
+then use all nine color-stencil entries, including diagonal ghost entries.
+The gradient implicitly applies the angle at the physical halfway wall;
+do not subsequently rotate it to impose the angle at the fluid center.
+The virtual value is not a physical population and is not clipped or counted
+as component mass. Require the same nonsingular flat-wall/interior-layer
+conditions as the location control.
+
+Compare local bounce-back and the conservative relative-phase flux using
+unchanged recoloring weights, relaxation and curvature differentiation.
+This is a faithful implementation of the cited scalar ghost formula under
+the present remaining operators, not a replication of the entire 2015
+model: that paper's link-length segregation weights and MRT spectrum differ.
+Verify the ghost formula independently, signed pressure, neutral equilibrium,
+angle/shape, speed, mass, MPI/restart and default preservation. Keep negative
+results; do not infer a general curved-wall or dynamic contact-line result.

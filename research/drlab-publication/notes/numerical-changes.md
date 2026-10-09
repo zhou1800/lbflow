@@ -26,6 +26,33 @@ Completed quantitative coverage is equal density, standard pressure weights, low
 
 ## Optional Capillary Research Operators
 
+The 9 October continuation adds optional `phaseBoundary "flux"`:
+antisymmetric relative-phase transfers on neighboring flat-wall diagonal
+links preserve each original bounce-back total population and global
+component mass. Pure phases give zero transfer. At rest with unit total
+density the neutral scalar operator becomes established specular-forward
+transport; this restores the complete bulk recurrence, unlike the earlier
+stationary-ratio multiplier. Outgoing halos and fractions are prepared
+before streaming, including the rest population.
+
+The separate `tangent`, `halfway` and `ghost` wall-gradient controls compare
+gradient magnitude and contact-angle location. The ghost scalar formula
+comes directly from Liu et al. (2015), DOI 10.1103/PhysRevE.92.033306,
+with phase-convention sign conversion and no subsequent angle rotation.
+Other recoloring/MRT/curvature operators remain LBFlow's, so this is not a
+complete replication of that model. Flat nonsingular D2Q9 stencils and an
+interior layer are required for the location controls.
+
+Neutral raw flow is at roundoff with phase transfer. Nonneutral pressure
+improves with the physical-wall/ghost control but retains real currents and
+two-step velocity/color oscillations. Eight previous default/optional
+controls preserve every recorded field and final population byte.
+The six CTest groups include independent full early transients, virtual-grid
+gradient comparison, pure forced phases, rotation and MPI/restart populations.
+See `paper/data/wall-flux.json`, `wall-flux-validation.json` and the two
+wall-flux source-kernel manifests. Open and curved-wall extensions remain
+unsupported; no damping, fitted sigma or new default is introduced.
+
 The continued wall study derives an optional `wallRecoloring "tangential"`
 from the discrete D2Q9 segregation/diffusion ratio. It requires the
 renormalized gradient and preserves the bulk neutral-plane fixed point.

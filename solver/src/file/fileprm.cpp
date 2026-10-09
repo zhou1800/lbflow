@@ -93,6 +93,16 @@ string FilePrm::getCurvatureStencil() const
     return result;
 }
 
+string FilePrm::getPhaseBoundary() const
+{
+    const auto value=iPrm.find("phaseBoundary");
+    if (value==iPrm.end()) return "bounce";
+    string result;
+    if (!parse(value->second,&result))
+        throw invalid_argument("phaseBoundary must be a quoted string.");
+    return result;
+}
+
 void FilePrm::ValidateSimulation() const
 {
     const size_t ndim = dimension.size();
@@ -128,6 +138,22 @@ void FilePrm::ValidateSimulation() const
             !isfinite(density[k]) || density[k] <= 0.0)
             throw invalid_argument("Densities must be positive; relaxation times must exceed 0.5.");
     if (model == "color") {
+        const string phaseBoundary=getPhaseBoundary();
+        if (phaseBoundary!="bounce" && phaseBoundary!="flux")
+            throw invalid_argument("phaseBoundary must be bounce or flux.");
+        if (phaseBoundary=="flux" || getWallGradient()=="tangent" || getWallGradient()=="halfway" || getWallGradient()=="ghost") {
+            if (ndim!=2 || getLSpeed()!=1.0 || density[0]!=density[1] || abs(getAlpha0()-4.0/9.0)>1e-14)
+                throw invalid_argument("Experimental wall phase/gradient operators require equal-density, standard-weight, unit-speed D2Q9.");
+            if (phaseBoundary=="flux" && getWallRecoloring()!="legacy")
+                throw invalid_argument("Wall phase flux requires legacy recoloring; do not also apply the tangent multiplier.");
+            if (phaseBoundary=="flux" && getWallGradient()!="renormalized" && getWallGradient()!="tangent" && getWallGradient()!="halfway" && getWallGradient()!="ghost")
+                throw invalid_argument("Wall phase flux requires renormalized, tangent, halfway or ghost wall gradients.");
+            for (const auto& item : idx) {
+                const IT type=item.second->Type;
+                if (type!=IT::VD && type!=IT::GV && type!=IT::SD && type!=IT::BB)
+                    throw invalid_argument("Experimental wall phase/gradient operators initially support closed VD/GV flow with SD/BB walls.");
+            }
+        }
         const string recoloring=getWallRecoloring();
         if (recoloring!="legacy" && recoloring!="tangential")
             throw invalid_argument("wallRecoloring must be legacy or tangential.");
@@ -165,8 +191,8 @@ void FilePrm::ValidateSimulation() const
         if (getViscosityInterpolation() != "arithmetic" && getViscosityInterpolation() != "harmonic")
             throw invalid_argument("viscosityInterpolation must be arithmetic or harmonic.");
         if (getWallGradient() != "legacy" && getWallGradient() != "renormalized" &&
-            getWallGradient() != "tanh")
-            throw invalid_argument("wallGradient must be legacy, renormalized or tanh.");
+            getWallGradient() != "tanh" && getWallGradient()!="tangent" && getWallGradient()!="halfway" && getWallGradient()!="ghost")
+            throw invalid_argument("wallGradient must be legacy, renormalized, tanh, tangent, halfway or ghost.");
         const double a0 = getAlpha0();
         const double a1 = 1.0 - density[0] / density[1] * (1.0 - a0);
         if (!isfinite(a0) || a0 < 0.0 || a0 >= 1.0 ||
@@ -349,6 +375,9 @@ void FilePrm::parseAll()
         }
         else if (a.first == "curvatureStencil") {
             // Optional algebraically equivalent continuum-force discretization.
+        }
+        else if (a.first == "phaseBoundary") {
+            // Optional conservative wall phase transport.
         }
         else if (a.first == "interfaceThickness")
             parse(a.second, &iThickness);

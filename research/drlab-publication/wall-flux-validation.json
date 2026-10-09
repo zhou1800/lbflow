@@ -1,0 +1,383 @@
+{
+  "ctest_groups": 6,
+  "ctest_failed": 0,
+  "ctest_seconds": 42.08,
+  "contracts": {
+    "neutral_transients": [
+      {
+        "name": "transient-beta0.35-L64-1rank",
+        "max_transient_error": 1.1102230246251565e-15,
+        "max_speed": 2.0819572716764675e-16
+      },
+      {
+        "name": "transient-beta0.35-L65-1rank",
+        "max_transient_error": 1.1102230246251565e-15,
+        "max_speed": 2.178856882155075e-16
+      },
+      {
+        "name": "transient-beta0.7-L64-1rank",
+        "max_transient_error": 1.6653345369377348e-15,
+        "max_speed": 2.0613303810414136e-16
+      },
+      {
+        "name": "transient-beta0.7-L65-1rank",
+        "max_transient_error": 1.6653345369377348e-15,
+        "max_speed": 2.0149692464182523e-16
+      },
+      {
+        "name": "transient-beta0.9-L64-1rank",
+        "max_transient_error": 1.6653345369377348e-15,
+        "max_speed": 2.465505300536223e-16
+      },
+      {
+        "name": "transient-beta0.9-L65-1rank",
+        "max_transient_error": 1.7763568394002505e-15,
+        "max_speed": 2.3502782434736615e-16
+      }
+    ],
+    "surface_transients": [
+      {
+        "name": "surface-transient-halfway-SRT-beta0.35-1rank",
+        "max_speed_every_step": 3.3334792683117317e-16
+      },
+      {
+        "name": "surface-transient-halfway-SRT-beta0.7-1rank",
+        "max_speed_every_step": 4.167611214686419e-16
+      },
+      {
+        "name": "surface-transient-halfway-SRT-beta0.9-1rank",
+        "max_speed_every_step": 3.196601642555654e-16
+      },
+      {
+        "name": "surface-transient-halfway-MRT-beta0.35-1rank",
+        "max_speed_every_step": 2.2939998976641867e-16
+      },
+      {
+        "name": "surface-transient-halfway-MRT-beta0.7-1rank",
+        "max_speed_every_step": 2.0849043500759888e-16
+      },
+      {
+        "name": "surface-transient-halfway-MRT-beta0.9-1rank",
+        "max_speed_every_step": 2.5036142879155697e-16
+      },
+      {
+        "name": "surface-transient-ghost-SRT-beta0.35-1rank",
+        "max_speed_every_step": 3.2901123096947334e-16
+      },
+      {
+        "name": "surface-transient-ghost-SRT-beta0.7-1rank",
+        "max_speed_every_step": 3.659411631516561e-16
+      },
+      {
+        "name": "surface-transient-ghost-SRT-beta0.9-1rank",
+        "max_speed_every_step": 3.3311462617255916e-16
+      },
+      {
+        "name": "surface-transient-ghost-MRT-beta0.35-1rank",
+        "max_speed_every_step": 2.2900978100966533e-16
+      },
+      {
+        "name": "surface-transient-ghost-MRT-beta0.7-1rank",
+        "max_speed_every_step": 2.1160785452475865e-16
+      },
+      {
+        "name": "surface-transient-ghost-MRT-beta0.9-1rank",
+        "max_speed_every_step": 2.2204460492503126e-16
+      }
+    ],
+    "fixed_points": [
+      {
+        "name": "fixed-renormalized-1rank",
+        "color_error": 4.9682480351975755e-14,
+        "max_speed": 1.0348389228962311e-16
+      },
+      {
+        "name": "fixed-tangent-1rank",
+        "color_error": 4.9682480351975755e-14,
+        "max_speed": 1.0348389228962311e-16
+      },
+      {
+        "name": "fixed-halfway-1rank",
+        "color_error": 5.034861416675085e-14,
+        "max_speed": 1.1105481518893366e-16
+      },
+      {
+        "name": "fixed-ghost-1rank",
+        "color_error": 5.029310301551959e-14,
+        "max_speed": 9.709648752643054e-17
+      }
+    ],
+    "comparisons": [
+      {
+        "left": "moving-interface-1rank",
+        "right": "moving-interface-parallel-2rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "moving-interface-1rank",
+        "right": "moving-interface-restart-1-1rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "moving-interface-1rank",
+        "right": "moving-interface-restart-2-2rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "moving-interface-ghost-1rank",
+        "right": "moving-interface-ghost-parallel-2rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "moving-interface-ghost-1rank",
+        "right": "moving-interface-ghost-resumed-2rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      }
+    ],
+    "population_checks": [
+      {
+        "left": "moving-interface-1rank",
+        "right": "moving-interface-parallel-2rank",
+        "bitwise_populations": true
+      },
+      {
+        "left": "moving-interface-1rank",
+        "right": "moving-interface-restart-1-1rank",
+        "bitwise_populations": true
+      },
+      {
+        "left": "moving-interface-1rank",
+        "right": "moving-interface-restart-2-2rank",
+        "bitwise_populations": true
+      },
+      {
+        "left": "moving-interface-ghost-1rank",
+        "right": "moving-interface-ghost-parallel-2rank",
+        "bitwise_populations": true
+      },
+      {
+        "left": "moving-interface-ghost-1rank",
+        "right": "moving-interface-ghost-resumed-2rank",
+        "bitwise_populations": true
+      }
+    ],
+    "rotation_errors": {
+      "r0": 9.43689570931383e-16,
+      "r1": 8.881784197001252e-16,
+      "v": 1.6992158548279068e-16
+    },
+    "mass": {
+      "total_mass": 0.0,
+      "phase_masses": 0.0
+    },
+    "pure_phases": [
+      {
+        "left": "pure-0-SRT-1rank",
+        "right": "pure-0-SRT-flux-1rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "pure-0-MRT-1rank",
+        "right": "pure-0-MRT-flux-1rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "pure-1-SRT-1rank",
+        "right": "pure-1-SRT-flux-1rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "pure-1-MRT-1rank",
+        "right": "pure-1-MRT-flux-1rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      }
+    ],
+    "guards": [
+      {
+        "name": "bad-phase-boundary",
+        "exit": 1
+      },
+      {
+        "name": "duplicate-recoloring",
+        "exit": 1
+      },
+      {
+        "name": "unsupported-gradient",
+        "exit": 1
+      },
+      {
+        "name": "unsupported-weights",
+        "exit": 1
+      },
+      {
+        "name": "unsupported-density",
+        "exit": 1
+      },
+      {
+        "name": "unsupported-3d",
+        "exit": 1
+      },
+      {
+        "name": "open-reservoir",
+        "exit": 1
+      },
+      {
+        "name": "singular-angle",
+        "exit": 1
+      },
+      {
+        "name": "thin-fluid-layer",
+        "exit": 1
+      },
+      {
+        "name": "ghost-thin-layer",
+        "exit": 1
+      },
+      {
+        "name": "ghost-singular-angle",
+        "exit": 1
+      },
+      {
+        "name": "wall-corner",
+        "exit": 1
+      }
+    ],
+    "ghost_gradient_audit": {
+      "max_gradient_error": 2.220446049250313e-16,
+      "input_sha256": "09cdf7fd37e2b6ee004eb6e1d28651abcefff854ceca34f636ae8daa717255cf",
+      "audit_driver_sha256": "41840581b246a3181f9d7a7dfe210636ba34b7279d3687ae697ba6c7c4d37ad9",
+      "note": "Outgoing-state gradients only; not a comparison with incoming-state velocities."
+    },
+    "solver_sha256": "7831fa20ab0624606030e908258323dde84bb1fa65cef8482842f47ff505b5cc",
+    "scope": "Flat D2Q9 transient/fixed-point identities, pure-phase no-slip, short nonneutral replay; not a wetting accuracy result."
+  },
+  "previous_fields": {
+    "comparisons": [
+      {
+        "name": "menisci-H16-theta60-legacy-beta0.7-wall-changes-flux-release-1rank",
+        "prior_solver_sha256": "f3b646a3099d68e80a9e7d94259b41ead7fe8c6d8d248e6cf0b77f4cc6f44557",
+        "current_solver_sha256": "7831fa20ab0624606030e908258323dde84bb1fa65cef8482842f47ff505b5cc",
+        "bitwise_all_snapshots": true,
+        "bitwise_final_populations": true
+      },
+      {
+        "name": "menisci-H16-theta60-renormalized-beta0.7-csf-tangential-gradient-final-kernel-flux-release-1rank",
+        "prior_solver_sha256": "f3b646a3099d68e80a9e7d94259b41ead7fe8c6d8d248e6cf0b77f4cc6f44557",
+        "current_solver_sha256": "7831fa20ab0624606030e908258323dde84bb1fa65cef8482842f47ff505b5cc",
+        "bitwise_all_snapshots": true,
+        "bitwise_final_populations": true
+      },
+      {
+        "name": "menisci-H16-theta60-renormalized-beta0.7-csf-tangential-normal-final-kernel-flux-release-1rank",
+        "prior_solver_sha256": "f3b646a3099d68e80a9e7d94259b41ead7fe8c6d8d248e6cf0b77f4cc6f44557",
+        "current_solver_sha256": "7831fa20ab0624606030e908258323dde84bb1fa65cef8482842f47ff505b5cc",
+        "bitwise_all_snapshots": true,
+        "bitwise_final_populations": true
+      },
+      {
+        "name": "menisci-H16-theta60-renormalized-beta0.7-csf-wall-changes-flux-release-1rank",
+        "prior_solver_sha256": "f3b646a3099d68e80a9e7d94259b41ead7fe8c6d8d248e6cf0b77f4cc6f44557",
+        "current_solver_sha256": "7831fa20ab0624606030e908258323dde84bb1fa65cef8482842f47ff505b5cc",
+        "bitwise_all_snapshots": true,
+        "bitwise_final_populations": true
+      },
+      {
+        "name": "menisci-H16-theta60-renormalized-beta0.7-tangential-normal-final-kernel-flux-release-1rank",
+        "prior_solver_sha256": "f3b646a3099d68e80a9e7d94259b41ead7fe8c6d8d248e6cf0b77f4cc6f44557",
+        "current_solver_sha256": "7831fa20ab0624606030e908258323dde84bb1fa65cef8482842f47ff505b5cc",
+        "bitwise_all_snapshots": true,
+        "bitwise_final_populations": true
+      },
+      {
+        "name": "menisci-H16-theta60-renormalized-beta0.7-wall-changes-flux-release-1rank",
+        "prior_solver_sha256": "f3b646a3099d68e80a9e7d94259b41ead7fe8c6d8d248e6cf0b77f4cc6f44557",
+        "current_solver_sha256": "7831fa20ab0624606030e908258323dde84bb1fa65cef8482842f47ff505b5cc",
+        "bitwise_all_snapshots": true,
+        "bitwise_final_populations": true
+      },
+      {
+        "name": "menisci-H16-theta90-legacy-beta0.7-wall-changes-flux-release-1rank",
+        "prior_solver_sha256": "f3b646a3099d68e80a9e7d94259b41ead7fe8c6d8d248e6cf0b77f4cc6f44557",
+        "current_solver_sha256": "7831fa20ab0624606030e908258323dde84bb1fa65cef8482842f47ff505b5cc",
+        "bitwise_all_snapshots": true,
+        "bitwise_final_populations": true
+      },
+      {
+        "name": "menisci-H16-theta90-renormalized-beta0.7-wall-changes-flux-release-1rank",
+        "prior_solver_sha256": "f3b646a3099d68e80a9e7d94259b41ead7fe8c6d8d248e6cf0b77f4cc6f44557",
+        "current_solver_sha256": "7831fa20ab0624606030e908258323dde84bb1fa65cef8482842f47ff505b5cc",
+        "bitwise_all_snapshots": true,
+        "bitwise_final_populations": true
+      }
+    ],
+    "scope": "Eight previous default/tangential/curvature controls; every recorded frame and final outgoing populations preserved."
+  },
+  "kernels": [
+    "run-kernels/wall-flux-location-manifest.json",
+    "run-kernels/wall-flux-ghost-manifest.json"
+  ],
+  "scientific_scope": "Neutral transport/fixed-point and bounded closed flat-wall pressure verification; remaining nonneutral currents and two-step oscillations prevent a general wetting/contact-line or trapping claim.",
+  "frozen_kernel_reconstruction": [
+    {
+      "kernel": "location",
+      "actual_solver_sha256": "38874efb34ae9a9830b81ad83032d97ea2090a6e7cf2155025f5ba136e15b7a3",
+      "expected_solver_sha256": "38874efb34ae9a9830b81ad83032d97ea2090a6e7cf2155025f5ba136e15b7a3",
+      "byte_identical_binary": true,
+      "source_files_verified": true
+    },
+    {
+      "kernel": "ghost",
+      "actual_solver_sha256": "7831fa20ab0624606030e908258323dde84bb1fa65cef8482842f47ff505b5cc",
+      "expected_solver_sha256": "7831fa20ab0624606030e908258323dde84bb1fa65cef8482842f47ff505b5cc",
+      "byte_identical_binary": true,
+      "source_files_verified": true
+    }
+  ],
+  "recorded_trajectories": 113,
+  "adjacent_replays": 12
+}

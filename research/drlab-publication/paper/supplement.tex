@@ -485,6 +485,80 @@ with actual sample intervals retained. Their remaining pressure bias is
 larger than in the uncorrected reconstructed-CSF controls. These results
 preclude a claim of a generally accurate capillary boundary or trapping law.
 
+\section{Additional wall-transport and location controls}
+The distributed \texttt{data/wall-flux.json} recomputes all included raw
+measurements and checksums. A relative-phase face transfer is applied after
+bounce-back and before the macroscopic update. Outgoing phase fractions
+sum all nine populations, including rest, before streaming; saved restart
+populations retain their outgoing meaning. Diagonal phase/total fields and
+fractions have their own halo exchange. Complementary phase assignment
+retains each original total incoming population. Paired face transfers
+conserve component mass globally, rather than preserving each node's
+component mass separately.
+
+For a neutral one-dimensional phase profile at rest, the replaced blocked
+diagonals add $b\Delta_x\varphi$ and
+$\beta b(J_{j-1}-J_{j+1})/\sqrt{2}$ to the wall scalar update. Therefore
+$A_w+b=A$ and $B_w+b/\sqrt{2}=B$. This is complete transient agreement;
+the earlier tangent multiplier only gives a matched stationary ratio.
+It is the established specular-forward scalar mechanism
+\cite{ginzburg2015}, embedded here in a total-population-preserving phase
+transfer. The face fraction average and its nonneutral extension are
+explicit closures. No general positivity, energy-dissipation or dynamic
+contact-line theorem is asserted.
+
+Independent tests cover lengths 64/65, beta values 0.35/0.7/0.9, random
+mixed fractions and nonuniform hydrodynamic equilibria. Six full-solver
+zero-sigma controls write every time step from 0 through 64, and twelve
+nonzero-sigma controls exercise the halfway/ghost gradients, both collision
+operators and all three beta values at odd length. Independently generated
+equilibria omit the older tangent multiplier. Pure forced phases remain
+bitwise unchanged with phase transfer. Nonneutral short-time MPI/restart
+checks compare both macroscopic fields and every outgoing population byte.
+Rotation is checked separately; an outgoing-state gradient audit compares
+the ghost implementation with an independent full-grid calculation.
+The six CTest groups retain the earlier default and checkerboard controls.
+
+The halfway cosine control uses an interior unprojected gradient with the
+unchanged $10^{-9}$ mask. Below that cutoff it explicitly continues the
+target cosine. It preserves the first-row central tangent derivative and
+requires a nonsingular angle and an interior fluid layer. Only the inward
+component of the extrapolated unit normal is constrained; a general
+normalized-vector extrapolation is not implied.
+For the published ghost-color comparison \cite{liu2015}, row-wise central
+tangent differences are extrapolated to the wall before constructing the
+virtual solid color. All color-stencil entries are then included without
+angle rotation. Prepared row derivatives and fluid-associated ghost values
+are exchanged to avoid requiring a second halo layer. The cited formula
+is reproduced with this paper's phase convention, but the remaining
+recoloring and MRT operators retain LBFlow's definitions.
+
+Each method uses the same equal reference densities, tau=1, input sigma,
+physical halfway walls and bulk recoloring widths. The H16 comparison
+contains seven angles at beta=0.7, plus three beta values at 60/90/120
+degrees for the ghost control. The three-width 60-degree comparisons use
+four initial durations. Pressure is sampled directly using the buffers
+and color cutoffs stated above. Circle fits retain exclusions of
+0.5/0.75/1 measured bulk widths; these extrapolations are sensitivity
+diagnostics, not direct independent contact-angle measurements.
+
+\input{data/wall-flux-table.tex}
+
+The apparent near-zero H16 halfway/bounce-back pressure error is not
+preserved at H32/H48. Ghost continuation with phase transfer improves the
+tested 60-degree pressure sequence but retains nonneutral currents and
+angle dependence. Even-time late color changes alone can hide two-step
+oscillations. The H16 60-degree ghost/transfer control has one-step maximum
+color change $6.65\times10^{-7}$ and two-step change
+$3.54\times10^{-12}$, while its raw/adjacent-averaged maximum speeds remain
+approximately $4.18\times10^{-5}$ and $4.27\times10^{-5}$.
+These are pressure-stable finite-time controls, not complete mechanical
+equilibria. The supplied adjacent-step diagnostics preserve raw
+velocities; they do not hide these currents with temporal averaging.
+Corners, staircase or curved walls, open reservoirs and selective films
+are explicitly rejected for the experimental flat-wall operators. These
+static tests do not establish a quantitative invasion/retraction interval.
+
 \section{Scientific limits and publication status}
 Only equal-density, low-speed flow in the documented parameter range is
 verified. Curved-wall and three-dimensional wetting accuracy, contact-line

@@ -1,5 +1,5 @@
 {
-  "purpose": "Reconstruct the identified frozen numerical kernel in a separate source copy; verify base hashes before applying the zero-context patch.",
+  "purpose": "Check out source_revision_before_patch in a separate copy, verify base hashes, then apply the patch to reconstruct the frozen kernel.",
   "frozen_executable_sha256": "f3b646a3099d68e80a9e7d94259b41ead7fe8c6d8d248e6cf0b77f4cc6f44557",
   "base_source_file_sha256": {
     "solver/src/file/fileprm.cpp": "d62d9cd56f7a970a38694b59756ac8e08e1c22862ba90b9c9781a0566b04bc3c",
@@ -13,5 +13,6 @@
   "apply_command": "git apply --unidiff-zero research/drlab-publication/run-kernels/wall-study.patch",
   "scope": "wall-study preserves the measured neutral correction; wall-pre-neutral-norm retains the earlier degenerate-mask failure. Final validation adds an unsupported-unit-speed guard and whitespace-only convergence-loop formatting; measured inputs all use latticeSpeed=1.",
   "rebuild_in_original_environment_byte_identical": true,
-  "final_validation_executable_sha256": "ab8e6efed034c94fcaab35e35b8ec02056fc6adf1968ae518c530ae0a8f20fe0"
+  "final_validation_executable_sha256": "ab8e6efed034c94fcaab35e35b8ec02056fc6adf1968ae518c530ae0a8f20fe0",
+  "source_revision_before_patch": "0a9a7022fdfda1d8c6cdb54115206257384dcd59"
 }
