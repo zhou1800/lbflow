@@ -23,17 +23,26 @@ LOADED_SOURCE_SHA256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 
 class StokesSlit:
     """MAC velocity from a Fourier/biharmonic stream function, including mean flux."""
-    def __init__(self,ny,nx=None,height=16.,nu=1/6,slip=0.):
-        self.ny=ny;self.nx=nx or 4*ny;self.h=height/ny;self.nu=nu
+    def __init__(self,ny,nx=None,height=16.,nu=1/6,slip=0.,fast=False):
+        self.ny=ny;self.nx=nx or 4*ny;self.h=height/ny;self.nu=nu;self.fast=fast
         h=self.h;m=ny-1
         frequencies=np.arange(self.nx//2+1)
         lam=-4*np.sin(np.pi*frequencies/self.nx)**2/h**2
-        lap=np.diag(np.full(m,-2/h**2))+np.diag(np.full(m-1,1/h**2),1)+np.diag(np.full(m-1,1/h**2),-1)
-        operators=lap[None]+lam[:,None,None]*np.eye(m)[None]
-        biharmonic=np.einsum('kij,kjl->kil',operators,operators)
         wall=2/(1+2*slip/h)/h**4
-        biharmonic[:,0,0]+=wall;biharmonic[:,-1,-1]+=wall
-        self.inverse=np.linalg.inv(nu*biharmonic)
+        if fast:
+            # The same Dirichlet Laplacian plus two boundary rank-one terms.
+            modes=np.arange(1,ny)
+            ly=-4*np.sin(np.pi*modes/(2*ny))**2/h**2
+            self.sine_weights=1/(ly[:,None]+lam[None])**2
+            first=np.sqrt(2/ny)*np.sin(np.pi*modes/ny)
+            self.wall_modes=[np.sqrt(2)*first*(modes%2==parity) for parity in (1,0)]
+            self.wall_denominators=[1/wall+(q[:,None]**2*self.sine_weights).sum(axis=0) for q in self.wall_modes]
+        else:
+            lap=np.diag(np.full(m,-2/h**2))+np.diag(np.full(m-1,1/h**2),1)+np.diag(np.full(m-1,1/h**2),-1)
+            operators=lap[None]+lam[:,None,None]*np.eye(m)[None]
+            biharmonic=np.einsum('kij,kjl->kil',operators,operators)
+            biharmonic[:,0,0]+=wall;biharmonic[:,-1,-1]+=wall
+            self.inverse=np.linalg.inv(nu*biharmonic)
         mean_lap=np.diag(np.full(ny,2/h**2))+np.diag(np.full(ny-1,-1/h**2),1)+np.diag(np.full(ny-1,-1/h**2),-1)
         ghost_ratio=(2*slip-h)/(2*slip+h)
         mean_lap[0,0]-=ghost_ratio/h**2;mean_lap[-1,-1]-=ghost_ratio/h**2
@@ -44,7 +53,14 @@ class StokesSlit:
         h=self.h;curl=(fy[1:-1]-np.roll(fy[1:-1],1,axis=1))/h-(fx[1:]-fx[:-1])/h
         transformed=np.fft.rfft(curl,axis=1)
         transformed[:,0]=0  # Mean flow is solved independently below.
-        interior=np.einsum('kij,jk->ik',self.inverse,transformed,optimize=False)
+        if self.fast:
+            from scipy.fft import dst
+            interior=dst(transformed,type=1,axis=0,norm='ortho')*self.sine_weights
+            for q,denominator in zip(self.wall_modes,self.wall_denominators):
+                coefficient=(q[:,None]*interior).sum(axis=0)/denominator
+                interior-=self.sine_weights*q[:,None]*coefficient[None]
+            interior=dst(interior,type=1,axis=0,norm='ortho')/self.nu
+        else:interior=np.einsum('kij,jk->ik',self.inverse,transformed,optimize=False)
         psi=np.zeros((self.ny+1,self.nx));psi[1:-1]=np.fft.irfft(interior,n=self.nx,axis=1)
         u=np.diff(psi,axis=0)/h
         u+=self.mean_inverse@fx.mean(axis=1)[:,None]
@@ -167,6 +183,17 @@ def projection_rest(phi,beta,cutoff=1e-9):
     return result
 
 
+def transverse_relaxation_rhs(phi,h,strength):
+    """Selective neutral-wall biharmonic diagnostic; not a physical phase law."""
+    if not np.isfinite(h) or h<=0 or not np.isfinite(strength) or not 0<=strength<=1:
+        raise ValueError('Use positive grid spacing and diagnostic strength in [0,1]')
+    extended=np.vstack((phi[0],phi,phi[-1]))
+    laplacian=(extended[2:]-2*phi+extended[:-2])/h**2
+    extended=np.vstack((laplacian[0],laplacian,laplacian[-1]))
+    biharmonic=(extended[2:]-2*laplacian+extended[:-2])/h**2
+    return -strength*h*h*biharmonic/24
+
+
 def observation(phi,u,v,h,clock):
     nx=phi.shape[1];length=nx*h
     z=np.sum(phi*np.exp(2j*np.pi*(np.arange(nx)+.5)/nx)[None])
@@ -176,12 +203,14 @@ def observation(phi,u,v,h,clock):
         phase_range=[float(phi.min()),float(phi.max())])
 
 
-def evolve(ny,force,end=2000.,dt_factor=1.,sigma=.005,width=WIDTH_REFERENCE,save=None,write=250.,transformed=False,slip=0.,phase_stencil='fv',initial_profile='auto'):
-    if ny<4 or ny%2 or not all(np.isfinite(x) for x in (force,end,dt_factor,sigma,width,write,slip)):
+def evolve(ny,force,end=2000.,dt_factor=1.,sigma=.005,width=WIDTH_REFERENCE,save=None,write=250.,transformed=False,slip=0.,phase_stencil='fv',initial_profile='auto',transverse_relaxation=0.,fast_stokes=False):
+    if ny<4 or ny%2 or not all(np.isfinite(x) for x in (force,end,dt_factor,sigma,width,write,slip,transverse_relaxation)):
         raise ValueError('Use an even height >=4 and finite parameters')
     if min(end,dt_factor,width,write)<=0 or min(sigma,slip)<0:
         raise ValueError('Duration, time factor, width and output interval must be positive; sigma and slip nonnegative')
-    solver=StokesSlit(ny,slip=slip);h=solver.h;beta=match_beta(width/h);b=beta/h
+    if not 0<=transverse_relaxation<=1 or (transverse_relaxation and (phase_stencil!='fv' or not transformed)):
+        raise ValueError('Transverse diagnostic requires transformed FV and strength in [0,1]')
+    solver=StokesSlit(ny,slip=slip,fast=fast_stokes);h=solver.h;beta=match_beta(width/h);b=beta/h
     if transformed and phase_stencil=='fv':b=match_logistic_width(width,h)
     profile=logistic_bridge(solver.nx,h,b) if transformed and phase_stencil=='fv' else planar_bridge(solver.nx,beta)
     if initial_profile=='projection':profile=planar_bridge(solver.nx,beta)
@@ -195,6 +224,7 @@ def evolve(ny,force,end=2000.,dt_factor=1.,sigma=.005,width=WIDTH_REFERENCE,save
         if phase_stencil=='projection':
             rate=phase_rhs(field,u,v,h,b,diffusion=0.)+(projection_rest(field,beta)-field)/h**2
         else:rate=phase_rhs(field,u,v,h,b,transformed=transformed)
+        if transverse_relaxation:rate+=transverse_relaxation_rhs(field,h,transverse_relaxation)
         return rate,u,v
     for step in range(steps+1):
         rate,u,v=rhs(phi);clock=step*dt
@@ -214,10 +244,10 @@ def evolve(ny,force,end=2000.,dt_factor=1.,sigma=.005,width=WIDTH_REFERENCE,save
     for row,x in zip(history,positions):row['centroid_unwrapped']=float(x)
     first,last=history[len(history)//2],history[-1]
     speed=(last['centroid_unwrapped']-first['centroid_unwrapped'])/(last['time']-first['time']) if end else 0.
-    return dict(parameters=dict(ny=ny,nx=solver.nx,h=h,dt=dt,end=end,force=force,sigma=sigma,nu=1/6,diffusion=1/6,beta=None if transformed and phase_stencil=='fv' else beta,b=b,width_target=width,angle=90,transformed=transformed,slip=slip,phase_stencil=phase_stencil,initial_profile=initial_profile),
+    return dict(parameters=dict(ny=ny,nx=solver.nx,h=h,dt=dt,end=end,force=force,sigma=sigma,nu=1/6,diffusion=1/6,beta=None if transformed and phase_stencil=='fv' else beta,b=b,width_target=width,angle=90,transformed=transformed,slip=slip,phase_stencil=phase_stencil,initial_profile=initial_profile,transverse_relaxation=transverse_relaxation,fast_stokes=fast_stokes),
         history=history,late_centroid_speed=speed,seconds=time.monotonic()-started,
         source_sha256=LOADED_SOURCE_SHA256,
-        scope=('Independent hydrodynamics with a retained discrete phase stencil; kinetic ablation, not independent continuum validation.' if phase_stencil=='projection' else 'Independent periodic neutral-wall creeping-flow/finite-volume phase reference. No physical slip calibration or nonneutral wall equivalence implied.'))
+        scope=('Independent hydrodynamics with a retained discrete phase stencil; kinetic ablation, not independent continuum validation.' if phase_stencil=='projection' else 'Selective transverse fourth-order phase intervention with theoretical coefficient; numerical mechanism diagnostic, not a physical phase law or the full projection stencil.' if transverse_relaxation else 'Independent periodic neutral-wall creeping-flow/finite-volume phase reference. No physical slip calibration or nonneutral wall equivalence implied.'))
 
 
 def main():
@@ -225,10 +255,13 @@ def main():
     parser.add_argument('--ny',type=int,default=16);parser.add_argument('--force',type=float,default=1e-7)
     parser.add_argument('--end',type=float,default=2000.);parser.add_argument('--dt-factor',type=float,default=1.)
     parser.add_argument('--sigma',type=float,default=.005);parser.add_argument('--root',required=True)
+    parser.add_argument('--width',type=float,default=WIDTH_REFERENCE,help='Sampled physical W09; independently specified, never fitted to flow.')
     parser.add_argument('--transformed',action='store_true')
     parser.add_argument('--slip',type=float,default=0.)
     parser.add_argument('--phase-stencil',choices=['fv','projection'],default='fv')
     parser.add_argument('--initial-profile',choices=['auto','projection','logistic'],default='auto')
+    parser.add_argument('--transverse-relaxation',type=float,default=0.,help='Selective numerical diagnostic strength [0,1]; coefficient h^2/24, default off.')
+    parser.add_argument('--fast-stokes',action='store_true',help='Equivalent sine-basis/rank-two inversion; default keeps the original dense solve.')
     args=parser.parse_args();root=Path(args.root);root.mkdir(parents=True,exist_ok=False)
     source=root/'source';source.mkdir()
     for name in ('stokes_phase_reference.py','front_mobility.py','phase_recurrence.py'):
@@ -236,7 +269,7 @@ def main():
     hashes={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in source.iterdir()}
     if hashes['stokes_phase_reference.py']!=LOADED_SOURCE_SHA256:
         raise RuntimeError('Reference source changed between import and freezing')
-    result=evolve(args.ny,args.force,args.end,args.dt_factor,args.sigma,save=root,transformed=args.transformed,slip=args.slip,phase_stencil=args.phase_stencil,initial_profile=args.initial_profile)
+    result=evolve(args.ny,args.force,args.end,args.dt_factor,args.sigma,width=args.width,save=root,transformed=args.transformed,slip=args.slip,phase_stencil=args.phase_stencil,initial_profile=args.initial_profile,transverse_relaxation=args.transverse_relaxation,fast_stokes=args.fast_stokes)
     result['source_files_sha256']=hashes
     (root/'result.json').write_text(json.dumps(result,indent=2)+'\n')
 

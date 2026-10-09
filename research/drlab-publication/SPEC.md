@@ -658,3 +658,57 @@ relative to each method's analytic discrete pure-channel conductance;
 increased pure conductance can dilute a relative speed difference.
 This exploratory resolution control neither presupposes agreement nor
 establishes contact-line convergence from a reduced discrepancy.
+
+### Predictive Numerical Resistance
+
+Results remain tied to their recorded numerical kernels and input checksums.
+
+Distinguish the exact finite-grid phase symbol and conditional higher-order
+coefficient from the established conservative Allen--Cahn mapping, mobility,
+profile preservation and slip concepts. Read the closest primary derivations;
+record specific overlap and any remaining priority uncertainty. Do not claim
+a new bulk model or first-ever diagnosis of interface discretization effects.
+
+Verify the independent coupled reference with an analytic manufactured
+two-interface logistic profile and incompressible Navier flow. Derive phase
+and external-force sources from continuous derivatives, independently of
+the implemented face flux and curvature routines. Test nonzero surface
+tension, time evolution and neutral walls at three spacings and a smaller
+time step. Check profile/velocity errors, conservation budgets and observed
+orders. Manufactured forcing establishes numerical consistency, not an
+unforced moving-contact-line solution. Keep that distinction explicit.
+
+Add a selective transverse fourth-order phase intervention to the research
+reference, not the production LBM. Its added rate is
+`-a*h^2*L_y^2(phi)/24`, with reflected neutral `L_y` and fixed
+`a=0,0.5,1`. The coefficient is supplied by the formal derivation, not fitted
+to a front speed. It conserves phase mass, leaves a planar profile unchanged
+and leaves leading diffusion, measured width, fluid solver and wall slip
+unchanged. Verify its zero-flow cosine rate against the discrete biharmonic
+eigenvalue before capillary comparison. Negative strengths and combining
+it with the shared-projection ablation are unsupported. Report unstable or
+unbounded states as failures. Do not describe this anisotropic diagnostic
+as a new physical model or exact replacement for the full projection stencil.
+
+Use this intervention, full velocity/force-field comparisons and independent
+reference refinement to assess which part of the resistance difference is
+explained. A mean-flow match alone does not bound local field errors. Keep
+both fixed measured-width comparisons and any fixed continuum-parameter
+refinement distinct. Resolve relevant time/rate sensitivity before using
+late speeds; do not discard an unfavorable intervention or grid result.
+
+Extend wave/cutoff/width controls within their actual production or matrix
+scope. Define numerical, advective and capillary time scales without claiming
+a universal error threshold. Derive or test moving wall phase transport
+separately from pure hydraulic slip. Treat the small transient rock example
+as a demonstration unless a quantitatively resolved two-phase pore benchmark
+is obtained. Reorganize the article around verified kinetic results and move
+supporting operator verification to the supplement. Keep current-kernel and older
+timing evidence distinct, and map every referee question to evidence or an
+explicitly bounded remaining limitation.
+
+An optional sine-basis/rank-two Stokes inversion may accelerate the finer
+reference grids. It must solve the identical existing staggered operator
+and agree with the dense inverse on nonuniform manufactured/random forces
+over multiple spacings and slips. Preserve the dense default for historical
+reanalysis and record the selected solver in every new run receipt.
