@@ -468,3 +468,48 @@ Surface tension and beta remain independently specified. Compare front
 drift for pressure brackets, two durations and grid refinement. Call these
 finite-time drift brackets, not a converged throat trapping or hysteresis
 law. Adjacent-step averaging is diagnostic only; never filter solver state.
+
+### Fixed-width front mobility and localized resistance
+
+Test the unexplained front/pure-channel mobility difference with unchanged
+physical kernels first. For projection/legacy MRT, equal tau1 and theta60,
+keep `W_0.9/H=4.765235021846117/16` at H16/H32/H48. Select beta from the
+independent axial zero-flux recurrence, then verify it with full-solver
+periodic planar controls. Match measured width, not pressure or speed.
+Keep sigma proportional to 16/H and durations proportional to (H/16)^2.
+With delta t proportional to delta x squared, the leading axial scalar
+diffusion A=1/6 and fluid viscosity remain fixed in physical units.
+This does not prove fixed effective contact-line slip; measure that response.
+
+The axial projection zero-flux relation is
+`phi_next-phi=-beta*[phi*(1-phi)+phi_next*(1-phi_next)]` on a descending
+interface. Use its symmetric midpoint and the physical quadratic root to
+construct the profile around the 0.9 crossings. Verify against independently
+time-marched scalar and production profiles. Retain the cutoff and sampling
+conventions, including dilute tails; do not weaken pressure-collar guards to
+hide a failed regime.
+
+Closed donors use the independently calibrated width and unchanged physical
+parameters. Pressure differences are specified relative to independently
+measured closed pressure, with offsets +/-0.02 Young pressure. Compare
+initial and doubled durations, adjacent fields, both motion directions,
+volume/centerline/first-row front positions and exact component budgets.
+Keep unfavorable static pressure and rate results. Extend pure corridors
+when necessary and state any departure from matched domain geometry.
+
+At H16, compare lengths 4H/8H and pressure offsets 0.01/0.02/0.04 Young
+pressure to test length and rate dependence. Independently measure pure
+hydraulic conductance for each length. Define excess resistance as
+`1/front_mobility - 1/pure_mobility`; test whether its absolute value is
+localized rather than assigning the relative mobility deficit directly to
+numerical error. A zero-sigma control remains diagnostic changed physics.
+
+Use the actual force audit and a separately measured pure-channel auxiliary
+velocity to assess the low-speed reciprocal balance. The force-weighted
+capillary pressure is `-sum(F_cap dot u_aux)/Q_aux`; compare the resulting
+flow prediction with raw total velocity and front motion. Record finite
+Mach, weak compressibility, discrete wall/pressure-boundary effects and
+incoming/outgoing force storage. This is a continuum diagnostic and not an
+exact discrete identity or an independently fitted contact-line law.
+Phase-field chemical-potential slip laws cannot be transferred to this
+color-gradient scalar recurrence without a derivation.

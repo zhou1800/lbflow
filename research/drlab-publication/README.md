@@ -124,7 +124,8 @@ python3 scripts/make_porous_figures.py --paper results/regenerated-cpc
 
 Together with `make_figures.py`, `make_transport_figure.py`,
 `make_capillary_figure.py`, `make_wall_figure.py` and `make_wall_flux_figure.py`,
-this regenerates all eleven manuscript figures.
+the later core/reservoir and front-resistance figure scripts regenerate
+all fifteen manuscript and supplementary figures.
 Text numbers and the timing table are generated from measured JSON. The raw
 VTI and populations are regenerated rather than bundled. Rock results are
 numerical crosschecks and transient observations, not an experimental
@@ -187,7 +188,7 @@ matched-physics spatial convergence study.
 
 ## Rebuild Figures And PDFs
 
-The latest campaign is `paper/data/core-reservoirs.json`: 209 recorded
+The core/reservoir campaign is `paper/data/core-reservoirs.json`: 209 recorded
 executions distinguish alternating force response, published core operators
 and guarded pressure-driven fronts. Projection beta is matched to the entire
 axial bulk recurrence, independently of pressure. Published projection
@@ -223,6 +224,42 @@ changes sigma to zero as a diagnostic. `parity_forcing.py` uses the supplied
 historical ghost audit/executable; `staggered_diagnostics.py` retains raw
 adjacent fields. The collector documents the corrected width diagnostic in
 copies of receipts while preserving all original metadata and populations.
+
+The latest `paper/data/front-mobility.json` adds 74 executions with the
+unchanged pressure-core kernel. An independent zero-flux recurrence chooses
+beta for fixed measured `W09/H`; H16/H32/H48 planar production controls
+verify it. Closed donors, bidirectional fronts, doubled durations and
+independent pure-channel conductance separate static pressure, channel
+resistance and a localized excess resistance. At H16, doubling length
+changes excess resistance by 0.0333%, while the relative mobility deficit
+decreases from 11.26% to 5.92%. Audited capillary-force work with independent
+pure-channel velocities accounts for incremental resistance within 0.023%.
+This continuum diagnostic retains absolute offsets near zero flow.
+At fixed measured relative width, deficits increase from 11.26% through
+18.57% to 22.30%; grid convergence and a physical contact-line law are
+not established. Matching width and leading scalar diffusion does not
+verify a fixed effective slip length. The paper distinguishes the known
+conservative Allen-Cahn phase mobility from Cahn-Hilliard chemical mobility.
+
+Use a fresh study root and the recorded campaign names:
+
+```sh
+python3 scripts/front_mobility.py calibrate --solver build/bin/LBFlow --root results/mobility/calibrate
+python3 scripts/front_mobility.py closed --solver build/bin/LBFlow --root results/mobility/closed --calibration results/mobility/calibrate/calibration.json
+python3 scripts/front_mobility.py channels --solver build/bin/LBFlow --root results/mobility/channels
+python3 scripts/front_mobility.py fronts --solver build/bin/LBFlow --root results/mobility/fronts-coarse --closed-root results/mobility/closed --heights 16 32
+python3 scripts/front_mobility.py fronts --solver build/bin/LBFlow --root results/mobility/fronts-fine --closed-root results/mobility/closed --heights 48
+python3 scripts/front_mobility.py hold --solver build/bin/LBFlow --root results/mobility/holds-coarse --front-root results/mobility/fronts-coarse --heights 16 32
+python3 scripts/front_mobility.py hold --solver build/bin/LBFlow --root results/mobility/holds-fine --front-root results/mobility/fronts-fine --heights 48
+python3 scripts/front_reciprocity.py --solver build/bin/LBFlow --audit-driver build/bin/NumericalAudit --root results/mobility/reciprocal-coarse --front-root results/mobility/holds-coarse --channels-root results/mobility/channels --heights 16 32
+python3 scripts/front_reciprocity.py --solver build/bin/LBFlow --audit-driver build/bin/NumericalAudit --root results/mobility/reciprocal-fine --front-root results/mobility/holds-fine --channels-root results/mobility/channels --heights 48
+python3 scripts/collect_front_mobility.py --root results/mobility --output results/mobility/front-mobility.json
+python3 scripts/make_front_mobility_figure.py --data results/mobility/front-mobility.json --paper results/regenerated-mobility
+```
+
+The collector recomputes diagnostics and reciprocal work from raw fields
+and audit logs, with inputs, geometry, executables and checkpoints checked.
+The original DRLab archive and historical C prototype remain unchanged.
 
 The continued wall study adds `paper/data/wall-consistency.json` and
 `wall-study-validation.json`. It contains independent phase recurrences,

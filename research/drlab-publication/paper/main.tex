@@ -14,6 +14,7 @@
 \input{data/cpc-numbers.tex}
 \input{data/wall-flux-numbers.tex}
 \input{data/core-reservoir-numbers.tex}
+\input{data/front-mobility-numbers.tex}
 \begin{document}
 \begin{frontmatter}
 \title{Finite-interface transport and wetting effects in pore-scale lattice Boltzmann simulations with LBFlow}
@@ -25,32 +26,32 @@
 Finite numerical interfaces and wall treatment can change pore-scale
 transport despite stable, mass-conserving two-phase simulations.
 We use LBFlow, a recovered C++/MPI color-gradient lattice Boltzmann program,
-to distinguish diffuse constitutive bias, core-operator effects and wetting
-response. An inverse-viscosity conductance relation and eighteen layered-flow
-controls separate continuum transition effects from discrepancies against
-reconstructed references. At viscosity ratio 9:1, the thickest tested
-arithmetic and harmonic interfaces change flux by $-9.19$\% and $+21.59$\%,
-respectively.
-A discrete wall recurrence identifies a stationary imbalance specific to
+to separate diffuse constitutive effects, core operators and capillary
+displacement. An inverse-viscosity conductance relation and eighteen
+layered-flow controls distinguish continuum transition effects from
+discrepancies against reconstructed references. At viscosity ratio 9:1,
+the thickest arithmetic and harmonic interfaces change flux by $-9.19$\%
+and $+21.59$\%, respectively.
+A discrete wall recurrence identifies an imbalance specific to
 cosine-normalized recoloring. Published projection recoloring already
-preserves that stationary ratio; exact axial transport matching permits an
-independent comparison. Conservative relative-phase wall transfer restores
-the complete neutral transient. Signed nonneutral pressure, raw parasitic
-flow and an established alternating lattice mode remain separately measured.
-The published MRT spectrum also changes pure-channel hydraulic response.
-Guarded pressure reservoirs then connect bidirectional front drift to closed
-capillary pressure, with independently checked component link-flux budgets.
-Estimated zero-drift pressure agrees with closed pressure within
-\CoreMaxZeroClosedPercent\% of the Young reference, while front mobility is
-11.3--17.8\% below separately measured pure-channel mobility. A zero-sigma
-control recovers the pure-channel response; a general contact-line law is
-not established.
+preserves its stationary ratio; conservative wall transfer restores the
+complete neutral transient. Nonneutral pressure and raw parasitic flow
+remain separately measured.
+Guarded pressure reservoirs connect bidirectional front motion to closed
+capillary pressure and independently verified component mass budgets.
+At fixed measured interface-width ratio, front-mobility deficits increase
+from 11.26\% to \FrontFineDeficit\% over three grids. Doubling the coarse
+channel length approximately halves the relative deficit, while excess resistance changes
+by only \FrontLengthResistancePercent\%. Independently weighted capillary
+force work accounts for incremental excess resistance within
+\FrontForceResistancePercent\%. This localizes the measured response to
+the interface region, without establishing a converged physical contact-line
+law.
 Independent LBPM comparisons on a public Bentheimer specimen check the
-single-phase geometric baseline. Two-phase rock cases retain their measured
-transient and resolution limits. Recorded inputs, source kernels and
-MPI/restart checks support reproduction. A new bulk multiphase model,
-curved-rock wetting accuracy and pore-throat trapping thresholds are not
-claimed.
+single-phase geometric baseline; two-phase rock cases retain their measured
+transient and resolution limits. Recorded source kernels and MPI/restart
+checks support reproduction. A new bulk theory, curved-rock wetting accuracy
+and trapping thresholds are not established.
 \end{abstract}
 \begin{keyword}
 lattice Boltzmann \sep two-phase flow \sep digital rock \sep diffuse interface \sep viscosity interpolation \sep wetting
@@ -134,6 +135,18 @@ not reproduce their full algorithms or establish comparable scope.
 Recent phase-field calculations also compare discretizations of
 continuously equivalent surface forces \cite{sugimoto2026}; rewriting a
 curvature expression does not establish a new force theory.
+
+Color-gradient interface evolution also has an established conservative
+Allen--Cahn description. Subhedar et al. identify its constrained phase
+mobility and the leading anisotropy introduced by cosine link normalization
+\cite{subhedar2020}; neither that mapping nor the associated tensor
+distinction is new here. A later model introduces independent mobility
+\cite{subhedar2022}. Diffuse-contact-line studies distinguish interface
+width from an emergent microscopic slip scale \cite{kusumaatmaja2016}.
+Those chemical-potential scaling laws cannot be transferred directly to
+the present recoloring recurrence. We instead test channel length and
+driving rate, and use independent hydraulic fields to trace the measured
+resistance to capillary-force work.
 
 The source baseline is the reference solver, historical revision
 \texttt{1bef9bbe7047}. The full source identity is recorded in the supplement. The original archive is
@@ -962,6 +975,86 @@ The narrower prespecified sign brackets and all raw mass budgets remain
 in the supplied data. No trapped pore or hysteresis loop is simulated.}
 \label{fig:fronts}\end{figure}
 
+\subsection{Fixed interface width and localized front resistance}
+The preceding fixed-beta sequence also sharpens the interface in physical
+units. To separate that change, projection recoloring and legacy MRT are
+retained at $\tau_0=\tau_1=1$, $\theta=60^\circ$ and
+$W_{0.9}/H=4.765235021846117/16$. Beta is selected from the independent
+descending axial zero-flux condition
+\begin{equation}
+ \varphi_{j+1}-\varphi_j=-\beta[
+ \varphi_j(1-\varphi_j)+\varphi_{j+1}(1-\varphi_{j+1})].
+\end{equation}
+Production planar controls verify the resulting widths at H16/H32/H48
+to relative $\FrontWidthRelativeError$. Beta is approximately
+$0.63165825,0.31145624,0.20699672$; no pressure or velocity enters that
+calibration. Diffusive units retain the leading axial scalar diffusion and
+fluid viscosity, both $1/6$, as well as the measured relative width.
+They do not independently fix an effective contact-line slip length.
+
+Closed donors supply pressure centers before any moving-front run.
+Offsets $\pm0.02p_Y$ are used on all three grids, with additional
+$\pm0.01p_Y,\pm0.04p_Y$ pairs and lengths $4H,8H$ at H16.
+Doubling the front duration changes the measured mobility by at most
+\FrontDurationMobilityPercent\%. With $M_V=d\dot X_V/d\Delta p$ and
+independently measured pure-channel mobility $G_0$, define
+\begin{equation}
+ R_e=M_V^{-1}-G_0^{-1}.
+ \label{eq:front-resistance}
+\end{equation}
+The H16 mobility deficit decreases from 11.26\% to 5.92\% when the
+channel doubles in length, while $R_e$ changes by only
+\FrontLengthResistancePercent\%. The response is almost independent of
+the fourfold pressure-halfwidth variation in this tested low-speed interval.
+Thus a length-independent interfacial contribution, added to the
+length-dependent hydraulic resistance, explains the measured length effect
+(Fig.~\ref{fig:front-resistance}). This does not separately locate all
+dissipation at the microscopic contact line.
+
+The low-speed reciprocal balance provides an independent force diagnostic.
+Let $\bm u_a,Q_a$ be the velocity and flux of a pure-channel auxiliary
+driven by $\Delta p_a$. In incompressible creeping flow with the same
+viscosity and stationary walls, the reciprocal work relation is
+$\Delta p_a Q=\Delta p Q_a+\int\bm F_c\cdot\bm u_a\,dV$.
+Its lattice quadrature defines
+\begin{equation}
+ p_F=-\frac{\sum_{\mathrm{fluid}}\bm F_c\cdot\bm u_a}{Q_a},
+ \qquad \overline U\simeq G_0(\Delta p-p_F).
+ \label{eq:force-work}
+\end{equation}
+The auxiliary is measured in separate positive/negative pure-channel runs;
+the production capillary force is audited from two adjacent checkpoints.
+Their reconstructed densities and color match physical output within
+$6.7\times10^{-16}$. Two-state averaging is applied only to diagnostics.
+The incremental resistance $\delta p_F/\delta\overline U$ agrees with
+$\delta\Delta p/\delta\overline U-G_0^{-1}$ within
+\FrontForceResistancePercent\%, with no force or slip parameter fitted.
+Absolute speed residuals up to $\FrontMaxForceResidual$ remain, and can be
+larger than the drift near rest. Equation~\eqref{eq:force-work} is consequently
+not asserted as an exact discrete identity or a zero-drift estimator.
+
+At fixed measured relative width the $4H$ mobility deficits are
+11.26\%, 18.57\% and \FrontFineDeficit\% on the three grids.
+Signed closed-pressure discrepancies are $+0.517$\%, $+1.389$\% and
+$+1.692$\%. The response has not converged on these resolutions.
+Force-work closure identifies how the numerical momentum balance produces
+the deficit; it does not verify its magnitude against independent physical
+contact-line data. The remaining discretization, diffuse regularization and
+wall coupling require a separate, matched moving-contact-line reference
+before quantitative rock displacement or pore-throat trapping is reported.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.98\linewidth]{front-resistance.pdf}
+\caption{Fixed-width and localized-resistance controls with unchanged
+projection/legacy MRT. (a) Independently calibrated planar profiles in common
+length units. (b) Grid-dependent mobility deficit at fixed measured $W_{0.9}/H$.
+(c) Nearly length-independent excess resistance across the tested pressure
+interval. The vertical scale resolves its small measured variation.
+(d) Resistance from independently weighted capillary force versus pressure
+and instantaneous mean flow, with the identity line for comparison.
+All results retain raw flow and exact component budgets.}
+\label{fig:front-resistance}\end{figure}
+
 \section{Pore-scale application and computational evidence}
 \subsection{Analytic pore flux and capillary entry}
 Two parallel, isolated slit pores have widths $H_0=8s$ and $H_1=16s$,
@@ -1122,6 +1215,10 @@ force formulation is not evidence for a new bulk theory.
 
 The guarded flat-slit pressure experiments connect closed capillary pressure
 to bidirectional front drift, while revealing a separate mobility difference.
+Length and rate controls resolve a localized excess resistance, and
+independent force work accounts for its incremental response. The fixed-width
+grid sequence still changes substantially; this closure of the numerical
+force balance does not supply an independent physical validation.
 Extending these findings to capillary trapping requires a different test.
 Quasistatic invasion and retraction in a specified pore throat must resolve
 the pressure interval, contact-line rate dependence, interface width and
@@ -1170,7 +1267,10 @@ complete neutral recurrence. A physical-wall location and published
 ghost-color comparison show that this transport condition alone does not
 establish nonneutral pressure accuracy. The guarded pressure experiment
 connects zero drift to the measured closed pressure while separating front
-mobility from pure-channel conductance. None supplies a general contact-line law. The
+mobility from pure-channel conductance. Length controls localize an excess
+resistance, whose rate response is recovered from audited capillary force
+work. Its grid dependence at fixed measured relative width prevents a
+convergence claim or a general contact-line law. The
 public-rock application adds an independently checked geometric flow
 baseline and exposes inadequate interface separation and continued
 two-phase evolution. It supports neither a steady relative-permeability

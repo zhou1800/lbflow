@@ -1,0 +1,86 @@
+\section{Fixed-width front resistance and reciprocal work}
+The new campaign retains the pressure-core executable recorded in the
+preceding section. No collision, force, wetting or phase-transfer kernel
+changes. Projection recoloring, legacy MRT, equal tau1 and theta60 are used.
+Each lattice length unit is $d=16/H$ in H16 base units, and its time unit
+is $d^2$. Surface tension is $0.005d$ in lattice units. Thus
+$U_b=U_l/d$, $p_b=p_l/d^2$, $M_b=M_l d$ and $R_b=R_l/d$.
+Leading axial scalar diffusion and viscosity both remain $1/6$ in base units.
+This is a matched-width grid sequence with a finite width ratio
+$W_{0.9}/H=0.29782719$, not a sharp-interface limit or a verified
+constant physical slip length.
+
+For the descending planar recurrence, let $u=\varphi_j$, $v=\varphi_{j+1}$
+and $C=(1-\beta)u+\beta u^2$. The stable quadratic branch is
+\begin{equation}
+ v=\frac{2C}{1+\beta+\sqrt{(1+\beta)^2-4\beta C}}.
+\end{equation}
+Symmetry across the midpoint gives the first high-side fraction
+$u=[1+(\sqrt{1+\beta^2}-1)/\beta]/2$ and the first low-side fraction
+$1-u$ at normal distance $1/2$. Linear interpolation to fraction $0.05$
+gives half the 0.9-color width. Bisection selects beta solely from this
+profile. Full periodic controls of lengths 128/256/384 and height four,
+run for 8000 steps, agree with independently time-marched scalar profiles
+within $4.87\times10^{-12}$. Full measured widths are
+4.76523502/9.53047004/14.29570506. The gradient cutoff remains $10^{-9}$;
+dilute tails and crossing interpolation are retained.
+
+Closed $4H$ donors run for 32000/128000/288000 steps.
+Their final numerical pressure supplies each front's pressure center;
+the prescribed pressure pairs are selected before the front calculation.
+Single-front runs use 8000/32000/72000 steps, followed by exact outgoing
+continuations to 16000/64000/144000. Late volume speeds use the latter
+half of each receipt's output interval. At H16 the pressure halfwidths are
+0.01/0.02/0.04 times $p_Y$ for both lengths; H32/H48 use 0.02.
+The separate centerline and first-row crossings remain in the JSON
+histories. They involve subgrid interpolation and are not substituted for
+volume transport or presented as resolved wall-contact positions.
+Pure channels use a pressure difference of magnitude $10^{-5}$ in both
+directions, with their own relaxation durations. Measured central gradients,
+midpoint profiles and exact kinetic budgets check these controls.
+
+\input{data/front-mobility-table.tex}
+
+The interfacial excess resistance in the table is in each lattice's native
+units. For cross-grid comparison it must be divided by $d$, yielding
+approximately 0.06231, 0.11306 and 0.14269 at $L=4H$.
+Near equality of native H16 long/short excess resistance is a localization
+test at one grid; it does not establish general length independence at
+other widths or wetting angles. The maximum new pressure-budget residual
+relative to initial interior mass is $\FrontMaxBudget$.
+
+The reciprocal auxiliary velocity is half the signed difference of the
+two independently measured pure-channel fields. Its flux is the sum of
+axial velocity across the middle section. The audited capillary force uses
+the actual scalar gradient, ghost continuation, curvature and cutoff.
+Outgoing color/density match the incoming physical macrostate at the same
+time because collision and recoloring preserve local phase mass.
+Both adjacent states are checked explicitly before work is calculated;
+no audit force is substituted into the simulation.
+The force-weighted pressure is the sum of actual force times auxiliary
+velocity over fluid nodes, with zero force on PB and solid nodes, divided
+by the auxiliary section flux. Spatial sums in both directions and all
+audit/checkpoint hashes are recorded for independent reanalysis.
+
+For common constant viscosity, incompressible Stokes stresses give
+$\int\nabla\bm u_a:\bm\sigma\,dV=
+\int\nabla\bm u:\bm\sigma_a\,dV$.
+Integration of the two momentum balances then gives the reciprocal work
+relation in the main text. Stationary wall velocities eliminate their
+boundary work; pressure faces give the pressure--flux products.
+The actual weakly compressible LBM pressure boundary and its discrete
+stress do not satisfy all of these continuum assumptions exactly.
+Absolute predicted mean speeds therefore retain residuals up to
+$\FrontMaxForceResidual$, particularly material near the zero drift.
+The incremental resistance comparison cancels most of that offset; it
+is checked at every signed rate pair and is not a new exact LBM identity.
+
+The independent scalar coefficient follows the known conservative
+Allen--Cahn behavior of color-gradient recoloring \cite{subhedar2020}.
+It is not the chemical-potential mobility in the Cahn--Hilliard
+contact-line scaling of Kusumaatmaja et al. \cite{kusumaatmaja2016}.
+An independent-mobility color-gradient model exists \cite{subhedar2022},
+but is not implemented or validated by this campaign. None of these
+citations makes the observed excess resistance a calibrated physical
+contact-line coefficient. Raw currents, signed pressure error and
+grid dependence remain in \texttt{data/front-mobility.json}.

@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-09",
+  "base_source_revision": "e28cbb67b7d36209f4b8aa37ed2f068f09a2859a",
+  "solver_sha256": "a1ff678f4fb72ddc9716dca3fce336aada514ca5ebe7285f8c6addfde6e58d80",
+  "numerical_kernel_unchanged": true,
+  "physical_executions": 74,
+  "physical_front_trajectories": 40,
+  "force_audited_adjacent_states": 40,
+  "verified_raw_provenance": true,
+  "dataset_sha256": "2d48e241f417f0a2b2f11b59082791dc29842ecb3562664401b41c18aad317a1",
+  "relative_width_error": 7.093282627934627e-10,
+  "fixed_width_mobility_deficits": [
+    0.11257015463726006,
+    0.18567167567856535,
+    0.22296506439871366
+  ],
+  "maximum_relative_force_resistance_residual": 0.00022399498162550824,
+  "maximum_absolute_reciprocal_speed_residual": 1.0560809284519194e-08,
+  "maximum_relative_duration_mobility_change": 0.00013692307265011916,
+  "maximum_relative_budget_residual": 1.0641995433219873e-12,
+  "original_archive_unchanged": 82,
+  "historical_c_files_unchanged": 66,
+  "pressure_contracts": "Passed; length-generalized helper also used by guarded reservoir contract group. Existing full eight-group validation retained in core-reservoir-validation.json; unchanged C++ kernels.",
+  "pressure_test_log_sha256": "a36638eb829565208f9e4b6fdb5827c95367cb962f90710131513da59936f163",
+  "manuscripts": {
+    "main.pdf": {
+      "pages": 34,
+      "sha256": "29d473cebbc13de9a910e0cb81f0ca2b58a360d0049d3d4f4be207e411e8389d"
+    },
+    "supplement.pdf": {
+      "pages": 16,
+      "sha256": "c1d12ae5827daea94603bfbc38cfb5ce3dcd9648bedcb12e7ac29058cc24cb50"
+    }
+  },
+  "figures": 15,
+  "highlights_max_characters": 75,
+  "abstract_whitespace_words": 226,
+  "literature_scope": "Subhedar2020 publisher PDF retrieved from KIT and relevant derivation/operator/conclusion sections inspected; Subhedar2022 primary abstract/metadata only; Kusumaatmaja2016 open manuscript methods/scaling/results and published metadata.",
+  "scope": "Equal-density/equal-viscosity D2Q9, planar theta60 walls. Length localization tested at H16; rate interval .01 to .04 Young pressure. Finite-width grid sequence is not converged. Reciprocal work is a continuum diagnostic, not an exact discrete identity or a verified physical contact-line law.",
+  "figures_regenerated_png_bitwise": true
+}

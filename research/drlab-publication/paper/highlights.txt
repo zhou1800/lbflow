@@ -1,5 +1,5 @@
 Finite-interface viscosity alters pore transport despite mass conservation.
-Core and wall controls separate capillary-pressure bias from front mobility.
-Exact axial matching distinguishes published recoloring operators.
-Guarded reservoir budgets connect closed pressure to bidirectional drift.
+Channel length and capillary force work isolate excess front resistance.
+Fixed-width controls retain unresolved grid dependence in displacement.
+Published core matching and exact mass budgets bound wetting claims.
 Digital-rock tests retain measured resolution and transient limits.

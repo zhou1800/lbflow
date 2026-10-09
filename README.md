@@ -52,6 +52,9 @@ flow and guarded flat pressure-reservoir experiments. Independently matched
 published recoloring/MRT controls separate core and wall effects. The force
 reduces residual velocities in the recorded slit controls,
 with remaining pressure and wall-profile errors documented explicitly.
+Fixed-width, length and rate controls trace a localized excess front
+resistance to independently weighted capillary force. That response still
+varies with grid resolution and is not a validated physical contact-line law.
 See the [numerical change log](research/drlab-publication/notes/numerical-changes.md).
 
 CTest exercises coefficients from the actual C++ implementation, 16 analytic
