@@ -53,6 +53,16 @@ string FilePrm::getWallGradient() const
     return result;
 }
 
+double FilePrm::getWallSlipLength() const
+{
+    const auto value=iPrm.find("wallSlipLength");
+    if (value==iPrm.end()) return 0.0;
+    double result;
+    if (!parse(value->second,&result) || !isfinite(result) || result<0.0)
+        throw invalid_argument("wallSlipLength must be a finite nonnegative number.");
+    return result;
+}
+
 string FilePrm::getViscosityInterpolation() const
 {
     const auto value = iPrm.find("viscosityInterpolation");
@@ -158,6 +168,18 @@ void FilePrm::ValidateSimulation() const
             !isfinite(density[k]) || density[k] <= 0.0)
             throw invalid_argument("Densities must be positive; relaxation times must exceed 0.5.");
     const string recoloringModel=getRecoloringModel(),spectrum=getMrtSpectrum();
+    if (getWallSlipLength()>0.0) {
+        if (model!="color" || ndim!=2 || getEquilModel()!="MRT" || spectrum!="legacy" ||
+            recoloringModel!="projection" || density[0]!=density[1] ||
+            rexlationTime[0]!=1.0 || rexlationTime[1]!=1.0 ||
+            getCapillaryModel()!="csf" || getWallGradient()!="ghost" || getPhaseBoundary()!="flux")
+            throw invalid_argument("Prescribed slip initially requires neutral ghost/flux projection/legacy-MRT color D2Q9 at equal tau1.");
+        for (const auto& item : idx) {
+            const IT type=item.second->Type;
+            if (type!=IT::VD && type!=IT::GV && type!=IT::SD && type!=IT::BB)
+                throw invalid_argument("Prescribed slip initially supports closed VD/GV with flat SD/BB walls.");
+        }
+    }
     if (recoloringModel!="cosine" && recoloringModel!="projection")
         throw invalid_argument("recoloringModel must be cosine or projection.");
     if (spectrum!="legacy" && spectrum!="liu2015")
@@ -419,6 +441,9 @@ void FilePrm::parseAll()
         }
         else if (a.first == "recoloringModel" || a.first == "mrtSpectrum") {
             // Independent published core-operator controls.
+        }
+        else if (a.first == "wallSlipLength") {
+            // Optional prescribed neutral Navier regularization.
         }
         else if (a.first == "interfaceThickness")
             parse(a.second, &iThickness);

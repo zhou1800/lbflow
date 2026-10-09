@@ -513,3 +513,135 @@ incoming/outgoing force storage. This is a continuum diagnostic and not an
 exact discrete identity or an independently fitted contact-line law.
 Phase-field chemical-potential slip laws cannot be transferred to this
 color-gradient scalar recurrence without a derivation.
+
+### Independent periodic Stokes and phase-field reference
+
+Use an independently discretized creeping-flow/phase-field calculation to
+test whether the measured interfacial resistance survives outside the LBM
+operators. Start with a periodic two-front bridge between flat stationary
+walls at theta90, where zero normal phase flux and the geometric neutral
+condition are compatible without an unspecified nonneutral wall closure.
+Use equal density/viscosity, physical H16, L64, D=nu=1/6, sigma=.005 and
+W09=4.765235021846117. Select segregation strength from planar width alone;
+do not fit pressure, force or front speed. Retain original kernels until a
+specific defect is demonstrated. A neutral reference does not validate
+theta60 or curved-rock wetting.
+
+The reference solves incompressible Stokes with no-slip/no-penetration
+walls and periodic x, coupled to
+`dt(phi)+div(phi*u)=D*div(grad(phi)-2*b*phi*(1-phi)*n)`.
+This is the leading conservative Allen-Cahn recoloring equation, not a
+chemical-potential/free-energy model. Use a conservative finite-volume
+scalar flux and independent staggered-grid Stokes solve. Reconstruct CSF
+as sigma*kappa*grad(phi), with a balanced gradient on momentum faces and
+explicit boundary-normal/curvature rules. Preserve phase mass; reject
+invalid phase fractions instead of silently clipping them. Measure spatial,
+time and equilibration sensitivity before treating the reference as evidence.
+
+Before coupling, verify pure Poiseuille response, exact discrete divergence,
+pressure-gradient cancellation, manufactured Stokes flow and a periodic
+planar phase equilibrium. Verify translation in a prescribed velocity and
+zero-sigma phase/hydraulic decoupling. Report finite-volume wall sampling
+error separately from the pure LBM response, with each hydraulic mobility
+independently measured. A fixed lattice reference is not a converged
+continuum result.
+
+Use the same physical bridge/width in production LBM and the reference.
+Record forcing, source hashes, independent calibration, raw fields, phase
+mass, mean flow and an unwrapped circular phase-centroid speed. Global
+phase volume cannot measure translation of a periodic bridge. Both signs
+and at least two driving magnitudes test linear response. Repeat duration
+and resolution; retain disagreement and failed regimes. Determine excess
+resistance per interface using the periodic length and two fronts.
+
+Measure relative phase advection in the translating frame along the zero
+color contour and its distance from the wall, keeping raw/parity diagnostics
+and sampling sensitivity. Call any emerging diffusion-zone length a
+diagnostic scale until its definition, resolution and model correspondence
+are verified. Derive nonneutral boundary equivalence before using theta60
+as a matched quantitative reference. Independent mobility and general
+contact-line laws remain separate model changes with published precedents.
+
+Probe the phase operator separately at sigma=0 with a small sinusoidal
+transverse displacement of an independently equilibrated neutral bridge.
+Use paired physical amplitudes +/-0.01 and an amplitude-doubling check,
+physical transverse wave number pi/H, identical width and both phase fronts.
+Measure projected displacement from phase integrals, native full-solver
+fields and an independent scalar recurrence. In the leading continuum
+flux, an ideal signed-distance profile has zero sharpening/diffusive flux;
+linearized shape transport must account for the variation of its normal.
+Do not substitute a fixed normal when drawing a contact-line conclusion.
+Report the measured transverse relaxation and resolution scaling without
+identifying it as a calibrated molecular mobility or a new physical law.
+
+If a centered primitive-variable reference develops unresolved transverse
+oscillations, retain that failed reference and do not equate its velocity
+with a continuum result. A mathematically equivalent transformed-variable
+flux may be used to preserve the planar tanh equilibrium: use logistic
+distance for the unit normal and the matched face chain rule. Its planar
+coefficient is selected by sampled width only. Any log-domain regularization
+must affect the flux reconstruction, not clip the evolving phase state;
+test cutoff sensitivity. Check manufactured operators, planar equilibrium,
+translation and small transverse perturbations before coupled comparison.
+State the numerical differences from the production lattice explicitly.
+
+### Prescribed neutral Navier-slip control
+
+Test the dynamic comparison at an independently specified hydrodynamic
+slip length, rather than fitting it to the unexplained mobility. Add an
+optional `wallSlipLength` in lattice length units, default zero. Initially
+restrict positive values to equal-density standard-weight color D2Q9,
+projection/legacy MRT, tau0=tau1=1, CSF, ghost neutral flat walls and
+conservative phase transfer, closed/periodic VD/GV with SD/BB walls.
+Reject pressure faces, nonneutral angles, unequal tau and general geometry.
+The option is an established Navier regularization, not molecular-slip
+calibration or a new wetting theory. Defaults must remain byte-identical.
+
+Mix full bounce-back and specular reflection for each phase with specular
+fraction s=lambda/(lambda+tau-1/2). Their sum preserves impermeability and
+each component's wall mass. The existing antisymmetric relative-phase
+transfer is multiplied by (1-s), since the specular fraction already
+performs the forward tangential reflection. Specular outgoing populations
+must come from the tangential source neighbor, not the same wall cell;
+use the already exchanged outgoing wall arrays. Same-cell specular mixing
+has the correct uniform pure-channel response but does not represent the
+spatial phase/advective reflection. Retain this failed prototype separately.
+The transfer remains conservative and leaves pure phases unchanged. Derive
+the pure-channel hydraulic response, including forcing/finite-grid offsets;
+do not substitute a fitted effective lambda for the independently given
+input. Verify both force signs, at least three slip lengths and widths,
+neutral stationary/transient phase controls, MPI/restart/rotation and
+invalid-input guards. Keep finite-grid errors and kernel provenance.
+
+The independent staggered Stokes solver applies the same Navier wall law
+u_wall=lambda*inward_normal_derivative(u_t), with zero penetration and
+neutral phase flux. Use physical lambda=1 in H16 base units, independently
+matched width and forcing, then compare both signs, duration, time step
+and spatial refinement. Probe another slip length after the first comparison
+passes. Calibrate neither lambda nor sigma to speed. Compare a defined
+finite-width, prescribed-slip model, not an unknown real rock's contact line.
+
+Analyze the exact neutral phase-wave symbol independently of measured rates.
+Include the variation of the normalized gradient. Compare the translational
+eigenmode with full-solver signed/amplitude-doubled waves and an additional
+transverse mode; mode two is a held-out prediction. Report spatial and
+wave-number scaling, not a fitted molecular diffusivity. For continuum
+signed-distance tanh equilibria the sharpening/diffusion flux vanishes;
+do not equate their leading equation with the complete discrete kinetics.
+
+An exploratory hybrid follows the actual-force hydraulic audit: combine
+independent staggered Stokes and conservative face advection with the full
+zero-flow projection phase stencil. It is a kinetic ablation that retains
+the original discrete phase relaxation, not another independent continuum
+validation. Compare its mean/centroid motion to both full LBM and the
+finite-volume leading equation. Preserve mass, amplitude/sign and temporal
+checks; do not fit a rate or claim physical validation from numerical closure.
+### Initial-profile cross-control
+
+The independent FV and shared-phase calculations start from their separately
+calibrated planar equilibria. A causal interpretation must distinguish the
+phase operator from this initial-profile choice. At H32 and identical force,
+width and prescribed slip, also start FV from the discrete projection profile
+and the shared-phase ablation from the analytic logistic profile. Compare both
+mean and centroid speeds after the same physical duration. This is a targeted
+review follow-up, not a claim that all exploratory decisions were prespecified.

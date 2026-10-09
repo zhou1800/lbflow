@@ -1,0 +1,267 @@
+\section{Exact zero-flow projection spectrum}
+\label{supp:phasespectrum}
+At unit total density, zero force and zero velocity, the projection
+recoloring map gives outgoing phase populations
+\begin{equation}
+ f_i^{0,*}=w_i[\varphi+\beta\varphi(1-\varphi)\bm e_i\cdot\bm n_h].
+\end{equation}
+Their sum after streaming defines a nonlinear scalar map $P(\varphi)$.
+Neutral ghost reflection and conservative phase transfer reproduce its
+reflected scalar extension at the wall. This is the projection model,
+not the older cosine normalization.
+
+Let $p_j$ be the independently relaxed periodic planar profile,
+$g_j=(p_{j+1}-p_{j-1})/2$, and $n_j=\operatorname{sgn}(g_j)$ where
+$2|g_j|>10^{-9}$, zero otherwise. The factor two matters because production
+applies its cutoff to the color gradient of $\chi=2\varphi-1$.
+Define shifts $(Lv)_j=v_{j-1}$ and $(Rv)_j=v_{j+1}$, and diagonal operators
+\begin{equation}
+ E=\operatorname{diag}[(1-2p_j)n_j],\quad
+ C=\operatorname{diag}\left[\frac{p_j(1-p_j)}{|g_j|}\right]_{active},
+ \quad S=\frac23 I+\frac16(L+R).
+\end{equation}
+Inactive entries of $C$ are zero. For a transverse Fourier perturbation
+$\delta\varphi_j\exp(iqy)$, differentiation of the gradient gives
+$\delta g_y=i\sin(q)S\delta\varphi$ and
+$\delta n_y=\delta g_y/|g_j|$ on the active mask. Variation of $n_x$
+vanishes to first order around the axial normal. With $a=1/9$, $b_d=1/36$
+and $c=\cos q$, summing all nine links yields
+\begin{align}\label{eq:exactsymbol}
+ T(q)={}&(4/9+2ac)I+(a+2b_dc)(L+R)\nonumber\\
+ &+\beta(a+2b_dc)(LE-RE)\nonumber\\
+ &+2\beta\sin^2(q)[aI+b_d(L+R)]CS.
+\end{align}
+The last term is the unit-normal variation; omitting it would give a
+different leading shape dynamics. The profile and active mask are common
+to the scalar matrix and production calculation. The derivative of a
+hard cutoff is considered only within this fixed active-mask neighborhood.
+No differentiability claim at the cutoff transition itself is made.
+
+The neutral reflected transverse modes have $q=m\pi/H$. We select the
+real positive eigenvalue whose eigenvector has the greatest normalized
+overlap with the central derivative of $p$. This overlap is above 0.9979
+in the measured cases. The physical rate is $-\log\mu/h^2$, not
+$(1-\mu)/h^2$. Numerical differentiation of $P$ with amplitude $10^{-5}$
+checks the full matrix action with maximum discrepancy
+$\PhaseSymbolError$ over the three grids.
+
+Full simulations start from outgoing populations built from
+$p_j-\epsilon\cos[m\pi(y+1/2)/H]\,\partial_xp_j$, with physical
+$\epsilon=\pm0.01$, and $\pm0.02$ at H16. They use zero surface tension,
+zero body force and no hydraulic slip. A phase integral over one interface,
+projected on the transverse cosine, measures its displacement. The decay
+rate is diagnosed by a log-linear fit over the latter half of each
+2000-physical-time trajectory. This fit measures the simulation response;
+it does not enter the matrix prediction.
+
+\begin{center}\small
+\begin{tabular}{rrrr}\toprule
+$H$ & $m$ & Predicted physical rate & Maximum relative difference \\\midrule
+16 & 1 & $6.09541216\times10^{-5}$ & $7.392\times10^{-6}$ \\
+32 & 1 & $1.55521488\times10^{-5}$ & $2.378\times10^{-6}$ \\
+48 & 1 & $6.90314294\times10^{-6}$ & $2.454\times10^{-6}$ \\
+16 & 2 & $9.86115881\times10^{-4}$ & $1.473\times10^{-6}$ \\
+32 & 2 & $2.48320427\times10^{-4}$ & $2.932\times10^{-6}$ \\
+\bottomrule\end{tabular}
+\end{center}
+Bounds round upward across both perturbation signs and tested amplitudes.
+The spectral rate ratios support fourth-order shape relaxation in this
+test. An arbitrary-interface modified equation, universal coefficient
+or isotropy theorem is not inferred from five measured mode/grid combinations.
+The known leading conservative Allen--Cahn mapping and projection/isotropy
+distinction remain prior results \cite{subhedar2020}.
+
+\subsection{Formal isolated-interface expansion}
+The $h^2/24$ trend can be understood in an idealized limit, separately
+from the exact finite-grid spectrum above. Consider one isolated ascending
+interface in an unbounded continuum coordinate, smooth decaying
+perturbations, projection weights and no active tail cutoff. Set
+$\beta=bh$, $J=\varphi(1-\varphi)\bm n$, and
+$p_0'=2bp_0(1-p_0)$. The D2Q9 moments give
+\begin{align}
+ \bm g_h&=\nabla\varphi+\frac{h^2}{6}\nabla\Delta\varphi+O(h^4),\\
+ \frac{P(\varphi)-\varphi}{h^2}
+ &=\frac16\Delta\varphi-\frac b3\nabla\cdot J
+ +h^2\left[\frac1{72}\Delta^2\varphi
+ -\frac b{18}\Delta\nabla\cdot J
+ -\frac b3\nabla\cdot\{\varphi(1-\varphi)\bm n_2\}\right]+O(h^4),
+\end{align}
+where $\bm n_h=\bm n+h^2\bm n_2+O(h^4)$. The gradient normalization
+is part of this expansion; $\bm n_2$ must not be discarded.
+
+For $\delta\varphi=-\eta(y)p_0'(x)$,
+$\delta n_y=-\eta'$ and $\delta n_{2,y}=-\eta'''/6$.
+The $p_0'''$ terms in gradient normalization cancel between numerator
+and denominator. On the leading profile,
+$\nabla\cdot J=\Delta\varphi/(2b)$, so the first two fourth-order
+terms combine to $-\Delta^2\varphi/72$.
+Integration of their linear variation across the interface gives
+$\eta''''/72$; the normal correction gives
+$b\eta''''\int p_0(1-p_0)\,dx/18=\eta''''/36$.
+The normal-profile correction does not introduce an integrated $k^2$
+term at this order: its stationary equation gives
+$p_h'-2bp_h(1-p_h)=h^2p_0'''/12+O(h^4)$, whose leading correction
+integrates to zero. The leading linear phase operator annihilates
+translation and conserves its integral, so the discrete-time logarithm
+has no additional contribution to this projected rate at order $h^2$.
+Since $\int\delta\varphi\,dx=-\eta$, the formal result is
+\begin{equation}
+ \partial_t\eta=-\frac{h^2}{24}\partial_y^4\eta+O(h^4),\qquad
+ \Gamma=\frac{h^2 k_{phys}^4}{24}+O(h^4).
+\end{equation}
+This conditional calculation explains the reference trend without fitting
+a coefficient. It is a formal smooth isolated-interface expansion, not
+a uniform theorem with production cutoffs, two interacting interfaces,
+nonneutral walls or arbitrary moving geometries. Those effects remain
+in $T(q)$; its eigenvalues supply the reported predictions. A formal
+coefficient is not substituted for the exact finite-grid comparison.
+As a separate mathematical control, exact matrices at the analytic
+zero-flux planar recurrence, diagnostic cutoff zero and fixed physical
+$k=\pi/2$ have coefficient $\Gamma/(h^2k^4)$ equal to
+0.03809364, 0.04072182 and 0.04142755 at H32/H64/H128.
+Their relative differences from $1/24$ are $-8.575$\%, $-2.268$\%
+and $-0.574$\%, with successive error orders 1.9190 and 1.9824.
+The scalar stationary residual is below $4\times10^{-16}$.
+These are additional matrix/expansion checks, not full production
+trajectories with altered cutoffs. The production-spectrum command
+also rejects a profile that has not relaxed sufficiently.
+
+\section{Prescribed neutral slip and independent dynamic controls}
+\subsection{Forward specular reflection and component transfer}
+Let $\Delta f_A$ and $\Delta f_T$ denote differences between the appropriate
+forward-neighbor outgoing specular link and the original local outgoing
+bounce-back link, for phase A and total fluid. At a wall face, let
+$\bar\varphi$ be the mean of its two outgoing node fractions. The new
+incoming A population is
+\begin{equation}
+ f_A^{in}=f_A^{BB}+s\Delta f_A+
+ (1-s)[\Delta f_A-\bar\varphi\Delta f_T],\qquad
+ f_T^{in}=f_T^{BB}+s\Delta f_T.
+\end{equation}
+The B population is complementary. Each face has its opposite partner,
+so component transfers sum to zero. Pure phases have zero relative transfer.
+At rest with constant total density, $\Delta f_T=0$; the phase update is
+the full scalar forward reflection independently of $s$.
+Using a same-node specular value or leaving the relative transfer unscaled
+does not give this closure. Earlier pilots with that combination are
+retained and excluded from the final comparisons.
+
+The admitted closure has $s=\lambda_l/(\lambda_l+1/2)$ and equal
+$\tau=1$, legacy MRT, standard pressure weights, projection recoloring,
+CSF and neutral flat ghost/flux walls. The three checked physical slip
+lengths are 0.5, 1 and 2 at $H=8,16,32$, with both driving signs.
+The independently calculated midpoint parabola supplies the hydraulic
+reference. The nine CTest groups include eighteen pure profiles,
+neutral fixed-point preservation, signed transport, rotated two-rank
+exchange, one-/two-rank outgoing restart and invalid-configuration exits.
+Three closed default settings retain bitwise fields and populations
+against the preceding frozen kernel. Slip is a specified numerical
+boundary control; a molecular slip parameter is not inferred.
+
+\subsection{Staggered Stokes and finite-volume phase reference}
+The independent hydraulic solver uses cell pressure, x-face axial
+velocity and y-face transverse velocity. A corner streamfunction gives
+$u=\delta_y\psi$ and $v=-\delta_x\psi$, with divergence cancelling
+algebraically. Periodic x Fourier modes diagonalize the axial Laplacian;
+the wall-normal biharmonic matrix solves
+$\nu\Delta_h^2\psi=\operatorname{curl}_h\bm F$. Nonzero modes have
+$\psi=0$ on both walls. Navier slip supplies wall vorticity through
+the ghost factor $(1-2\lambda/h)/(1+2\lambda/h)$. The mean axial flow is
+solved separately using ghost velocity ratio
+$(2\lambda-h)/(2\lambda+h)$, so it is not lost in a periodic
+streamfunction inversion.
+
+For constant axial force, its exact sampled discrete profile is
+\begin{equation}
+ u_j=\frac{F}{2\nu}
+ [y_j(16-y_j)+16\lambda+h^2/4].
+\end{equation}
+The positive $h^2/4$ difference from the LBM midpoint reference is retained.
+All checked no-slip/Navier discrete profiles agree within $2\times10^{-12}$
+relatively. Manufactured flow from
+$\psi=y^2(16-y)^2\sin(2\pi x/64)$ has relative velocity errors
+0.0248095, 0.00622349 and 0.00155717 on 16/32/64 grids, giving
+orders 1.9951 and 1.9988. A discretely exact gradient force produces
+maximum velocity below $5\times10^{-17}$; manufactured divergence is
+also checked separately.
+
+The independent scalar uses conservative centered face advection and
+second-order Runge--Kutta stepping. Direct primitive-variable pilot
+fluxes produced transverse distortion and incorrect flow direction;
+reducing the time step did not resolve that failure. These failures
+are retained and do not validate the leading PDE.
+The accepted reference discretizes the continuously equivalent flux
+using $d=\log[\varphi/(1-\varphi)]/(2b)$:
+\begin{equation}
+ \bm q=D\,2b\varphi(1-\varphi)(\nabla d-\bm n_d).
+\end{equation}
+On a face, $2b\varphi(1-\varphi)$ is represented by the divided
+difference $\Delta\varphi/\Delta d$, with its analytic equal-value limit.
+Tangential face gradients and unit normals use the distance field.
+The clipping interval $[10^{-12},1-10^{-12}]$ regularizes reconstruction
+only; the evolving fractions are not clipped. It is inactive throughout
+the reported comparisons. Published signed-distance/profile-preservation
+approaches motivate this representation \cite{hao2024}; their complete
+algorithms and boundedness proofs are not claimed for our stencil.
+
+For finite-volume runs, the analytic tanh coefficient is chosen to match
+the same interpolated $W_{0.9}$ crossing width, independently of velocity.
+The scalar keeps a flat tanh bridge stationary and translates a prescribed
+profile at speed 0.001 over physical time 100 with relative centroid
+errors $-1.381\times10^{-4}$ and $-3.651\times10^{-5}$ at H16/H32.
+Two-phase zero-sigma runs recover the exact discrete pure hydraulics
+within $2\times10^{-15}$ relatively. The dynamic reference has
+$\nu=D=1/6$, $\sigma=.005$, physical force $10^{-7}$ and slip 1.
+Its phase mass changes by less than $2\times10^{-13}$ relatively.
+H32 negative-force half-step and positive-force full-step mean speeds
+agree in magnitude within $\PhaseFVTimeSignError$. The last output-interval
+changes are below $7\times10^{-6}$ relatively. These checks bound the
+specified discretization; they do not establish full dynamic convergence.
+
+At H32, an additional FV run starts from the independently generated
+discrete projection profile, while an additional ablation starts from the
+analytic logistic profile. The respective late mean-speed changes are
+$-1.629\times10^{-6}$ and $3.249\times10^{-13}$ relatively; centroid
+changes are $-1.783\times10^{-6}$ and $-6.352\times10^{-11}$.
+This targeted cross-control distinguishes initialization from the changed
+phase operator. It does not remove the dynamic continuum discrepancy.
+
+The ablation adds $(P(\varphi)-\varphi)/h^2$ to the conservative
+face-advection right-hand side in place of the finite-volume phase flux.
+The Stokes solver and distance-based capillary force stay independent.
+It is a semidiscrete shared-kinetics experiment, rather than a replay of
+the full LBM or an independent PDE validation. Its phase mass changes
+by less than $4\times10^{-12}$ relatively; the H32 half-step mean-flow
+comparison is recorded separately. Mean and circular-centroid velocities
+remain distinct observables in the data.
+
+\subsection{Actual-force audit and retained evidence}
+The production force audit uses the new frozen executable's own
+gradient, curvature and cutoff on two adjacent outgoing checkpoints.
+Its density/color match the physical fields within $3\times10^{-12}$.
+Cell forces are averaged onto the appropriate MAC faces, converted by
+$F_{phys}=F_l/h^3$, and combined with the independent uniform body force.
+The actual-force and same-phase-field reference-force means are retained
+for each state. These are hydraulic diagnostics on a supplied phase field;
+their small residual does not independently verify its evolution.
+
+\texttt{data/phase-kinetics.json} records 55 LBM executions, including
+14 phase-wave trajectories, six default-compatibility runs and three
+two-state hydraulic replays. It separately records seven independent
+finite-volume runs and five shared-phase ablations. The collector
+recomputes all diagnostics from raw fields, matches frozen reference
+source hashes and checks inputs, geometry, executables and native
+outgoing donor hashes. The preceding zero-slip kernel remains distinct
+from the optional-slip kernel pinned by
+\texttt{run-kernels/navier-slip-manifest.json}.
+
+Original receipts retain diagnostic mistakes: early pure-run elapsed times
+used step minus one although their start was zero; exploratory spectrum
+files omitted the factor two in the active-gradient cutoff. The collector
+recomputes both correctly. An early H48 ablation recorded its source hash
+at completion after a docstring/scope edit; it is excluded and replaced
+by a canonical rerun with launch-time source/dependency hashes. Earlier
+ablation scopes are corrected explicitly in the scientific summary while
+their original metadata are retained. Primitive-reference failures,
+same-node slip pilots and unverified early reference source identities
+remain outside the claimed successful comparisons.

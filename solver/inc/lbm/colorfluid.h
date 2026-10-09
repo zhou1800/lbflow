@@ -36,6 +36,8 @@ private:
     const bool gradientCurvature;
     const bool projectionRecoloring;
     const bool pressureReservoirs;
+    const double wallSlipLength;
+    void applyWallSlip();
     size_t reservoirAxis, boundaryBudgetReference;
     va_u8_t reservoirTypes;
     va_idx_t reservoirPhase;

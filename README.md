@@ -179,6 +179,16 @@ draft and has not been submitted or accepted.
   inflow/outflow, with a new baseline on restart. Long physical validation
   covers theta60, equal tau1 and H16/H32. These are flat-slit drift controls,
   not validated curved-pore entry thresholds or contact-line laws.
+- `wallSlipLength 1.0` prescribes a lattice-unit hydraulic Navier slip length;
+  zero is the default. This research control currently requires neutral flat
+  D2Q9 SD/BB walls, equal tau=1, standard equal-density color flow,
+  projection recoloring, legacy MRT and CSF ghost/flux. Closed VD/GV labels
+  are admitted; pressure reservoirs and nonneutral/curved walls are rejected.
+  Forward specular populations and complementary component transfer preserve
+  the neutral phase recurrence. Pure-channel calibration, rotation, MPI and
+  restart are checked; molecular slip and rock contact-line laws are not
+  inferred. Under grid refinement, convert physical slip to lattice units
+  using `lambda_lattice=lambda_physical/h`.
 - `reportDir 0` requests a prescribed run duration. Automatic convergence
   requires three stable velocity/color reports and applicable scalar diagnostics,
   including changes from the adjacent time step. Even reporting intervals

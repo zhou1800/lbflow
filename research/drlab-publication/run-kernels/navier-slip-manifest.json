@@ -1,0 +1,21 @@
+{
+  "source_revision_before_patch": "394b26d93ac9a147ba2e202e685f2c98c6c26df3",
+  "patch": "navier-slip.patch",
+  "apply_option": "--unidiff-zero",
+  "patch_sha256": "972316afa17d8400bd6b8e80b8f6b7ececad4395561945b7c1767b8d3ab4500e",
+  "solver_sha256": "9d9b5196a034e90e8cc02199840cd4b040084213022f850fff89f6f1a21165c5",
+  "audit_driver_sha256": "64826d44dc1b940cf9bab1912234c6fb789489bf0d2fbd60fa9fe2c2889198ea",
+  "files_before_patch": {
+    "solver/inc/file/fileprm.h": "13b4748355e9ae03a29f3ff026ee042d79f960a01c248a50cab3e57f67b98bc3",
+    "solver/inc/lbm/colorfluid.h": "8982b9b658c4548fdbe63f5393f40f5c2db425ffde22d3bbb4863dd668cec169",
+    "solver/src/file/fileprm.cpp": "95d26a1e8d8512063046c4d65d1414a4d27048388d7450d21971d23ec7f21bd3",
+    "solver/src/lbm/colorfluid.cpp": "4d0fe6ffd4110df35559497495dab1db4273b2e5133d6ea52ca2dff40cbd8485"
+  },
+  "files_after_patch": {
+    "solver/inc/file/fileprm.h": "fdc895c641b8847f7ad995602829077c382b73c2894a65f81a0300c5b15fd262",
+    "solver/inc/lbm/colorfluid.h": "4449ad39ec4b2ce65f74cc7cb9017c6a9a399e4c7e9a1f46e4ce657c6f334f67",
+    "solver/src/file/fileprm.cpp": "aec26b54586e5fe32263c9057690d8bae10b8c344729a85d6bc4f4c158c4d228",
+    "solver/src/lbm/colorfluid.cpp": "a37c709e9020bee7861b990758b890966023af9ce465338f241eecf4dd82a539"
+  },
+  "scope": "Optional neutral flat-wall Navier reflection at equal tau1, projection/legacy MRT, CSF ghost/flux. Default zero-slip macros and outgoing populations are bitwise identical in three closed controls. Hydraulic slip is prescribed and not a molecular wetting law."
+}

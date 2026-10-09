@@ -29,6 +29,7 @@ ColorFluid::ColorFluid(const FilePrm &prm)
     , gradientCurvature(p.getCurvatureStencil()=="gradient")
     , projectionRecoloring(p.getRecoloringModel()=="projection")
     , pressureReservoirs(p.getCapillaryModel()=="csf" && !p.getIdx({IT::PB}).empty())
+    , wallSlipLength(p.getWallSlipLength())
     , reservoirAxis(0), boundaryBudgetReference(p.getTStart())
     , reservoirTypes(pressureReservoirs ? g.LG.FG.N : 0)
     , reservoirPhase(size_t(2),pressureReservoirs ? g.LG.N : 0)
@@ -150,6 +151,7 @@ void ColorFluid::Run(std::ostream &logProc)
         // 2. Apply doundary condition.
         bounceBack(&f[0], fOld[0], ibS);
         bounceBack(&f[1], fOld[1], ibS);
+        if (wallSlipLength>0.0) applyWallSlip();
         if (phaseFlux) applyWallPhaseFlux();
 
         // Halfpass film boundary condition.
@@ -972,6 +974,8 @@ void ColorFluid::calcWallRecoloring()
     wallRecolorFactor=((a+b)*(a+sqrt(2.0)*b)/(a+2*b)-b/sqrt(2.0))/a;
     for (size_t i=0; i<g.LG.N; ++i) {
         if (!ibI[i]) continue;
+        if (wallSlipLength>0.0 && abs(ibCosCA[ibI[i]])>1e-14)
+            throw runtime_error("Prescribed slip initially requires neutral flat walls.");
         if ((tangentWall || halfwayWall || ghostWall) && abs(ibSinCA[ibI[i]])<1e-8)
             throw runtime_error("Tangent wall reconstruction requires a nonsingular contact angle.");
         const auto& normal=ibNorm[ibI[i]];
@@ -1072,11 +1076,34 @@ void ColorFluid::applyWallPhaseFlux()
             if (pressureReservoirs && (reservoirTypes[i2f[i]]==IT::PB || reservoirTypes[j]==IT::PB)) continue;
             const size_t mirror=wallMirror[normalAxis][q];
             const double fraction=.5*(wallFraction[i2f[i]]+wallFraction[j]);
-            const double transfer=wallOutgoing0[mirror][j]-wallOutgoing0[opposite][i2f[i]]
+            double transfer=wallOutgoing0[mirror][j]-wallOutgoing0[opposite][i2f[i]]
                 -fraction*(wallOutgoingTotal[mirror][j]-wallOutgoingTotal[opposite][i2f[i]]);
+            if (wallSlipLength>0.0) transfer*=0.5/(wallSlipLength+0.5);
             const double total=f[0][q][i]+f[1][q][i];
             f[0][q][i]+=transfer;
             f[1][q][i]=total-f[0][q][i];
+        }
+    }
+}
+
+void ColorFluid::applyWallSlip()
+{
+    // At tau=1 a linear shear gives lambda=s/[2(1-s)] at the halfway wall.
+    const double specular=wallSlipLength/(wallSlipLength+0.5);
+    const auto& i2f=g.LG.getI2fMap();const auto& adj=g.LG.FG.getAdjI();
+    for (size_t i=0;i<g.LG.N;++i) {
+        if (!ibI[i]) continue;
+        const size_t tangent=wallTangent[i];
+        const size_t normalAxis=g.S.Qi[tangent][0]==0 ? 0 : 1;
+        for (size_t q=1;q<g.S.Q;++q) {
+            if (g.S.Qnorm[q]<=1.0 || g.S.Qi[q][normalAxis]*ibNorm[ibI[i]][normalAxis]<=0.0) continue;
+            const size_t opposite=g.S.Qop[q],mirror=wallMirror[normalAxis][q];
+            const size_t tangentNeighbor=g.S.Qi[q][1-normalAxis]>0 ? g.S.Qop[tangent] : tangent;
+            const size_t j=adj[i2f[i]][tangentNeighbor];
+            const double zero=wallOutgoing0[mirror][j]-wallOutgoing0[opposite][i2f[i]];
+            const double total=wallOutgoingTotal[mirror][j]-wallOutgoingTotal[opposite][i2f[i]];
+            f[0][q][i]+=specular*zero;
+            f[1][q][i]+=specular*(total-zero);
         }
     }
 }

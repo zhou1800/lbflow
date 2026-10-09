@@ -204,6 +204,7 @@ public:
     string getPhaseBoundary() const;
     string getRecoloringModel() const;
     string getMrtSpectrum() const;
+    double getWallSlipLength() const;
 
     /// \name Get functions for #grid mesh
     ///@{

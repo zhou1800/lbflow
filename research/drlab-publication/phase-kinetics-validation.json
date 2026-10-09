@@ -1,0 +1,164 @@
+{
+  "date": "2026-10-09",
+  "base_source_revision": "394b26d93ac9a147ba2e202e685f2c98c6c26df3",
+  "solver_sha256": "9d9b5196a034e90e8cc02199840cd4b040084213022f850fff89f6f1a21165c5",
+  "audit_driver_sha256": "64826d44dc1b940cf9bab1912234c6fb789489bf0d2fbd60fa9fe2c2889198ea",
+  "source_kernel_reconstruction": {
+    "base_commit": "394b26d93ac9a147ba2e202e685f2c98c6c26df3",
+    "executables": {
+      "LBFlow": "9d9b5196a034e90e8cc02199840cd4b040084213022f850fff89f6f1a21165c5",
+      "NumericalAudit": "64826d44dc1b940cf9bab1912234c6fb789489bf0d2fbd60fa9fe2c2889198ea"
+    },
+    "all_kernel_sources_match": true,
+    "executables_byte_identical": true
+  },
+  "dataset_sha256": "20e5c99d7442963e8dffda5a5e39723efdb9b61da79c42b46cdab5d3f06a1613",
+  "raw_reanalysis_byte_identical": true,
+  "retained_raw_files": 2471,
+  "production_executions": 55,
+  "full_solver_phase_waves": 14,
+  "independent_fv_runs": 7,
+  "shared_phase_ablation_runs": 5,
+  "mathematical_expansion_controls": 3,
+  "max_relative_wave_rate_difference": 7.391197003769889e-06,
+  "max_symbol_derivative_error": 2.6031340985695648e-11,
+  "max_production_spectrum_stationary_residual": 5.551115123125783e-16,
+  "dynamic_comparison": [
+    {
+      "height": 16,
+      "lbm_centroid_speed": 1.5106660469553408e-05,
+      "lbm_mean_speed": 1.5106667402795671e-05,
+      "fv_centroid_speed": 1.290072097467032e-05,
+      "fv_mean_speed": 1.2898718444468689e-05,
+      "hybrid_centroid_speed": 1.5282840144228872e-05,
+      "hybrid_mean_speed": 1.5282845197181747e-05,
+      "relative_lbm_fv_mean_difference": 0.17117583950937454,
+      "relative_hybrid_lbm_mean_difference": 0.011662254135115901,
+      "relative_hybrid_lbm_centroid_difference": 0.01166238395511332
+    },
+    {
+      "height": 32,
+      "lbm_centroid_speed": 1.3942617873458592e-05,
+      "lbm_mean_speed": 1.3942673595770412e-05,
+      "fv_centroid_speed": 1.2106563690041483e-05,
+      "fv_mean_speed": 1.2105314477373802e-05,
+      "hybrid_centroid_speed": 1.4010844685721225e-05,
+      "hybrid_mean_speed": 1.401085369565044e-05,
+      "relative_lbm_fv_mean_difference": 0.15178119674881985,
+      "relative_hybrid_lbm_mean_difference": 0.004890030553444946,
+      "relative_hybrid_lbm_centroid_difference": 0.004893400427512962
+    },
+    {
+      "height": 48,
+      "lbm_centroid_speed": 1.344221843712982e-05,
+      "lbm_mean_speed": 1.3442303955607287e-05,
+      "fv_centroid_speed": 1.1821687986428131e-05,
+      "fv_mean_speed": 1.1820717063758525e-05,
+      "hybrid_centroid_speed": 1.348149881749805e-05,
+      "hybrid_mean_speed": 1.3481346582448444e-05,
+      "relative_lbm_fv_mean_difference": 0.13718177020076316,
+      "relative_hybrid_lbm_mean_difference": 0.002904459456510855,
+      "relative_hybrid_lbm_centroid_difference": 0.002922165009588751
+    }
+  ],
+  "initial_profile_controls": [
+    {
+      "changed": "reference-slip1-H32-projection-seed",
+      "baseline": "reference-slip1-H32",
+      "relative_mean_speed_change": -1.6285405810556597e-06,
+      "relative_centroid_speed_change": -1.782251925819267e-06
+    },
+    {
+      "changed": "hybrid-slip1-H32-logistic-seed",
+      "baseline": "hybrid-slip1-H32",
+      "relative_mean_speed_change": 3.248512570053208e-13,
+      "relative_centroid_speed_change": -6.351907888557662e-11
+    }
+  ],
+  "reference_manufactured_orders": [
+    1.995095729240262,
+    1.9988018550498363
+  ],
+  "formal_coefficient_error_orders": [
+    1.9189959842974917,
+    1.9823934924800901
+  ],
+  "ctest": {
+    "passed": 9,
+    "failed": 0,
+    "full_test_log_sha256": "7e0d5d891f986a717f2e115cb1c0fa447a0b93ea33c10b4be6daa2813d8d2ebc",
+    "navier_component_rerun_log_sha256": "b1f1b728cf760ef0de0eec7a3f3852cb0e283a937d2fd4c23b983ca8b0f9f695",
+    "navier_max_relative_hydraulic_error": 9.350994085871444e-10,
+    "navier_max_relative_component_mass_error": 2.220446049250313e-16,
+    "navier_neutral_color_error": 2.270406085358445e-14,
+    "navier_rotation_errors": {
+      "r0": 6.661338147750939e-16,
+      "r1": 6.106226635438361e-16,
+      "v": 1.1796120298386778e-16
+    }
+  },
+  "default_compatibility": [
+    {
+      "left": "default-cosine-legacy-1rank",
+      "right": "default-cosine-legacy-1rank",
+      "max_absolute_differences": {
+        "r0": 0.0,
+        "r1": 0.0,
+        "v": 0.0
+      },
+      "bitwise_fields": true,
+      "bitwise_populations": true
+    },
+    {
+      "left": "default-projection-legacy-1rank",
+      "right": "default-projection-legacy-1rank",
+      "max_absolute_differences": {
+        "r0": 0.0,
+        "r1": 0.0,
+        "v": 0.0
+      },
+      "bitwise_fields": true,
+      "bitwise_populations": true
+    },
+    {
+      "left": "default-projection-liu2015-1rank",
+      "right": "default-projection-liu2015-1rank",
+      "max_absolute_differences": {
+        "r0": 0.0,
+        "r1": 0.0,
+        "v": 0.0
+      },
+      "bitwise_fields": true,
+      "bitwise_populations": true
+    }
+  ],
+  "original_archive_unchanged": 82,
+  "historical_c_files_unchanged": 66,
+  "manuscripts": {
+    "main.pdf": {
+      "pages": 37,
+      "sha256": "d2ccd115122044d136048cb68ae638638c139e6497b45cbff70f88983e629bae"
+    },
+    "supplement.pdf": {
+      "pages": 20,
+      "sha256": "ba8f4558fff112fab2d77bb568641adbbfa8fa4d177d455098186a94cca1f86a"
+    }
+  },
+  "figures": 17,
+  "new_figures_regenerated_png_bitwise": {
+    "phase-spectrum": "d622f33443aacbb0ba5429dd4dabe2228178c44520ace806c89ed529fd69c0d9",
+    "kinetic-resistance": "c9800b8c1fc61e37fe25a3ccea51f9ffd6644d06670e21c3f6ecee2541596f63"
+  },
+  "abstract_whitespace_words": 217,
+  "highlights_max_characters": 75,
+  "author": {
+    "name": "Yu Zhou",
+    "affiliation": "Independent Researcher, Canada",
+    "email": "[private contact omitted]",
+    "specific_funding": false,
+    "competing_interests": false,
+    "confirmation_date": "2026-10-09"
+  },
+  "literature_scope": "Subhedar2020 retained primary derivation; Mirjalili2020 author manuscript introduction/phase equation/boundedness scope, Hao2024 author manuscript signed-distance/flux/force discretization sections plus publisher Crossref metadata; Ahmed2009 author manuscript and publisher metadata. No replication or priority claim for their full algorithms.",
+  "scope": "Equal-density/equal-tau1 D2Q9 neutral flat walls; explicit hydraulic slip is numerical and is not molecular calibration. Spectrum predictions verify discrete phase kinetics; the hybrid shares that operator. Three-grid FV/LBM mismatch remains and neither independent full dynamic validation nor a universal contact-line law is established."
+}

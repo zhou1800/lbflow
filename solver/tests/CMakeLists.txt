@@ -47,3 +47,8 @@ add_test(NAME pressure_reservoir_contracts
         --solver $<TARGET_FILE:LBFlow> --root "${PROJECT_BINARY_DIR}/verification"
         --mpiexec "${MPIEXEC_EXECUTABLE}" --numproc-flag=${MPIEXEC_NUMPROC_FLAG})
 set_tests_properties(pressure_reservoir_contracts PROPERTIES TIMEOUT 180 PROCESSORS 2)
+add_test(NAME navier_slip_contracts
+    COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/navier_slip_checks.py"
+        --solver $<TARGET_FILE:LBFlow> --root "${PROJECT_BINARY_DIR}/verification"
+        --mpiexec "${MPIEXEC_EXECUTABLE}" --numproc-flag=${MPIEXEC_NUMPROC_FLAG})
+set_tests_properties(navier_slip_contracts PROPERTIES TIMEOUT 240 PROCESSORS 3)

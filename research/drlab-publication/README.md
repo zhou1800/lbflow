@@ -5,15 +5,16 @@ for the LBFlow solver. The maintained implementation and experiment
 scripts are `../../solver/` and `../../scripts/`; see the repository-root README
 for build instructions. The study contract is [SPEC.md](SPEC.md).
 
-The sole author is Yu Zhou, Independent Researcher, [private contact omitted]. Code is
-licensed under MIT. The article has not been submitted or accepted. Funding,
-competing interests, public repository access and the final release citation
-must be resolved before submission.
+The sole author is Yu Zhou, Independent Researcher, Canada, [private contact omitted].
+Code is licensed under MIT. The author confirms no specific funding and no
+competing interests. The article has not been submitted or accepted; author
+review, public repository access and an immutable release citation remain.
 
 ## Physical Research Extension
 
-The study addresses finite-interface transport and wetting effects, supported by a
-continuum momentum derivation and a new controlled campaign. See
+The study addresses predictive discrete interface kinetics and capillary resistance,
+supported by continuum/discrete derivations and operator-controlled
+experiments. See [the latest research status](notes/phase-kinetics-status.zh.txt) and
 [the physical research direction](notes/physics-direction.md) for literature
 overlap, completed evidence and the remaining capillary-trapping experiments.
 Neither a new bulk model nor a measured trapping threshold is claimed.
@@ -260,6 +261,54 @@ python3 scripts/make_front_mobility_figure.py --data results/mobility/front-mobi
 The collector recomputes diagnostics and reciprocal work from raw fields
 and audit logs, with inputs, geometry, executables and checkpoints checked.
 The original DRLab archive and historical C prototype remain unchanged.
+
+The subsequent `paper/data/phase-kinetics.json` records 55 LBM executions,
+seven independent Stokes/finite-volume runs and five shared-phase ablations.
+Fourteen zero-force/zero-sigma wave runs test the exact phase-stencil spectrum
+at fixed physical width. Differentiating the unit normal is essential:
+the predicted rates agree within 0.00074%, including a second wavelength.
+The measured dependence is consistent with numerical fourth-order shape
+relaxation; the known conservative Allen-Cahn mapping and signed-distance
+profile-preservation property are not new results.
+
+An optional neutral Navier closure prescribes hydraulic slip separately.
+Its eighteen pure profiles, stationary phase, rotation, MPI and restart
+checks pass; three default configurations retain bitwise fields/populations.
+The independent Stokes solve passes analytic and manufactured controls.
+Its finite-volume phase reference retains a 13.72% finest-grid dynamic
+discrepancy. A shared-phase ablation reduces the mean-speed difference to
+0.290%; actual-force Stokes differs by 0.0619%. This supports a discrete
+kinetic contribution in this geometry; the ablation is not independent
+continuum validation and no physical contact-line law is established.
+An H32 cross-control exchanges the two initial planar profiles: late speeds
+change by less than two parts per million. Initialization therefore does
+not explain the tested dynamic discrepancy.
+
+Use fresh result directories. The old no-slip campaigns use the separately
+pinned pressure-core kernel; optional slip uses `navier-slip-manifest.json`.
+Physical `lambda=1` corresponds to lattice `wallSlipLength=1/h`.
+
+```sh
+python3 scripts/phase_wave_spectrum.py --heights 16 32 48 --modes 1 2 --output results/phase-spectrum.json
+python3 scripts/periodic_contact.py waves --solver build/bin/LBFlow --root results/phase-waves --heights 16 32 48 --end 2000
+python3 scripts/periodic_contact.py waves --solver build/bin/LBFlow --root results/phase-mode2 --heights 16 32 --modes 2 --end 2000
+python3 scripts/periodic_contact.py fronts --solver build/bin/LBFlow --root results/neutral-slip --heights 16 32 48 --forces -1e-7 1e-7 --slip 1
+python3 scripts/stokes_reference_checks.py --output results/stokes-checks.json
+python3 scripts/stokes_phase_reference.py --ny 32 --force 1e-7 --end 8000 --transformed --slip 1 --root results/reference-H32
+python3 scripts/stokes_phase_reference.py --ny 32 --force 1e-7 --end 8000 --transformed --slip 1 --phase-stencil projection --root results/ablation-H32
+python3 scripts/force_stokes_audit.py --solver build/bin/LBFlow --audit-driver build/bin/NumericalAudit --root results/force-stokes --seeds <positive-front-receipts>
+python3 scripts/make_phase_kinetics_figures.py --data research/drlab-publication/paper/data/phase-kinetics.json --paper results/regenerated-kinetics
+```
+
+`collect_phase_kinetics.py --root <archived-root> --output <summary>` expects
+the exact campaign topology recorded in its constants. It recomputes fields,
+centroids, rates and force diagnostics, checks frozen sources/executables and
+hashes retained raw files. The summary records clock/cutoff corrections;
+original failed and superseded receipts remain intact and excluded from
+successful comparisons. The optional slip kernel is reproducible from its
+fixed base commit plus patch with byte-identical executables in the recorded
+toolchain. Nine CTest groups now pass. All seventeen figure pairs can be
+regenerated from included measurement summaries.
 
 The continued wall study adds `paper/data/wall-consistency.json` and
 `wall-study-validation.json`. It contains independent phase recurrences,

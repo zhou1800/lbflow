@@ -1,0 +1,84 @@
+diff --git a/solver/inc/file/fileprm.h b/solver/inc/file/fileprm.h
+index d67639e..881565e 100644
+--- a/solver/inc/file/fileprm.h
++++ b/solver/inc/file/fileprm.h
+@@ -206,0 +207 @@ public:
++    double getWallSlipLength() const;
+diff --git a/solver/inc/lbm/colorfluid.h b/solver/inc/lbm/colorfluid.h
+index 772ee2e..cffeead 100644
+--- a/solver/inc/lbm/colorfluid.h
++++ b/solver/inc/lbm/colorfluid.h
+@@ -38,0 +39,2 @@ private:
++    const double wallSlipLength;
++    void applyWallSlip();
+diff --git a/solver/src/file/fileprm.cpp b/solver/src/file/fileprm.cpp
+index 2e64f53..0b2324b 100644
+--- a/solver/src/file/fileprm.cpp
++++ b/solver/src/file/fileprm.cpp
+@@ -54,0 +55,10 @@ string FilePrm::getWallGradient() const
++
++double FilePrm::getWallSlipLength() const
++{
++    const auto value=iPrm.find("wallSlipLength");
++    if (value==iPrm.end()) return 0.0;
++    double result;
++    if (!parse(value->second,&result) || !isfinite(result) || result<0.0)
++        throw invalid_argument("wallSlipLength must be a finite nonnegative number.");
++    return result;
++}
+@@ -160,0 +171,12 @@ void FilePrm::ValidateSimulation() const
++    if (getWallSlipLength()>0.0) {
++        if (model!="color" || ndim!=2 || getEquilModel()!="MRT" || spectrum!="legacy" ||
++            recoloringModel!="projection" || density[0]!=density[1] ||
++            rexlationTime[0]!=1.0 || rexlationTime[1]!=1.0 ||
++            getCapillaryModel()!="csf" || getWallGradient()!="ghost" || getPhaseBoundary()!="flux")
++            throw invalid_argument("Prescribed slip initially requires neutral ghost/flux projection/legacy-MRT color D2Q9 at equal tau1.");
++        for (const auto& item : idx) {
++            const IT type=item.second->Type;
++            if (type!=IT::VD && type!=IT::GV && type!=IT::SD && type!=IT::BB)
++                throw invalid_argument("Prescribed slip initially supports closed VD/GV with flat SD/BB walls.");
++        }
++    }
+@@ -422,0 +445,3 @@ void FilePrm::parseAll()
++        else if (a.first == "wallSlipLength") {
++            // Optional prescribed neutral Navier regularization.
++        }
+diff --git a/solver/src/lbm/colorfluid.cpp b/solver/src/lbm/colorfluid.cpp
+index 75a6cea..4c4c85f 100644
+--- a/solver/src/lbm/colorfluid.cpp
++++ b/solver/src/lbm/colorfluid.cpp
+@@ -31,0 +32 @@ ColorFluid::ColorFluid(const FilePrm &prm)
++    , wallSlipLength(p.getWallSlipLength())
+@@ -152,0 +154 @@ void ColorFluid::Run(std::ostream &logProc)
++        if (wallSlipLength>0.0) applyWallSlip();
+@@ -974,0 +977,2 @@ void ColorFluid::calcWallRecoloring()
++        if (wallSlipLength>0.0 && abs(ibCosCA[ibI[i]])>1e-14)
++            throw runtime_error("Prescribed slip initially requires neutral flat walls.");
+@@ -1075 +1079 @@ void ColorFluid::applyWallPhaseFlux()
+-            const double transfer=wallOutgoing0[mirror][j]-wallOutgoing0[opposite][i2f[i]]
++            double transfer=wallOutgoing0[mirror][j]-wallOutgoing0[opposite][i2f[i]]
+@@ -1076,0 +1081 @@ void ColorFluid::applyWallPhaseFlux()
++            if (wallSlipLength>0.0) transfer*=0.5/(wallSlipLength+0.5);
+@@ -1082,0 +1088,22 @@ void ColorFluid::applyWallPhaseFlux()
++
++void ColorFluid::applyWallSlip()
++{
++    // At tau=1 a linear shear gives lambda=s/[2(1-s)] at the halfway wall.
++    const double specular=wallSlipLength/(wallSlipLength+0.5);
++    const auto& i2f=g.LG.getI2fMap();const auto& adj=g.LG.FG.getAdjI();
++    for (size_t i=0;i<g.LG.N;++i) {
++        if (!ibI[i]) continue;
++        const size_t tangent=wallTangent[i];
++        const size_t normalAxis=g.S.Qi[tangent][0]==0 ? 0 : 1;
++        for (size_t q=1;q<g.S.Q;++q) {
++            if (g.S.Qnorm[q]<=1.0 || g.S.Qi[q][normalAxis]*ibNorm[ibI[i]][normalAxis]<=0.0) continue;
++            const size_t opposite=g.S.Qop[q],mirror=wallMirror[normalAxis][q];
++            const size_t tangentNeighbor=g.S.Qi[q][1-normalAxis]>0 ? g.S.Qop[tangent] : tangent;
++            const size_t j=adj[i2f[i]][tangentNeighbor];
++            const double zero=wallOutgoing0[mirror][j]-wallOutgoing0[opposite][i2f[i]];
++            const double total=wallOutgoingTotal[mirror][j]-wallOutgoingTotal[opposite][i2f[i]];
++            f[0][q][i]+=specular*zero;
++            f[1][q][i]+=specular*(total-zero);
++        }
++    }
++}

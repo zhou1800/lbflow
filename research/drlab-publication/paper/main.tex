@@ -15,46 +15,45 @@
 \input{data/wall-flux-numbers.tex}
 \input{data/core-reservoir-numbers.tex}
 \input{data/front-mobility-numbers.tex}
+\input{data/phase-kinetics-numbers.tex}
 \begin{document}
 \begin{frontmatter}
-\title{Finite-interface transport and wetting effects in pore-scale lattice Boltzmann simulations with LBFlow}
+\title{Discrete interface kinetics and capillary resistance in pore-scale lattice Boltzmann simulations with LBFlow}
 \author{Yu Zhou\corref{cor1}}
-\address{Independent Researcher}
+\address{Independent Researcher, Canada}
 \ead{[private contact omitted]}
 \cortext[cor1]{Corresponding author.}
 \begin{abstract}
-Finite numerical interfaces and wall treatment can change pore-scale
-transport despite stable, mass-conserving two-phase simulations.
-We use LBFlow, a recovered C++/MPI color-gradient lattice Boltzmann program,
-to separate diffuse constitutive effects, core operators and capillary
-displacement. An inverse-viscosity conductance relation and eighteen
-layered-flow controls distinguish continuum transition effects from
-discrepancies against reconstructed references. At viscosity ratio 9:1,
-the thickest arithmetic and harmonic interfaces change flux by $-9.19$\%
-and $+21.59$\%, respectively.
-A discrete wall recurrence identifies an imbalance specific to
-cosine-normalized recoloring. Published projection recoloring already
-preserves its stationary ratio; conservative wall transfer restores the
-complete neutral transient. Nonneutral pressure and raw parasitic flow
-remain separately measured.
-Guarded pressure reservoirs connect bidirectional front motion to closed
-capillary pressure and independently verified component mass budgets.
-At fixed measured interface-width ratio, front-mobility deficits increase
-from 11.26\% to \FrontFineDeficit\% over three grids. Doubling the coarse
-channel length approximately halves the relative deficit, while excess resistance changes
-by only \FrontLengthResistancePercent\%. Independently weighted capillary
-force work accounts for incremental excess resistance within
-\FrontForceResistancePercent\%. This localizes the measured response to
-the interface region, without establishing a converged physical contact-line
-law.
-Independent LBPM comparisons on a public Bentheimer specimen check the
-single-phase geometric baseline; two-phase rock cases retain their measured
-transient and resolution limits. Recorded source kernels and MPI/restart
-checks support reproduction. A new bulk theory, curved-rock wetting accuracy
-and trapping thresholds are not established.
+Matching numerical interface width and leading diffusion does not
+necessarily match pore-scale two-phase dynamics. We investigate this
+distinction with LBFlow, a recovered C++/MPI color-gradient lattice
+Boltzmann program. The exact zero-flow phase operator, including variation
+of its unit normal, predicts interface-perturbation decay rates in fourteen
+complete simulations within \PhaseSpectrumPercent\% without a fitted rate.
+The measured grid and wavelength dependence is consistent with fourth-order
+numerical shape relaxation, although the leading conservative Allen--Cahn
+flux vanishes for a smooth signed-distance equilibrium profile.
+Neutral periodic displacement tests prescribe the same hydraulic slip,
+viscosity and measured width in an independent Stokes/finite-volume reference.
+The finest-grid mean-speed discrepancy is \PhaseFineFVDifference\%.
+Retaining the discrete phase stencil in an explicitly shared-kinetics
+ablation reduces it to \PhaseFineHybridDifference\%; the independent
+Stokes prediction from actual capillary force differs by only
+\PhaseFineHydraulicDifference\%. This identifies phase kinetics as a
+contributor without establishing converged physical contact-line dynamics.
+Separate pressure-driven fronts localize excess resistance: doubling
+channel length changes its magnitude by \FrontLengthResistancePercent\%,
+and weighted capillary-force work accounts for its incremental response
+within \FrontForceResistancePercent\%. Layered-flow controls distinguish
+diffuse constitutive viscosity effects from numerical discrepancies;
+conservative wall transfer restores the complete neutral phase transient.
+A public Bentheimer specimen and independent single-phase LBPM comparison
+provide the digital-rock baseline. Recorded source kernels and MPI/restart
+checks support reproduction; nonneutral currents, unresolved grid effects
+and transient rock-flow limits remain explicit.
 \end{abstract}
 \begin{keyword}
-lattice Boltzmann \sep two-phase flow \sep digital rock \sep diffuse interface \sep viscosity interpolation \sep wetting
+lattice Boltzmann \sep two-phase flow \sep digital rock \sep interface kinetics \sep capillary resistance \sep wetting
 \end{keyword}
 \end{frontmatter}
 
@@ -72,9 +71,9 @@ capillary stress and fluid--solid wetting. A diffuse numerical interface
 spreads these processes over several grid nodes. When that width approaches
 a pore dimension, a regularization chosen for computation can become part
 of the measured flow response. The physical question addressed here is how
-to distinguish that constitutive change from a remaining discretization
-error, and why an accurate static contact angle alone is insufficient to
-verify capillary displacement.
+diffuse constitutive response, discrete interface kinetics and wall
+regularization separately enter measured transport. An accurate static
+contact angle or matched interface width alone cannot resolve this distinction.
 
 This question matters when simulations connect fluid arrangements in
 segmented rock images with transport properties. Geometry, wetting and
@@ -148,6 +147,20 @@ the present recoloring recurrence. We instead test channel length and
 driving rate, and use independent hydraulic fields to trace the measured
 resistance to capillary-force work.
 
+The principal additional contribution is a predictive discrete phase
+analysis coupled to an operator-controlled resistance experiment. A
+transverse spectrum, with the interface normal differentiated, predicts
+complete-solver shape relaxation at two wavelengths without a fitted rate.
+Independent Stokes and same-phase-field force audits then separate that
+kinetic effect from errors in the measured hydraulic response. A shared-phase
+ablation narrows the dynamic discrepancy, while an independent continuum
+reference retains it. The distinction between those controls is essential:
+agreement after sharing a phase operator is evidence about numerical
+kinetics, rather than independent validation of a physical contact line.
+Conservative diffuse-interface and signed-distance profile-preservation
+methods already address equilibrium representation and discretization
+\cite{mirjalili2020,hao2024}; that underlying idea is not new here.
+
 The source baseline is the reference solver, historical revision
 \texttt{1bef9bbe7047}. The full source identity is recorded in the supplement. The original archive is
 preserved; repairs, inputs, run receipts and analysis are maintained in a
@@ -194,7 +207,7 @@ checksums, crop coordinates, voxel scale and periodic connectivity. Numerical
 timers include exchange and finite checks, while field/diagnostic output and
 checkpoint I/O are counted separately.
 
-\subsection{Recovered and corrected operators}
+\subsection{Bulk dynamics, forcing and viscosity}
 In lattice units, the component densities and color field are
 \begin{equation}
  \rho_k=\sum_i f_i^k,\quad \rho=\rho_0+\rho_1,\quad
@@ -457,7 +470,7 @@ below are consistent with needing both checks; Eq.~\ref{eq:wallmagnitude}
 alone is not a quantitative prediction of the observed capillary pressure
 or spurious velocity.
 
-\section{Illustrative verification}
+\section{Numerical controls for transport and capillarity}
 All runs use double precision, GCC 13.3, CMake 3.28.3 and Open MPI 4.1.6 on
 Linux. Dedicated workstation timings are described separately below.
 The tested physical range is low-speed flow at unit, equal reference density,
@@ -613,200 +626,89 @@ reduces pressure error for reconstruction, while CSF reduces residual flow.
 It does not remove the wall-color distortion.}
 \label{fig:closedcapillary}\end{figure}
 
-\subsection{A discrete neutral-wall fixed point for cosine recoloring}
-The zero-sigma result permits an independent phase-only experiment.
-At unit total density and zero velocity, recoloring sets outgoing
-phase populations directly from $\varphi$ and the projected unit normal.
-For a one-dimensional profile along a Cartesian D2Q9 wall, denote coordinate
-and diagonal weights by $a=1/9$ and $b=1/36$, and set
-$J_j=s_j\varphi_j(1-\varphi_j)$, where $s_j$ is the sign of the active
-central color derivative. The bulk scalar recurrence is
+\subsection{Wall phase transport, equilibrium and physical location}
+A neutral zero-sigma control isolates the phase operator from capillary
+feedback. At rest, its axial scalar recurrence is
 \begin{equation}\label{eq:phaserecurrence}
- \varphi'_j-\varphi_j=A(\varphi_{j-1}-2\varphi_j+\varphi_{j+1})
-                 +\beta B(J_{j-1}-J_{j+1}),\qquad
- A=a+2b,\quad B=a+\sqrt{2}b.
+ \varphi'_j-\varphi_j=A\Delta_x\varphi_j+
+ \beta B(J_{j-1}-J_{j+1}),\qquad
+ J_j=n_j\varphi_j(1-\varphi_j).
 \end{equation}
-Local bounce-back at a neutral wall instead gives
-$A_w=a+b$ and $B_w=a+b/\sqrt{2}$. Matching the interface direction does
-not match this segregation-to-diffusion ratio. The independent recurrence
-reproduces the full zero-sigma solver profile to within
-$8\times10^{-14}$ in phase fraction.
-
-Multiply only the two wall-parallel coordinate recoloring terms by
-\begin{equation}\label{eq:wallbalance}
- k=\frac{(a+b)(a+\sqrt{2}b)/(a+2b)-b/\sqrt{2}}{a}
-   =0.9511844635\ldots .
-\end{equation}
-Then $B_w^{new}=ak+b/\sqrt{2}$ and $B_w^{new}/A_w=B/A$.
-For a lifted one-dimensional profile with a common active-gradient mask,
-the wall update residual is $A_w/A=5/6$ times the bulk residual.
-Thus a bulk discrete stationary profile remains stationary at the wall;
-the transient wall operator still differs from the bulk operator.
-Opposite links have the same multiplier, so component mass is conserved
-locally, and complementary recoloring preserves every total population.
-This lattice-weight relation contains no calibrated parameter.
-It concerns the recovered cosine normalization. Projection recoloring
-specified in published work already gives the stationary wall/bulk ratio;
-the matched comparison below bounds the significance of this correction.
-
-The common mask is substantive. At a tangent-profile extremum, the clipped
-nonlinear stencil can produce a false normal derivative even when the
-tangent derivative vanishes. A 65-cell manufactured control failed without
-addressing this defect. The optional rule uses the reconstructed tangent
-magnitude at a neutral wall, discarding the raw normal component before
-applying the unchanged $10^{-9}$ cutoff and angle projection.
-The tested fixed-point extension supports flat Cartesian D2Q9 walls and
-equal reference densities with standard weights. Corners, staircase walls,
-open reservoirs and selective films are rejected; a nonneutral angle is
-an exploratory use outside the derivation.
+For cosine recoloring, $A=a+2b$ and $B=a+\sqrt2b$, whereas local
+wall bounce-back gives $A_w=a+b$ and $B_w=a+b/\sqrt2$;
+$a=1/9$ and $b=1/36$. The wall/bulk stationary ratios differ.
+A cosine-specific tangent multiplier
+$k=[(a+b)(a+\sqrt2b)/(a+2b)-b/\sqrt2]/a=0.9511844635$
+restores that ratio. It does not restore the entire transient operator.
+Published projection recoloring already has equal stationary ratios,
+so this multiplier is not needed for that model.
+Independent scalar recurrences, cutoff/rotation controls and the
+unfavorable nonneutral results are detailed in the supplement.
 
 \input{data/wall-numbers.tex}
-Across $\beta=0.35,0.7,0.9$, the zero-sigma wall-to-center color differences
-fall from $0.0085$--$0.0109$ to below \WallZeroColorBound.
-Independently generated outgoing equilibria, including odd/even periodic
-lengths, preserve color to within \WallFixedColorBound\ and maximum
-velocity below \WallFixedSpeedBound. Rotation and SRT, together with
-bitwise MPI and restart controls, test the implementation separately from
-the recurrence. These results establish a planar discrete fixed point,
-not dynamic contact-line or digital-rock wetting accuracy.
-
-\subsection{Temporal aliasing and the limits of the correction}
-From a step initialization, the corrected CSF slit still develops a small
-raw velocity. Adjacent fields reveal sign reversal rather than a stationary
-circulation (Fig.~\ref{fig:wallbalance}). For the H16, $\beta=0.7$ normal
-curvature case, the raw maximum speed is \WallRawSpeed, while its
-adjacent-step average is below \WallPairSpeedBound. The tangential staggered
-momentum projection accounts for more than \WallStaggeredEnergyPercent\%
-of that component's energy. Raw fields are retained; the average is a
-diagnostic and is not substituted for a solution.
-Across the three slit widths, its raw $\mu U_{max}/\sigma$ decreases from
-about $1.93\times10^{-6}$ to $2.14\times10^{-7}$ under the specified joint
-scaling, rather than retaining the uncorrected neutral value near
-$3.3\times10^{-4}$. This observation does not remove the period-two state
-or establish convergence at fixed physical interface width.
-
-This mode is established in LBM dispersion analysis \cite{lallemand2000}
-and related two-phase work \cite{guo2011}. In the linearized system,
-$\delta f_i=3w_i e_{ix}A(-1)^x$ is an equilibrium momentum perturbation.
-Collision preserves it, whereas streaming, including wall-parallel
-bounce-back, changes its sign. Its eigenvalue is $-1$ rather than a
-viscous decay factor. Manufactured nonlinear equilibrium seeds also
-propagate with period two in both SRT and MRT; switching between these
-operators is therefore not a damping remedy. The previous even-report
-stopping test accepted such a state. The adjacent-step criterion rejects
-it while retaining termination of stationary controls.
-
-The uncorrected CSF slit retains substantial velocity even after the
-adjacent-step average; its prior residual is not explained away by this
-mode. The gradient curvature form is likewise not uniformly superior:
-it lowers the corrected neutral raw velocity but increases bulk D2Q9
-Laplace discrepancies to approximately 1.78\% and 0.385\% at radii 12 and 24,
-compared with 1.39\% and 0.303\% for normal differentiation.
-Exploratory 60/120-degree controls also retain larger pressure bias and
-slower phase relaxation with the wall multiplier. After four initial
-durations, normal-CSF 60-degree pressure discrepancies are 9.34\%, 5.59\%
-and 4.37\% at $H=16,32,48$, with final color RMS changes below
-$10^{-9}$ and mass drift below $10^{-11}$. The corresponding uncorrected reconstructed-CSF discrepancies
-are 7.22\%, 3.12\% and 1.71\% after their documented longer holds.
-Those negative controls
-exclude treating a neutral fixed-point derivation as a generally validated
-wetting model. Full histories and longer holds are retained in
-\texttt{wall-consistency.json}; no entry pressure or trapping law is inferred.
+The cosine correction preserves generated neutral equilibria within
+\WallFixedColorBound\ in color and \WallFixedSpeedBound\ in velocity.
+From a step initialization, however, raw adjacent fields can retain
+period-two momentum (Fig.~\ref{fig:wallbalance}). A spatially alternating
+equilibrium momentum perturbation is preserved by collision and reverses
+under streaming, giving the established eigenvalue $-1$
+\cite{lallemand2000,guo2011}. Even-time reporting can conceal it.
+Adjacent-step stopping checks reject such false stationarity; no filtering
+or damping is applied to numerical fields. Exploratory nonneutral use
+of the cosine multiplier worsens the measured pressure bias.
 
 \begin{figure}[htbp]\centering
 \includegraphics[width=.98\linewidth]{wall-balance.pdf}
-\caption{Discrete wall-phase correction and temporal checks. Zero-force
-color distortion is compared across segregation strengths. Nonzero-force
-raw and adjacent-averaged speeds are distinguished from manufactured
-equilibrium preservation. The alternating grid velocity is shown directly;
-no filtering is applied to solver fields. Corrected neutral results use
-the reconstructed tangent magnitude and normal-curvature CSF.}
+\caption{Neutral discrete fixed point and temporal controls. A cosine-specific
+wall correction removes static profile distortion but can retain raw
+alternating velocity. Adjacent-step averages diagnose this mode;
+they are not substituted into the solver. Complete histories and
+nonneutral negative controls are supplied in the supplement.}
 \label{fig:wallbalance}\end{figure}
 
-\subsection{Wall transport and physical contact-angle location}
-Matching a stationary segregation ratio does not match transient transport.
-For two adjacent wall fluid nodes $L,R$, let $p,m$ denote the outgoing
-diagonals directed into the solid with opposite tangent components.
-Writing $f_T=f_0+f_1$ and $\varphi=\sum_i f_{0i}/\sum_i f_{Ti}$, define
+The full transient instead requires a conservative face transfer. For
+adjacent wall nodes $L,R$ and outgoing reflected diagonals $p,m$, define
 \begin{equation}\label{eq:wallphaseflux}
  J_{LR}=f_{0p}(L)-f_{0m}(R)
-       -\frac{\varphi_L+\varphi_R}{2}[f_{Tp}(L)-f_{Tm}(R)].
+ -\frac{\varphi_L+\varphi_R}{2}[f_{Tp}(L)-f_{Tm}(R)].
 \end{equation}
-Add $J_{LR}$ to the corresponding incoming diagonal at $R$ and subtract
-it from its partner at $L$ after local bounce-back. The second phase is
-complementary to each original bounce-back total. Face transfers conserve
-each component globally and leave total-fluid reflection unchanged.
-Pure phases give $J_{LR}=0$, including nonuniform total populations.
-The face fraction is an explicit numerical closure, not a thermodynamic
-or general moving-contact-line law.
+Opposite incoming face populations receive $\pm J_{LR}$; the second phase
+is complementary to its original total reflection. Each component is
+conserved globally, total-fluid reflection is unchanged and pure phases
+have zero transfer. At unit-density rest this reduces to the established
+forward specular scalar transport \cite{ginzburg2015}. It restores the
+complete neutral bulk recurrence, with six full-solver trajectories
+agreeing within \FluxTransientBound\ and unfiltered neutral velocity below
+\FluxNeutralSpeedBound. This condition controls numerical phase reflection,
+not a general contact-line constitutive relation.
 
-At unit density and rest, the total-population difference vanishes and
-the rule reduces to established nonlocal specular-forward scalar transport
-\cite{ginzburg2015}. The additional neutral phase update is
-$b\Delta_x\varphi+\beta b(J_{j-1}-J_{j+1})/\sqrt{2}$, restoring both
-$A$ and $B$ in Eq.~\eqref{eq:phaserecurrence}. Independently generated
-scalar trajectories match the bulk recurrence throughout relaxation;
-six full-solver early trajectories match it within \FluxTransientBound.
-Nonzero-sigma neutral runs retain unfiltered maximum speed below
-\FluxNeutralSpeedBound, including SRT/MRT and odd periodic lengths.
-This avoids excitation of the observed plane-control oscillation; the
-undamped lattice eigenmode still exists and no damping was added.
+Physical wall location remains distinct. Rotating the normal at the first
+fluid center imposes the angle half a cell from the halfway wall. A circular
+sharp-interface estimate then replaces $H$ by $H-1$, giving pressure bias
+$1/(H-1)$; this is a testable geometric estimate rather than a fitted width.
+The halfway control extrapolates the inward normal to the physical wall.
+The published scalar ghost formula \cite{liu2015} instead sets
+$\chi_g=\chi_1-\cot\theta|1.5g_{t1}-0.5g_{t2}|$, followed by a full
+virtual-color stencil without a second center-angle rotation.
+This formula alone is not the complete published algorithm.
 
-Nonneutral pressure requires a separate location control. The original
-rotation specifies the normal at the first fluid center, whereas the
-physical wall lies half a lattice spacing away. For a sharp circular
-meniscus, imposing the same angle on the first/last centers can replace
-the physical spacing $H$ by $H-1$, giving the geometric estimate
-$1/(H-1)$ for relative pressure bias. This is a mechanism to test, not
-a fitted effective width. A halfway control instead sets the first-row
-inward-normal cosine to $c_1=(2\cos\theta+c_2)/3$, so
-$1.5c_1-0.5c_2=\cos\theta$, and preserves the central tangent derivative.
-
-A second control uses the published scalar ghost continuation
-\cite{liu2015}, with the sign converted to this code's angle convention:
-$\chi_g=\chi_1-\cot\theta|1.5g_{t1}-0.5g_{t2}|$.
-The full color stencil then includes the virtual values and receives no
-subsequent center-angle rotation. This reproduces that ghost formula under
-LBFlow's remaining operators; its segregation weights and MRT spectrum
-are not the complete published model. An independent outgoing-state
-gradient calculation verifies the implementation.
-
-All three-width 60-degree comparisons in Fig.~\ref{fig:wallflux} use four
-initial durations, fixed $\beta=0.7$, common input surface tension and the
-same physical wall spacing. With ordinary rotation, phase transfer alone
-worsens pressure. With ghost reconstruction, transferred-phase discrepancies
-are \FluxGhostPressureSixteen\%, \FluxGhostPressureThirtyTwo\% and
-\FluxGhostPressureFortyEight\% at $H=16,32,48$. Yet nonneutral currents remain,
-and the H16 controls (seven angles at $\beta=0.7$, three beta values at
-60/90/120 degrees) do not show uniform improvement
-in pressure, shape and velocity. A small H16 halfway/bounce-back pressure
-error also fails to remain small under refinement; it is not a general
-accuracy result. Circle-exclusion and bulk-sampling sensitivity are retained.
-For ghost/transfer, the H16 circle-extrapolated angles span 57.49--59.14
-degrees over the specified exclusions, versus 59.60--59.61 degrees at H48;
-they are not direct contact-angle measurements at the wall.
-Adjacent fields still show nonneutral two-step oscillations: in the H16
-ghost/transfer control, one-step maximum color change is approximately
-$6.65\times10^{-7}$ despite much smaller even-time differences.
-The tested pressure-coefficient change over adjacent steps remains below
-$6\times10^{-9}$. Stable pressure therefore does not establish a stationary
-phase/velocity field, and temporal averaging does not eliminate the
-nonneutral circulation. Relative component/total mass drift over the
-recorded trajectories remains below $10^{-11}$.
-These controls distinguish transport and location defects without
-establishing dynamic or curved-wall wetting accuracy.
+Phase transfer with ordinary center rotation worsens pressure. With ghost
+color, the 60-degree errors after four initial durations become
+\FluxGhostPressureSixteen\%, \FluxGhostPressureThirtyTwo\% and
+\FluxGhostPressureFortyEight\% at H16/H32/H48 (Fig.~\ref{fig:wallflux}).
+Nonneutral currents, contour-fitting sensitivity and adjacent-step phase
+oscillations remain. The matched-core comparison below therefore retains
+signed pressure errors and raw velocities. Neutral transient consistency
+and static pressure improvement establish neither nonneutral dynamic
+accuracy nor curved digital-rock wetting.
 
 \begin{figure}[htbp]\centering
 \includegraphics[width=.98\linewidth]{wall-flux.pdf}
-\caption{Separate wall-transport and location controls. (a) Independent
-phase-only transient discrepancy from the bulk recurrence. (b) Raw neutral
-CSF velocity with the same ghost gradient and different phase reflection.
-(c) Signed 60-degree pressure discrepancies after four initial durations;
-the grey curve is the first-center geometric estimate, not a fit.
-(d) Corresponding nonneutral residual capillary numbers.
-Input surface tension is common and has no fitted multiplier. The
-phase-only plot floors exact zeros at $10^{-17}$ for display. Neutral
-equilibrium preservation does not imply negligible nonneutral flow.}
+\caption{Wall transport and location are separate controls. (a) Independent
+phase-transient discrepancy. (b) Raw neutral velocity. (c) Signed nonneutral
+pressure discrepancy; the grey curve is the first-center geometric estimate.
+(d) Nonneutral residual capillary numbers. The full neutral transient is
+preserved without implying negligible nonneutral circulation.}
 \label{fig:wallflux}\end{figure}
 
 \subsection{Published core controls at matched phase transport}
@@ -1055,6 +957,8 @@ and instantaneous mean flow, with the identity line for comparison.
 All results retain raw flow and exact component budgets.}
 \label{fig:front-resistance}\end{figure}
 
+\input{phase-kinetics.tex}
+
 \section{Pore-scale application and computational evidence}
 \subsection{Analytic pore flux and capillary entry}
 Two parallel, isolated slit pores have widths $H_0=8s$ and $H_1=16s$,
@@ -1219,6 +1123,13 @@ Length and rate controls resolve a localized excess resistance, and
 independent force work accounts for its incremental response. The fixed-width
 grid sequence still changes substantially; this closure of the numerical
 force balance does not supply an independent physical validation.
+The exact phase spectrum explains why matching width and leading
+diffusion is insufficient to match a discrete shape response. Prescribed
+neutral hydraulic slip and independent actual-force Stokes audits narrow
+the possible source of the dynamic discrepancy. Retaining the discrete
+phase stencil reduces it substantially, supporting a kinetic contribution
+in the tested geometry. This shared-operator agreement remains distinct
+from successful independent validation of the leading continuum model.
 Extending these findings to capillary trapping requires a different test.
 Quasistatic invasion and retraction in a specified pore throat must resolve
 the pressure interval, contact-line rate dependence, interface width and
@@ -1276,6 +1187,17 @@ baseline and exposes inadequate interface separation and continued
 two-phase evolution. It supports neither a steady relative-permeability
 curve nor a quantified trapping threshold.
 
+The central kinetic result is quantitative: the exact projection-phase
+spectrum predicts zero-flow shape relaxation without a fitted rate,
+including a second wavelength. A neutral displacement comparison with
+prescribed hydraulic slip distinguishes mean-flow/force discrepancies
+from the much larger full dynamic-reference difference. Retaining the
+discrete phase operator narrows that difference to 0.290\% on the finest
+tested grid. Width, leading diffusion and hydraulic calibration therefore
+do not exhaust the numerical conditions needed for comparable interface
+dynamics. The three-grid sequence and shared-phase ablation support this
+diagnosis, while leaving physical contact-line validation unresolved.
+
 LBFlow provides reproducible implementations and measurements for this
 physical analysis, including corrected local relaxation and forcing,
 mass monitoring and consistent MPI restart. These results motivate a
@@ -1284,14 +1206,15 @@ confinement, wall and rate checks. A new bulk multiphase theory or universal
 wetting method is not claimed.
 
 \clearpage
-\section*{Declarations --- author confirmation required}
+\section*{Declarations}
 \textbf{Software and data availability:} the MIT-licensed implementation,
 reproduction scripts and measurement summaries are prepared in
 \url{https://github.com/zhou1800/lbflow}. Public access and an immutable release
 identifier will be verified before submission.
 The Bentheimer image and derived crops retain CC BY 4.0; data courtesy of
 Qatar Carbonates and Carbon Storage Research Centre, Imperial College London.
-\textbf{Funding and competing interests:} not yet supplied by the author.
+\textbf{Funding:} this research received no specific funding.\\
+\textbf{Competing interests:} the author declares no competing interests.\\
 \textbf{AI assistance:} OpenAI Codex and ChatGPT assisted source inspection,
 implementation, literature triage and drafting. Numerical claims are tied to
 recorded executions or explicit derivations. This disclosure and all final

@@ -1,5 +1,5 @@
-Finite-interface viscosity alters pore transport despite mass conservation.
-Channel length and capillary force work isolate excess front resistance.
-Fixed-width controls retain unresolved grid dependence in displacement.
-Published core matching and exact mass budgets bound wetting claims.
-Digital-rock tests retain measured resolution and transient limits.
+The discrete phase spectrum predicts interface-shape decay without fitting.
+Matched width and diffusion leave a distinct discrete interface kinetics.
+A shared-phase ablation isolates its contribution to capillary resistance.
+Independent force and hydraulic controls bound dynamic interpretation.
+LBFlow supplies reproducible pore-flow and digital-rock experiments.

@@ -1,22 +1,20 @@
-Draft cover letter for author review; final submission declarations remain pending.
+Draft cover letter for author review; public program archive and final submission attestations remain pending.
 
 Dear Editor,
 
-Please consider "Finite-interface transport and wetting effects in pore-scale lattice Boltzmann simulations with LBFlow" for the Computer Programs in Physics category of Computer Physics Communications.
+Please consider "Discrete interface kinetics and capillary resistance in pore-scale lattice Boltzmann simulations with LBFlow" for the Computer Programs in Physics category of Computer Physics Communications.
 
-The physical question is how numerical interface transport, wetting and capillary force change the conductance and displacement of immiscible fluids in a pore. Eighteen layered-flow controls distinguish diffuse constitutive bias from disagreement with independently reconstructed continuum references. At viscosity ratio 9:1, the thickest tested interfaces change flux by -9.19% and +21.59% for arithmetic and harmonic viscosity. The directly overlapping layered-flow and viscosity literature is acknowledged; neither the continuum balance nor these interpolation rules is claimed as a new law.
+The manuscript asks which numerical interface properties must be controlled before pore-scale two-phase transport can be interpreted physically. Its main contribution is a quantitative diagnosis of discrete phase kinetics. An exact zero-flow projection-stencil spectrum, including unit-normal variation, predicts shape-perturbation decay in fourteen complete LBM runs within 0.00074%, with a second wavelength checked without refitting. The grid and wavelength dependence is consistent with numerical fourth-order shape relaxation even though the leading signed-distance equilibrium phase flux vanishes.
 
-The continued study distinguishes a cosine-specific wall fixed point from the stationary balance already provided by published projection recoloring. An exact axial transport match compares core operators without fitting surface tension or capillary pressure. Conservative relative-phase wall transfer preserves the entire neutral transient. Nonneutral pressure, residual current and the known alternating lattice mode remain separately measured, with negative refinement results retained.
+A neutral displacement experiment prescribes the same hydraulic slip, viscosity and measured width for LBM and an independently verified Stokes/finite-volume reference. Their finest-grid mean-flow discrepancy remains 13.72%. A deliberately shared-phase ablation reduces it to 0.290%, while the independent Stokes prediction using actual production capillary force differs by 0.0619%. These controls identify a kinetic contribution; shared-operator agreement is explicitly distinguished from independent physical contact-line validation. No converged dynamic law is claimed.
 
-Guarded flat pressure reservoirs connect the measured closed capillary pressure to both directions of front drift, with exact component link-flux budgets and four-duration checks. Narrow pressure pairs remain bidirectional; estimated zero-drift pressure differs from closed pressure by at most 0.0066% of the Young reference. Front mobility is 11.3--17.8% below independently measured pure-channel mobility. A changed-physics zero-sigma control recovers the pure-channel response. These results do not establish a general contact-line law or a geometric throat trapping threshold.
+Complementary pressure-driven tests localize excess resistance and recover its incremental response from capillary-force work. Diffuse-viscosity and conservative wall-transfer controls, an attributed public Bentheimer image and independent single-phase LBPM comparison support the application. Nonneutral currents, negative grid results and transient rock limits are retained.
 
-A further 74 executions hold the independently measured interface-width ratio fixed and vary driving rate, channel length and duration with an unchanged numerical kernel. Doubling channel length at the coarse grid reduces the relative mobility deficit from 11.26% to 5.92%, while excess resistance changes by only 0.0333%. Actual capillary-force work, weighted by independent pure-channel fields, accounts for the incremental excess resistance within 0.023%. This identifies a localized interfacial response in the numerical momentum balance; three-grid deficits of 11.26%, 18.57% and 22.30% retain unresolved discretization and regularization effects. The known conservative Allen-Cahn behavior and its distinction from chemical-potential contact-line mobility are explicitly acknowledged. The reciprocal diagnostic is not presented as independent physical validation.
+The MIT-licensed C++/MPI program includes reconstruction scripts, source-kernel identities, raw-evidence hashes, operator derivations and MPI/restart checks. Established conservative Allen-Cahn mappings, signed-distance reconstruction, slip controls and related recent literature are acknowledged. AI-assisted work is disclosed.
 
-The MIT-licensed C++/MPI program, recorded executions and reproduction scripts support this bounded physical investigation. An attributed public Bentheimer image and unmodified LBPM single-phase comparisons provide the digital-rock application baseline; transient two-phase rock results do not establish relative-permeability curves. The manuscript documents operating limits, source provenance, CPU/MPI timings and AI-assisted work.
-
-Public software access, an immutable release citation, author approval and required journal declarations must be finalized before submission. This draft does not attest exclusive submission or publication rights on behalf of the author.
+Public software access, an immutable program-archive citation, author review and final submission attestations must be finalized before submission. This draft does not attest exclusive submission or publication rights on behalf of the author.
 
 Sincerely,
 Yu Zhou
-Independent Researcher
+Independent Researcher, Canada
 [private contact omitted]
