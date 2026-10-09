@@ -27,6 +27,20 @@ REFERENCES=('reference-slip1-H16','reference-slip1-H32','reference-slip1-H48',
     'reference-slip1-H32-projection-seed','hybrid-slip1-H32-logistic-seed')
 
 
+def receipt_at_root(receipt, root):
+    """Relocate paths in memory while keeping original receipt/input bytes."""
+    folder=Path(receipt['output_files'][-1]).parent
+    if folder.parent.name!='cases':raise ValueError('Unexpected recorded case topology')
+    original=str(folder.parents[2])+'/'
+    destination=str(root)+'/'
+    def moved(value):
+        if isinstance(value,dict):return {k:moved(v) for k,v in value.items()}
+        if isinstance(value,list):return [moved(v) for v in value]
+        if isinstance(value,str) and value.startswith(original):return destination+value[len(original):]
+        return value
+    return moved(receipt)
+
+
 def reference_measure(folder):
     original=json.loads((folder/'result.json').read_text());p=original['parameters']
     frozen=folder/'source';source_hashes={f.name:sha(f) for f in frozen.glob('*.py')}
@@ -63,7 +77,7 @@ def collect(root):
     receipts={};rows=[]
     for campaign in CAMPAIGNS:
         for path in sorted((root/campaign/'results').glob('*.json')):
-            r=json.loads(path.read_text());verify(r);folder=Path(r['output_files'][-1]).parent
+            r=receipt_at_root(json.loads(path.read_text()),root);verify(r);folder=Path(r['output_files'][-1]).parent
             if r['start']:
                 for key,suffix in (('checkpoint_sha256','.rst'),('checkpoint_metadata_sha256','.rst.meta')):
                     if sha(folder/f'field.{r["start"]:010d}{suffix}')!=r[key]:raise AssertionError('Outgoing donor changed')

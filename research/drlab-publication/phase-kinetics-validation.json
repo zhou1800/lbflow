@@ -12,7 +12,7 @@
     "all_kernel_sources_match": true,
     "executables_byte_identical": true
   },
-  "dataset_sha256": "20e5c99d7442963e8dffda5a5e39723efdb9b61da79c42b46cdab5d3f06a1613",
+  "dataset_sha256": "298484ca8a6b2c6efde43bbcb231b3d0dfc5b1e4073f2b73af219f616e28d0ab",
   "raw_reanalysis_byte_identical": true,
   "retained_raw_files": 2471,
   "production_executions": 55,
@@ -160,5 +160,7 @@
     "confirmation_date": "2026-10-09"
   },
   "literature_scope": "Subhedar2020 retained primary derivation; Mirjalili2020 author manuscript introduction/phase equation/boundedness scope, Hao2024 author manuscript signed-distance/flux/force discretization sections plus publisher Crossref metadata; Ahmed2009 author manuscript and publisher metadata. No replication or priority claim for their full algorithms.",
-  "scope": "Equal-density/equal-tau1 D2Q9 neutral flat walls; explicit hydraulic slip is numerical and is not molecular calibration. Spectrum predictions verify discrete phase kinetics; the hybrid shares that operator. Three-grid FV/LBM mismatch remains and neither independent full dynamic validation nor a universal contact-line law is established."
+  "scope": "Equal-density/equal-tau1 D2Q9 neutral flat walls; explicit hydraulic slip is numerical and is not molecular calibration. Spectrum predictions verify discrete phase kinetics; the hybrid shares that operator. Three-grid FV/LBM mismatch remains and neither independent full dynamic validation nor a universal contact-line law is established.",
+  "raw_reanalysis_at_different_directory_byte_identical": true,
+  "relocation_receipts_unchanged": true
 }

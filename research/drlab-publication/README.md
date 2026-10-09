@@ -309,6 +309,11 @@ successful comparisons. The optional slip kernel is reproducible from its
 fixed base commit plus patch with byte-identical executables in the recorded
 toolchain. Nine CTest groups now pass. All seventeen figure pairs can be
 regenerated from included measurement summaries.
+Archived receipt paths are relocated in memory under the supplied root;
+original receipt and input bytes remain unchanged. Reanalysis at a different
+directory was checked against the canonical summary byte for byte in the
+recorded environment. This permits moving the extracted raw archive without
+recreating the original temporary directory names.
 
 The continued wall study adds `paper/data/wall-consistency.json` and
 `wall-study-validation.json`. It contains independent phase recurrences,
