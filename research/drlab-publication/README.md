@@ -126,7 +126,8 @@ python3 scripts/make_porous_figures.py --paper results/regenerated-cpc
 Together with `make_figures.py`, `make_transport_figure.py`,
 `make_capillary_figure.py`, `make_wall_figure.py` and `make_wall_flux_figure.py`,
 the later core/reservoir and front-resistance figure scripts regenerate
-all fifteen manuscript and supplementary figures.
+the earlier fifteen manuscript and supplementary figures; the phase-kinetics
+script below adds the latest two figure pairs.
 Text numbers and the timing table are generated from measured JSON. The raw
 VTI and populations are regenerated rather than bundled. Rock results are
 numerical crosschecks and transient observations, not an experimental
@@ -262,8 +263,8 @@ The collector recomputes diagnostics and reciprocal work from raw fields
 and audit logs, with inputs, geometry, executables and checkpoints checked.
 The original DRLab archive and historical C prototype remain unchanged.
 
-The subsequent `paper/data/phase-kinetics.json` records 55 LBM executions,
-seven independent Stokes/finite-volume runs and five shared-phase ablations.
+The subsequent `paper/data/phase-kinetics.json` records 67 LBM executions,
+ten independent Stokes/finite-volume runs and five shared-phase ablations.
 Fourteen zero-force/zero-sigma wave runs test the exact phase-stencil spectrum
 at fixed physical width. Differentiating the unit normal is essential:
 the predicted rates agree within 0.00074%, including a second wavelength.
@@ -284,15 +285,27 @@ An H32 cross-control exchanges the two initial planar profiles: late speeds
 change by less than two parts per million. Initialization therefore does
 not explain the tested dynamic discrepancy.
 
+A separately prescribed physical slip of 4 reduces the three-grid speed
+gaps to 5.40%, 3.95% and 3.23%. Six further signed pure profiles verify
+the analytic wall law within 6.09e-11 relatively. The finest-grid normalized
+excess resistances still differ by 22.38%; larger pure conductance partly
+dilutes the speed percentage. Both prescribed-slip controls, finite-grid
+pure-law offsets and final-interval changes are retained. This sensitivity
+experiment does not establish a converged capillary resistance or fit slip
+to front speed.
+
 Use fresh result directories. The old no-slip campaigns use the separately
 pinned pressure-core kernel; optional slip uses `navier-slip-manifest.json`.
 Physical `lambda=1` corresponds to lattice `wallSlipLength=1/h`.
+The separate `lambda=4` control uses `wallSlipLength=4/h`.
 
 ```sh
 python3 scripts/phase_wave_spectrum.py --heights 16 32 48 --modes 1 2 --output results/phase-spectrum.json
 python3 scripts/periodic_contact.py waves --solver build/bin/LBFlow --root results/phase-waves --heights 16 32 48 --end 2000
 python3 scripts/periodic_contact.py waves --solver build/bin/LBFlow --root results/phase-mode2 --heights 16 32 --modes 2 --end 2000
-python3 scripts/periodic_contact.py fronts --solver build/bin/LBFlow --root results/neutral-slip --heights 16 32 48 --forces -1e-7 1e-7 --slip 1
+python3 scripts/periodic_contact.py fronts --solver build/bin/LBFlow --root results/neutral-slip --heights 16 32 48 --forces -0.0000001 0.0000001 --slip 1
+python3 scripts/periodic_contact.py fronts --solver build/bin/LBFlow --root results/neutral-slip4 --heights 16 32 48 --forces -0.0000001 0.0000001 --slip 4
+python3 scripts/periodic_contact.py pure --solver build/bin/LBFlow --root results/pure-slip4 --heights 16 32 48 --forces -0.0000001 0.0000001 --slip 4
 python3 scripts/stokes_reference_checks.py --output results/stokes-checks.json
 python3 scripts/stokes_phase_reference.py --ny 32 --force 1e-7 --end 8000 --transformed --slip 1 --root results/reference-H32
 python3 scripts/stokes_phase_reference.py --ny 32 --force 1e-7 --end 8000 --transformed --slip 1 --phase-stencil projection --root results/ablation-H32

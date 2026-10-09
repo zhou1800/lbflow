@@ -35,12 +35,14 @@ numerical shape relaxation, although the leading conservative Allen--Cahn
 flux vanishes for a smooth signed-distance equilibrium profile.
 Neutral periodic displacement tests prescribe the same hydraulic slip,
 viscosity and measured width in an independent Stokes/finite-volume reference.
-The finest-grid mean-speed discrepancy is \PhaseFineFVDifference\%.
+At prescribed slip 1 the finest-grid mean-speed discrepancy is \PhaseFineFVDifference\%.
 Retaining the discrete phase stencil in an explicitly shared-kinetics
 ablation reduces it to \PhaseFineHybridDifference\%; the independent
 Stokes prediction from actual capillary force differs by only
 \PhaseFineHydraulicDifference\%. This identifies phase kinetics as a
 contributor without establishing converged physical contact-line dynamics.
+Larger prescribed slip reduces the speed discrepancy while leaving
+excess resistance unresolved.
 Separate pressure-driven fronts localize excess resistance: doubling
 channel length changes its magnitude by \FrontLengthResistancePercent\%,
 and weighted capillary-force work accounts for its incremental response

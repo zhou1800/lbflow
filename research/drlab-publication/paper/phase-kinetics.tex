@@ -113,8 +113,8 @@ sampling offset $h^2/4$ is retained explicitly.
 The common physical domain is height 16 and periodic length 64, with
 $W_{0.9}=4.765235$, $\nu=D=1/6$, $\sigma=0.005$, $F=10^{-7}$ and
 prescribed hydraulic slip $\lambda=1$. Two interfaces span the channel,
-and their circular phase centroid measures displacement. At physical
-time 8000, LBM and independent-reference mean speeds differ by
+and their circular phase centroid measures displacement. At the final
+sampled states of nominal physical duration 8000, LBM and independent-reference mean speeds differ by
 17.12\%, 15.18\% and \PhaseFineFVDifference\% over the three grids.
 This comparison is an unresolved discrepancy, not successful independent
 dynamic validation. Doubling the H16/H48 LBM durations changes late
@@ -128,6 +128,20 @@ Swapping the H32 initial equilibria between the finite-volume and
 shared-phase algorithms changes their late mean speeds by less than
 $2\times10^{-6}$ relatively. The tested initialization difference does
 not explain the dynamic discrepancy either.
+
+A separate control increases the prescribed physical slip to $\lambda=4$
+without changing width, force or the numerical kernel. Six signed pure
+profiles verify Eq.~\eqref{eq:slippure} within $\PhaseLargerSlipPureError$
+relatively. The three dynamic mean-speed differences decrease to 5.40\%,
+3.95\% and \PhaseLargerSlipSpeedPercent\%. This is a sensitivity result,
+not independent validation. Define the equivalent hydraulic resistance
+$R=F/\overline u$ and its excess relative to each analytic discrete pure
+channel, $R_{ex}=R-R_0$. At H48, $R_{ex}/R_0$ is 0.12735 for LBM and
+0.16407 for FV: their normalized excesses still differ by
+\PhaseLargerSlipExcessPercent\%. Larger pure conductance partly dilutes the
+relative speed gap. The prescribed-slip table in the supplement retains
+both slip controls, so a smaller speed percentage cannot be mistaken for
+converged capillary resistance.
 
 \subsection{Separating momentum, force and phase operators}
 The actual production capillary force is reconstructed from two adjacent

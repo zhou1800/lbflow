@@ -1,0 +1,11 @@
+\begin{table}[htbp]\centering\small
+\caption{Prescribed-slip resolution control at fixed width and force. Speeds are multiplied by $10^5$; $\Delta_U=100(U_{LB}/U_{FV}-1)$. The normalized excess resistance $\Lambda=R_{ex}/R_0=U_0/U-1$ uses each discretization's analytic pure-channel speed $U_0$, including its sampling offset. Slip is independently specified, not fitted to velocity.}\label{tab:slipresolution}
+\begin{tabular}{rrrrrrr}\toprule
+$\lambda$ & $H$ & LBM & Stokes/FV & $\Delta_U$ (\%) & $\Lambda_{LB}$ & $\Lambda_{FV}$ \\ \midrule
+1 & 16 & 1.510667 & 1.289872 & 17.118 & 0.166703 & 0.372229 \\
+1 & 32 & 1.394267 & 1.210531 & 15.178 & 0.262760 & 0.455972 \\
+1 & 48 & 1.344230 & 1.182072 & 13.718 & 0.309506 & 0.489851 \\
+4 & 16 & 2.960897 & 2.809180 & 5.401 & 0.081598 & 0.142682 \\
+4 & 32 & 2.873068 & 2.763845 & 3.952 & 0.114009 & 0.158712 \\
+4 & 48 & 2.838763 & 2.749920 & 3.231 & 0.127349 & 0.164074 \\
+\bottomrule\end{tabular}\end{table}

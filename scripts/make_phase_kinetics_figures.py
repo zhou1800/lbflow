@@ -63,6 +63,10 @@ def main():
         PhaseFVTimeSignError=scientific(abs(half['late_mean_speed']/(-full['late_mean_speed'])-1)),
         PhaseHybridTimeError=scientific(abs(halfhybrid['late_mean_speed']/fullhybrid['late_mean_speed']-1)),
         PhaseSymbolError=scientific(max(r['max_absolute_error'] for r in data['symbol_checks'])))
+    larger=[r for r in data['slip_resolution_controls'] if r['physical_slip']==4]
+    vals.update(PhaseLargerSlipSpeedPercent=f'{100*larger[-1]["relative_lbm_fv_mean_difference"]:.2f}',
+        PhaseLargerSlipExcessPercent=f'{100*abs(larger[-1]["relative_lbm_fv_normalized_excess_difference"]):.2f}',
+        PhaseLargerSlipPureError=scientific(max(r['relative_max_profile_error'] for r in data['pure_slip_resolution_controls'])))
     (paper/'data/phase-kinetics-numbers.tex').write_text('% Generated from audited phase-kinetics.json.\n'+
         ''.join('\\newcommand{\\'+name+'}{'+value+'}\n' for name,value in vals.items()))
     table=[r'\begin{table}[htbp]\centering\small',
@@ -73,6 +77,16 @@ def main():
             f'{1e5*np.mean([p["actual_force_stokes_speed"] for p in audit["points"]]):.6f}'+r' \\')
     table.extend([r'\bottomrule\end{tabular}\end{table}'])
     (paper/'data/phase-kinetics-table.tex').write_text('\n'.join(table)+'\n')
+    table=[r'\begin{table}[htbp]\centering\small',
+        r"\caption{Prescribed-slip resolution control at fixed width and force. Speeds are multiplied by $10^5$; $\Delta_U=100(U_{LB}/U_{FV}-1)$. The normalized excess resistance $\Lambda=R_{ex}/R_0=U_0/U-1$ uses each discretization's analytic pure-channel speed $U_0$, including its sampling offset. Slip is independently specified, not fitted to velocity.}\label{tab:slipresolution}",
+        r'\begin{tabular}{rrrrrrr}\toprule',
+        r'$\lambda$ & $H$ & LBM & Stokes/FV & $\Delta_U$ (\%) & $\Lambda_{LB}$ & $\Lambda_{FV}$ \\ \midrule']
+    for r in data['slip_resolution_controls']:
+        table.append(f'{r["physical_slip"]:g} & {r["height"]} & {1e5*r["lbm_mean_speed"]:.6f} & '+
+            f'{1e5*r["fv_mean_speed"]:.6f} & {100*r["relative_lbm_fv_mean_difference"]:.3f} & '+
+            f'{r["lbm_excess_resistance_over_pure"]:.6f} & {r["fv_excess_resistance_over_pure"]:.6f}'+r' \\')
+    table.extend([r'\bottomrule\end{tabular}\end{table}'])
+    (paper/'data/phase-slip-table.tex').write_text('\n'.join(table)+'\n')
     print(json.dumps(vals))
 
 

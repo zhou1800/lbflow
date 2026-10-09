@@ -19,12 +19,13 @@ CAMPAIGNS=('production-pilot','pure-pilot','waves-pilot','production-fine',
     'pure-fine','waves-fine','waves-mode2','production-slip1-forward-H16',
     'production-slip1-forward-fine','pure-slip1-forward-fine',
     'production-slip1-holds','compat-default-old','compat-default-new',
-    'hydraulic-audit-canonical')
+    'hydraulic-audit-canonical','production-slip4','pure-slip4')
 REFERENCES=('reference-slip1-H16','reference-slip1-H32','reference-slip1-H48',
     'reference-slip1-H32-halfstep-negative','reference-zero-sigma-H16',
     'reference-zero-sigma-H32','hybrid-slip1-H16','hybrid-slip1-H32',
     'hybrid-slip1-H48-canonical','hybrid-slip1-H32-halfstep',
-    'reference-slip1-H32-projection-seed','hybrid-slip1-H32-logistic-seed')
+    'reference-slip1-H32-projection-seed','hybrid-slip1-H32-logistic-seed',
+    'reference-slip4-H16','reference-slip4-H32','reference-slip4-H48')
 
 
 def receipt_at_root(receipt, root):
@@ -52,6 +53,8 @@ def reference_measure(folder):
     for f in sorted(folder.glob('field.*.npz')):
         with np.load(f) as field:
             phi,u,v=field['phi'],field['u'],field['v'];h=float(field['h']);t=float(field['time'])
+            if not all(np.isfinite(a).all() for a in (phi,u,v,np.array([h,t]))) or h<=0:
+                raise AssertionError('Reference field contains invalid values or grid spacing')
             row=observation(phi,u,v,h,t)
             row['max_divergence']=float(abs((np.roll(u,-1,axis=1)-u)/h+np.diff(v,axis=0)/h).max())
             history.append(row)
@@ -76,7 +79,9 @@ def reference_measure(folder):
 def collect(root):
     receipts={};rows=[]
     for campaign in CAMPAIGNS:
-        for path in sorted((root/campaign/'results').glob('*.json')):
+        paths=sorted((root/campaign/'results').glob('*.json'))
+        if not paths:raise FileNotFoundError(f'Missing archived campaign: {campaign}')
+        for path in paths:
             r=receipt_at_root(json.loads(path.read_text()),root);verify(r);folder=Path(r['output_files'][-1]).parent
             if r['start']:
                 for key,suffix in (('checkpoint_sha256','.rst'),('checkpoint_metadata_sha256','.rst.meta')):
@@ -134,6 +139,41 @@ def collect(root):
             relative_lbm_fv_mean_difference=lbm['late_mean_speed']/fv['late_mean_speed']-1,
             relative_hybrid_lbm_mean_difference=hybrid['late_mean_speed']/lbm['late_mean_speed']-1,
             relative_hybrid_lbm_centroid_difference=hybrid['late_centroid_speed']/lbm['late_centroid_speed']-1))
+    slip_controls=[];pure_slip_controls=[]
+    for slip in (1.,4.):
+        for h in (16,32,48):
+            campaign='production-slip1-forward' if slip==1 else 'production-slip4'
+            pair=[r for r in rows if r['campaign'].startswith(campaign)
+                and r['parameters']['height']==h and abs(r['parameters']['physical_force'])==1e-7]
+            lbm=next(r for r in pair if r['parameters']['physical_force']>0)
+            reverse=next(r for r in pair if r['parameters']['physical_force']<0)
+            fv=next(r for r in references if r['name']==f'reference-slip{int(slip)}-H{h}')
+            dx=16/h;force=1e-7
+            lbm_pure=3*force*(16**2/6+16*slip+dx*dx/12)
+            fv_pure=3*force*(16**2/6+16*slip+dx*dx/3)
+            lbm_excess=lbm_pure/lbm['late_mean_speed']-1
+            fv_excess=fv_pure/fv['late_mean_speed']-1
+            slip_controls.append(dict(height=h,physical_slip=slip,
+                lbm_mean_speed=lbm['late_mean_speed'],fv_mean_speed=fv['late_mean_speed'],
+                lbm_pure_mean_speed=lbm_pure,fv_pure_mean_speed=fv_pure,
+                relative_lbm_fv_mean_difference=lbm['late_mean_speed']/fv['late_mean_speed']-1,
+                lbm_excess_resistance_over_pure=lbm_excess,
+                fv_excess_resistance_over_pure=fv_excess,
+                relative_lbm_fv_normalized_excess_difference=lbm_excess/fv_excess-1,
+                relative_signed_lbm_mean_difference=lbm['late_mean_speed']/(-reverse['late_mean_speed'])-1,
+                relative_lbm_last_interval_mean_change=lbm['history'][-1]['mean_speed']/lbm['history'][-2]['mean_speed']-1,
+                relative_fv_last_interval_mean_change=fv['relative_last_interval_mean_change']))
+    for (campaign,name),receipt in receipts.items():
+        if campaign!='pure-slip4':continue
+        p=receipt['parameters'];dx=p['dx'];height=p['height'];force=p['physical_force']
+        _,_,_,velocity=geometry_fields(receipt)
+        profile=velocity[0,1:-1,:,0].mean(axis=1)/dx;y=(np.arange(height)+.5)*dx
+        ideal=3*force*(y*(16-y)+16*p['physical_slip'])
+        error=float(abs(profile-ideal).max()/abs(ideal).max())
+        if error>2e-9:raise AssertionError('Larger-slip pure hydraulic profile fails')
+        pure_slip_controls.append(dict(name=name,height=height,physical_force=force,
+            physical_slip=p['physical_slip'],relative_max_profile_error=error,
+            measured_profile=profile.tolist(),analytic_profile=ideal.tolist()))
     durations=[]
     for hold in (r for r in rows if r['campaign']=='production-slip1-holds'):
         p=hold['parameters']
@@ -182,11 +222,12 @@ def collect(root):
         and p.name not in ('phase-kinetics.json','reanalyzed-phase-kinetics.json','raw-manifest.json')
         and not p.name.endswith('.tex.build.log') and p.suffix!='.zip']
     data=dict(protocol='Fixed physical width and D; exact zero-flow phase spectrum, neutral periodic displacement with prescribed Navier slip, independent Stokes/FV reference and shared-phase kinetic ablation.',
-        units='Physical height 16 and length 64; h=16/H, dt_lbm=h^2, nu=D=1/6, sigma=.005, body force=1e-7, prescribed hydraulic slip=1. Width W09=4.765235021842287. Waves use zero sigma/force and default zero slip.',
+        units='Physical height 16 and length 64; h=16/H, dt_lbm=h^2, nu=D=1/6, sigma=.005, body force=1e-7, main prescribed hydraulic slip=1, separate resolution control slip=4. Width W09=4.765235021842287. Waves use zero sigma/force and default zero slip.',
         production_executions=len(receipts),waves=waves,spectra=list(spectra.values()),symbol_checks=symbol_checks,
         formal_expansion_checks=expansion_controls(),
         production=rows,references=references,dynamic_comparison=dynamic,duration_controls=durations,rate_controls=rate_control,
         initial_profile_controls=initial_controls,
+        slip_resolution_controls=slip_controls,pure_slip_resolution_controls=pure_slip_controls,
         force_audit=force_rows,force_audit_driver_sha256=audit['audit_driver_sha256'],
         reference_checks=checks,zero_sigma_controls=zeros,default_compatibility=compatibility,
         raw_manifest=manifest,

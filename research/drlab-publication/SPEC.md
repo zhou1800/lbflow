@@ -645,3 +645,16 @@ width and prescribed slip, also start FV from the discrete projection profile
 and the shared-phase ablation from the analytic logistic profile. Compare both
 mean and centroid speeds after the same physical duration. This is a targeted
 review follow-up, not a claim that all exploratory decisions were prespecified.
+
+### Larger prescribed-slip resolution control
+
+After the lambda=1 audit, compare a separate neutral periodic case with
+physical lambda=4 at H16/H32/H48, paired forces +/-1e-7 and physical duration
+8000. Keep measured width, sigma, nu, D and the frozen kernel unchanged.
+Measure six signed pure-channel profiles independently and compare the
+finite-volume calculation at the same prescribed lambda. Do not fit slip
+to a front speed. Report both mean-speed differences and excess resistance
+relative to each method's analytic discrete pure-channel conductance;
+increased pure conductance can dilute a relative speed difference.
+This exploratory resolution control neither presupposes agreement nor
+establishes contact-line convergence from a reduced discrepancy.

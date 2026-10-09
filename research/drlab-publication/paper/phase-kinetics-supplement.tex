@@ -235,6 +235,25 @@ by less than $4\times10^{-12}$ relatively; the H32 half-step mean-flow
 comparison is recorded separately. Mean and circular-centroid velocities
 remain distinct observables in the data.
 
+An exploratory control prescribes physical slip 4 with the same width,
+force, surface tension, viscosity and nominal duration. Six signed LBM
+fronts, six signed pure channels and three independent FV trajectories
+are retained. The pure profiles satisfy the analytic pointwise law within
+$\PhaseLargerSlipPureError$. Dynamic LBM sign pairs agree in mean-speed
+magnitude within $2\times10^{-13}$; the final output-interval mean changes
+are below $2.4\times10^{-8}$ for LBM and $1.5\times10^{-6}$ for FV.
+These late changes bound the tested duration effect, not arbitrary-time
+convergence. LBM's final field precedes the nominal endpoint by $h^2$;
+FV samples that endpoint. Each history retains its actual physical clock.
+For the table, the respective analytic pure means are
+$U_{0,LB}=3F[16^2/6+16\lambda+h^2/12]$ and
+$U_{0,FV}=3F[16^2/6+16\lambda+h^2/3]$. We compare the equivalent excess
+resistance $R_{ex}=F/U-F/U_0$, normalized by $R_0=F/U_0$.
+This sensitivity comparison changes the wall law; it is not a refinement
+at fixed slip and cannot establish a molecular contact-line parameter.
+
+\input{data/phase-slip-table.tex}
+
 \subsection{Actual-force audit and retained evidence}
 The production force audit uses the new frozen executable's own
 gradient, curvature and cutoff on two adjacent outgoing checkpoints.
@@ -245,9 +264,9 @@ The actual-force and same-phase-field reference-force means are retained
 for each state. These are hydraulic diagnostics on a supplied phase field;
 their small residual does not independently verify its evolution.
 
-\texttt{data/phase-kinetics.json} records 55 LBM executions, including
+\texttt{data/phase-kinetics.json} records 67 LBM executions, including
 14 phase-wave trajectories, six default-compatibility runs and three
-two-state hydraulic replays. It separately records seven independent
+two-state hydraulic replays. It separately records ten independent
 finite-volume runs and five shared-phase ablations. The collector
 recomputes all diagnostics from raw fields, matches frozen reference
 source hashes and checks inputs, geometry, executables and native
