@@ -73,6 +73,26 @@ string FilePrm::getCapillaryModel() const
     return result;
 }
 
+string FilePrm::getWallRecoloring() const
+{
+    const auto value=iPrm.find("wallRecoloring");
+    if (value==iPrm.end()) return "legacy";
+    string result;
+    if (!parse(value->second,&result))
+        throw invalid_argument("wallRecoloring must be a quoted string.");
+    return result;
+}
+
+string FilePrm::getCurvatureStencil() const
+{
+    const auto value=iPrm.find("curvatureStencil");
+    if (value==iPrm.end()) return "normal";
+    string result;
+    if (!parse(value->second,&result))
+        throw invalid_argument("curvatureStencil must be a quoted string.");
+    return result;
+}
+
 void FilePrm::ValidateSimulation() const
 {
     const size_t ndim = dimension.size();
@@ -108,10 +128,31 @@ void FilePrm::ValidateSimulation() const
             !isfinite(density[k]) || density[k] <= 0.0)
             throw invalid_argument("Densities must be positive; relaxation times must exceed 0.5.");
     if (model == "color") {
+        const string recoloring=getWallRecoloring();
+        if (recoloring!="legacy" && recoloring!="tangential")
+            throw invalid_argument("wallRecoloring must be legacy or tangential.");
+        if (recoloring=="tangential") {
+            if (getWallGradient()!="renormalized")
+                throw invalid_argument("Tangential wall recoloring requires wallGradient renormalized.");
+            if (ndim!=2 || density[0]!=density[1] || abs(getAlpha0()-4.0/9.0)>1e-14)
+                throw invalid_argument("Tangential wall recoloring requires equal-density standard-weight D2Q9.");
+            for (const auto& item : idx) {
+                const IT type=item.second->Type;
+                if (type!=IT::VD && type!=IT::GV && type!=IT::SD && type!=IT::BB)
+                    throw invalid_argument("Tangential wall recoloring initially supports only closed VD/GV flow with SD/BB walls.");
+            }
+        }
         const string capillary = getCapillaryModel();
+        const string curvature=getCurvatureStencil();
+        if (curvature!="normal" && curvature!="gradient")
+            throw invalid_argument("curvatureStencil must be normal or gradient.");
+        if (curvature=="gradient" && capillary!="csf")
+            throw invalid_argument("The gradient curvature stencil requires capillaryModel csf.");
         if (capillary != "perturbation" && capillary != "csf")
             throw invalid_argument("capillaryModel must be perturbation or csf.");
         if (capillary == "csf") {
+            if (getLSpeed()!=1.0)
+                throw invalid_argument("Experimental CSF requires latticeSpeed=1 for Guo forcing.");
             const double standardAlpha = ndim == 2 ? 4.0/9.0 : 1.0/3.0;
             if (density[0] != density[1] || abs(getAlpha0()-standardAlpha) > 1e-14)
                 throw invalid_argument("Experimental CSF requires equal reference densities and standard pressure weights.");
@@ -302,6 +343,12 @@ void FilePrm::parseAll()
         }
         else if (a.first == "capillaryModel") {
             // Optional experimental capillary force selector.
+        }
+        else if (a.first == "wallRecoloring") {
+            // Optional discrete wall-segregation balance.
+        }
+        else if (a.first == "curvatureStencil") {
+            // Optional algebraically equivalent continuum-force discretization.
         }
         else if (a.first == "interfaceThickness")
             parse(a.second, &iThickness);

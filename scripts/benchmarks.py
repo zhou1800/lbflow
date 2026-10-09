@@ -86,6 +86,10 @@ class Study:
         params['viscosityInterpolation']=f'"{s.get("viscosity_interpolation","arithmetic")}"'
         if 'capillary_model' in s:
             params['capillaryModel']=f'"{s["capillary_model"]}"'
+        if 'wall_recoloring' in s:
+            params['wallRecoloring']=f'"{s["wall_recoloring"]}"'
+        if 'curvature_stencil' in s:
+            params['curvatureStencil']=f'"{s["curvature_stencil"]}"'
         params.update(s.get('overrides',{}))
         text = '\n'.join(f'{key} {val};' for key,val in params.items())
         text += '\n'+'\n'.join(s['indices'])+'\n'
@@ -126,6 +130,9 @@ class Study:
                     finished='Simulation finished!' in transcript,command=command,
                     output_files=[str(f) for f in sorted(folder.glob('field.*.vti'))],
                     timing=json.loads(timing_lines[0]) if len(timing_lines)==1 else None)
+        if checkpoint:
+            result['checkpoint_sha256']=sha(folder/f'field.{start:010d}.rst')
+            result['checkpoint_metadata_sha256']=sha(folder/f'field.{start:010d}.rst.meta')
         (self.root/'results'/f'{name}.json').write_text(json.dumps(result,indent=2))
         print(json.dumps({k:result[k] for k in ('name','exit','finished','seconds')}),flush=True)
         if code=='timeout': raise RuntimeError(f'{name}: timed out; inspect {folder/"run.log"}')

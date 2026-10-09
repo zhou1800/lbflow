@@ -79,6 +79,8 @@ void SCSP::Run(std::ostream &logProc)
         bounceBack(&f, fOld, ibS);
         //axisymmetric(&f);
         zouHeBoundary();
+        if (p.getReportDir()!=0 && (t%p.getTStep()==0 || t%p.getTRpt()==0))
+            adjacentReportVelocity=v;
         calcMacroVar();
         bodyForce();
         seconds[NUMERICAL_TIME] += MPI_Wtime() - begin;
@@ -362,7 +364,8 @@ bool SCSP::report(ostream &os, const va_val_t &dens, const vava_val_t &v)
         }
         if (!hasPressureDrop && mpi().getId() == 0)
             os << " - pressure-based permeability unavailable: zero pressure drop" << endl;
-        return updateConvergence(v, !hasPressureDrop || errK < MaxErr, MaxErr, os);
+        return updateConvergence(v, !hasPressureDrop || errK < MaxErr, MaxErr, os,
+                                 nullptr,&adjacentReportVelocity);
     }
     catch (exception& e) { os << e.what(); throw; }
     return false;

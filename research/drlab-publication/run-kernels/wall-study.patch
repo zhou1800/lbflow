@@ -1,0 +1,14 @@
+--- a/solver/src/file/fileprm.cpp
++++ b/solver/src/file/fileprm.cpp
+@@ -154,2 +153,0 @@
+-            if (getLSpeed()!=1.0)
+-                throw invalid_argument("Experimental CSF requires latticeSpeed=1 for Guo forcing.");
+--- a/solver/src/lbm/simulator.cpp
++++ b/solver/src/lbm/simulator.cpp
+@@ -259 +259,2 @@
+-    for (size_t d = 0; d < velocity.size(); ++d) {
++    for (size_t d = 0; d < velocity.size(); ++d)
++        {
+@@ -277 +278 @@
+-    }
++        }

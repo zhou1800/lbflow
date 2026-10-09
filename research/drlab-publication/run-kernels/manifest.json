@@ -1,5 +1,5 @@
 {
-  "purpose": "Reconstruct the pre-storage-refactor numerical kernel used by the refined/continued slit and bulk campaigns. Apply the patch in a separate copy of this source revision.",
+  "purpose": "Reconstruct the pre-storage-refactor numerical kernel used by the earlier refined/continued slit and bulk campaigns. Check out source_revision_before_patch in a separate copy before applying the patch.",
   "restored_frozen_executable_sha256": "6694a743a12b8054c0cb98b4b47465f4f276262673aa9b7db44e8077eada9eac",
   "rebuild_in_original_environment_byte_identical": true,
   "final_verification_executable_sha256": "125c7ff2c3222448db9c9219ac837ccd34a3e1787c8a6c7d4a8c44ae6757e33c",
@@ -8,5 +8,6 @@
   "patch_sha256": "91cfeb2b1eefc5386b07214184ab0a711ec933477a9951d30d3c7958cc10ff52",
   "scope": "Only force-vector storage differs; equations, stencil, cutoff, forcing and boundary operators are unchanged. Historical pilot/baseline executable hashes are retained separately; binary hashes depend on compiler/build environment.",
   "apply_command": "git apply --unidiff-zero research/drlab-publication/run-kernels/6694a743-force-storage.patch",
-  "patch_context": "Zero context preserves the historical mixed CRLF/LF source bytes without storing carriage-return context as trailing whitespace."
+  "patch_context": "Zero context preserves the historical mixed CRLF/LF source bytes without storing carriage-return context as trailing whitespace.",
+  "source_revision_before_patch": "dc1c52306006d9dc40683bd136e9b909e9910f8e"
 }

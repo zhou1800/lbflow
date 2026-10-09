@@ -1,0 +1,19 @@
+{
+  "purpose": "Reconstruct the identified frozen numerical kernel in a separate source copy; verify base hashes before applying the zero-context patch.",
+  "frozen_executable_sha256": "396f114b0e638b4ee6307728155c9a91b936a056c897957e4d342b359e44081f",
+  "base_source_file_sha256": {
+    "solver/src/lbm/colorfluid.cpp": "455496263af0726a4eb10e98041851e2b0a7e7564b1bb9e1ba88b0649c642645",
+    "solver/src/file/fileprm.cpp": "d62d9cd56f7a970a38694b59756ac8e08e1c22862ba90b9c9781a0566b04bc3c",
+    "solver/src/lbm/simulator.cpp": "adcc90709346eaa7fecbbb2e225802292937343f7f466583ca1a378c0fb67390"
+  },
+  "historical_source_file_sha256": {
+    "solver/src/lbm/colorfluid.cpp": "d9b37695fbaec3fea97679ea037f940d627fed7389b4ed611bf2b9cf3fe19dfd",
+    "solver/src/file/fileprm.cpp": "b8cc5c73569c0a204b5dd33367695216834c86082dd4f00631c07656b1efd1d9",
+    "solver/src/lbm/simulator.cpp": "03b4cebaa6e649da5469e605f0a2720159d82ee7b55832fc69f2717f3544d798"
+  },
+  "patch_sha256": "00930d75c182528d9010035625690a5b56aa529ce04772a8142fe3d55b011e72",
+  "apply_command": "git apply --unidiff-zero research/drlab-publication/run-kernels/wall-pre-neutral-norm.patch",
+  "scope": "wall-study preserves the measured neutral correction; wall-pre-neutral-norm retains the earlier degenerate-mask failure. Final validation adds an unsupported-unit-speed guard and whitespace-only convergence-loop formatting; measured inputs all use latticeSpeed=1.",
+  "rebuild_in_original_environment_byte_identical": true,
+  "final_validation_executable_sha256": "ab8e6efed034c94fcaab35e35b8ec02056fc6adf1968ae518c530ae0a8f20fe0"
+}

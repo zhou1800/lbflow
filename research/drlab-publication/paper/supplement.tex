@@ -427,6 +427,64 @@ meniscus comparisons are bitwise identical to the frozen pre-change solver.
 Neither these replay tests nor the bulk-drop pressure checks establish
 dynamic or curved three-dimensional wall accuracy.
 
+\section{Neutral-wall phase balance and adjacent-time controls}
+The new \texttt{data/wall-consistency.json} retains the independent phase
+recurrence, flat-wall zero/nonzero-sigma controls, rotation/parity tests,
+manufactured fixed points, adjacent physical fields, matched bulk drops
+and nonneutral negative controls. Coordinate/diagonal contributions to a
+bulk tangential phase update are $A=a+2b$ and $B=a+\sqrt{2}b$; local reflection
+leaves $A_w=a+b$ and $B_w=a+b/\sqrt{2}$. Scaling the two wall-parallel
+coordinate recoloring terms by the factor $k$ derived in the main text
+sets $B_w/A_w=B/A$. The matched residual is $5/6$ of the bulk residual;
+this is a stationary-profile condition, not equality of transient transport.
+The factor applies to opposite links symmetrically and leaves total
+populations unchanged. Neutral tangent-magnitude reconstruction is also
+required at degenerate extrema: an odd-grid manufactured control without
+it fails. Its frozen source is reconstructible with
+\texttt{run-kernels/wall-pre-neutral-norm.patch} and the accompanying hashes.
+
+Manufactured tests use an independently relaxed scalar bulk profile to
+construct outgoing populations, rather than reading an equilibrium from
+the hydrodynamic solver. With no flow and unit total density,
+$f_{0i}^{out}=w_i[\varphi+\beta\varphi(1-\varphi)
+ (\bm e_i\cdot\bm n)/|\bm e_i|]$ for moving directions and
+$f_{00}^{out}=w_0\varphi$; the second phase is complementary.
+The tangent multiplier is included only at wall-adjacent coordinate links.
+Both 64- and 65-cell periodic tangential domains are tested at three
+segregation strengths and both curvature forms with MRT; a rotated control
+uses SRT. Seeds, native-double outgoing metadata and checksums are retained.
+MPI and restart comparisons are bitwise identical.
+
+The gradient curvature form differentiates neighboring $\bm g$ without
+normalizing each neighbor. Its local force uses the same $10^{-9}$ mask,
+while weak neighboring raw gradients remain in the derivative.
+The continuously equivalent force expressions have established precedents
+\cite{sugimoto2026}. Matched 44/80-cell square drop domains separate the
+force-stencil comparison from two additional 48/96-cell domain controls.
+These controls do not establish higher-density or three-dimensional wall
+accuracy.
+
+Staggered amplitudes use the fluid-node mean of $\rho u_x(-1)^x$ and
+$\rho u_y(-1)^y$. Projection energy and raw velocities are retained alongside
+one- and two-step differences. Their adjacent-step average is a diagnostic;
+no averaging or mode removal enters collision or streaming. The relevant
+dispersion mode has established precedents \cite{lallemand2000,guo2011}.
+Complete nonlinear equilibrium checkerboard seeds of amplitude $10^{-6}$
+are propagated with SCSP and color, SRT and MRT, under even reports.
+The new adjacent-step criterion prevents premature termination, whereas
+stationary controls retain termination after three stable report intervals.
+The scalar and velocity comparisons use the existing tolerances.
+An audit may inspect root-local force/gradient arrays from an identified
+outgoing state with \texttt{NumericalAudit input.prm --capillary-state};
+local size, global size and local origin are explicitly identified.
+
+The neutral correction is not validated for nonneutral wetting. Direct
+60/120-degree pressure controls use the same three-width scaling as the
+earlier study; 60-degree normal-CSF cases are held to four initial durations,
+with actual sample intervals retained. Their remaining pressure bias is
+larger than in the uncorrected reconstructed-CSF controls. These results
+preclude a claim of a generally accurate capillary boundary or trapping law.
+
 \section{Scientific limits and publication status}
 Only equal-density, low-speed flow in the documented parameter range is
 verified. Curved-wall and three-dimensional wetting accuracy, contact-line
@@ -443,4 +501,6 @@ Public repository access, an immutable release citation, funding and competing
 interest declarations remain to be finalized before submission.
 The manuscript is a research draft, not a submitted article or a peer-review
 decision. AI-assisted inspection and drafting are disclosed in the main text.
+\bibliographystyle{unsrt}
+\bibliography{references}
 \end{document}

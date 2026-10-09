@@ -1,0 +1,257 @@
+{
+  "executable_sha256": "ab8e6efed034c94fcaab35e35b8ec02056fc6adf1968ae518c530ae0a8f20fe0",
+  "ctest_groups": [
+    "numerical_moments",
+    "simulator_contracts",
+    "pore_flow",
+    "capillary_contracts",
+    "wall_equilibria"
+  ],
+  "ctest_all_passed": true,
+  "ctest_seconds": 28.23,
+  "manufactured_fixed_points": [
+    {
+      "name": "fixed-beta0.35-L64-normal-1rank",
+      "max_speed": 1.106323332765709e-16,
+      "color_error": 4.413136522884997e-14
+    },
+    {
+      "name": "fixed-beta0.35-L64-gradient-1rank",
+      "max_speed": 1.0755028331944463e-16,
+      "color_error": 4.2577052994374753e-14
+    },
+    {
+      "name": "fixed-beta0.35-L65-normal-1rank",
+      "max_speed": 1.7685713466380898e-16,
+      "color_error": 4.546363285840016e-14
+    },
+    {
+      "name": "fixed-beta0.35-L65-gradient-1rank",
+      "max_speed": 1.458017500898221e-16,
+      "color_error": 4.0745185003743245e-14
+    },
+    {
+      "name": "fixed-beta0.7-L64-normal-1rank",
+      "max_speed": 1.0712971783416561e-16,
+      "color_error": 7.033262861000367e-14
+    },
+    {
+      "name": "fixed-beta0.7-L64-gradient-1rank",
+      "max_speed": 8.680727915768251e-17,
+      "color_error": 5.645484080218921e-14
+    },
+    {
+      "name": "fixed-beta0.7-L65-normal-1rank",
+      "max_speed": 1.1796119636642286e-16,
+      "color_error": 7.904787935331115e-14
+    },
+    {
+      "name": "fixed-beta0.7-L65-gradient-1rank",
+      "max_speed": 1.1841566584206943e-16,
+      "color_error": 7.793765632868599e-14
+    },
+    {
+      "name": "fixed-beta0.9-L64-normal-1rank",
+      "max_speed": 8.948416863109745e-17,
+      "color_error": 1.3139489496438728e-13
+    },
+    {
+      "name": "fixed-beta0.9-L64-gradient-1rank",
+      "max_speed": 1.0308627466757121e-16,
+      "color_error": 1.3089529460330596e-13
+    },
+    {
+      "name": "fixed-beta0.9-L65-normal-1rank",
+      "max_speed": 1.0174032416145528e-16,
+      "color_error": 1.0902390101819037e-13
+    },
+    {
+      "name": "fixed-beta0.9-L65-gradient-1rank",
+      "max_speed": 9.720644932346757e-17,
+      "color_error": 1.1407541578023483e-13
+    },
+    {
+      "name": "fixed-rotated-SRT-1rank",
+      "max_speed": 6.776263786756314e-16,
+      "color_error": 3.758104938356155e-14
+    }
+  ],
+  "mpi_restart": [
+    {
+      "left": "fixed-beta0.7-L64-gradient-1rank",
+      "right": "fixed-parallel-2rank",
+      "max_absolute_differences": {
+        "r0": 0.0,
+        "r1": 0.0,
+        "v": 0.0
+      },
+      "bitwise_fields": true
+    },
+    {
+      "left": "fixed-beta0.7-L64-gradient-1rank",
+      "right": "fixed-resumed-1-1rank",
+      "max_absolute_differences": {
+        "r0": 0.0,
+        "r1": 0.0,
+        "v": 0.0
+      },
+      "bitwise_fields": true
+    },
+    {
+      "left": "fixed-beta0.7-L64-gradient-1rank",
+      "right": "fixed-resumed-2-2rank",
+      "max_absolute_differences": {
+        "r0": 0.0,
+        "r1": 0.0,
+        "v": 0.0
+      },
+      "bitwise_fields": true
+    }
+  ],
+  "convergence": [
+    {
+      "name": "checkerboard-scsp-SRT-1rank",
+      "mode_error": 1.4877921960284972e-17,
+      "oscillatory_steps": 15,
+      "settled_steps": 8
+    },
+    {
+      "name": "checkerboard-scsp-MRT-1rank",
+      "mode_error": 1.4877921960284972e-17,
+      "oscillatory_steps": 15,
+      "settled_steps": 8
+    },
+    {
+      "name": "checkerboard-color-SRT-1rank",
+      "mode_error": 1.4878768993232226e-17,
+      "oscillatory_steps": 15,
+      "settled_steps": 8
+    },
+    {
+      "name": "checkerboard-color-MRT-1rank",
+      "mode_error": 1.4878133718521785e-17,
+      "oscillatory_steps": 15,
+      "settled_steps": 8
+    }
+  ],
+  "unsupported_units_rejected": true,
+  "archived_source_files_unchanged": 82,
+  "physical_study_executable_sha256": "f3b646a3099d68e80a9e7d94259b41ead7fe8c6d8d248e6cf0b77f4cc6f44557",
+  "scope": "Final validator adds a speed-unit guard and formatting only; physical measurements use the reconstructible frozen wall-study kernel. No GPU/performance, general wetting or submission claim.",
+  "post_guard_comparisons": [
+    {
+      "left": "wall-balance-H16-beta0.7-tangential-sigma0.005-csf-MRT-x-1rank",
+      "right": "wall-balance-H16-beta0.7-tangential-sigma0.005-csf-MRT-x-final-guard-1rank",
+      "max_absolute_differences": {
+        "r0": 0.0,
+        "r1": 0.0,
+        "v": 0.0
+      },
+      "bitwise_fields": true
+    },
+    {
+      "left": "wall-balance-H16-beta0.7-tangential-sigma0.005-csf-MRT-x-gradient-1rank",
+      "right": "wall-balance-H16-beta0.7-tangential-sigma0.005-csf-MRT-x-gradient-final-guard-1rank",
+      "max_absolute_differences": {
+        "r0": 0.0,
+        "r1": 0.0,
+        "v": 0.0
+      },
+      "bitwise_fields": true
+    },
+    {
+      "left": "wall-balance-H16-beta0.7-legacy-sigma0.005-csf-MRT-x-1rank",
+      "right": "wall-balance-H16-beta0.7-legacy-sigma0.005-csf-MRT-x-final-guard-1rank",
+      "max_absolute_differences": {
+        "r0": 0.0,
+        "r1": 0.0,
+        "v": 0.0
+      },
+      "bitwise_fields": true
+    }
+  ],
+  "prior_default_and_nonneutral_comparisons": [
+    {
+      "left": "menisci-H16-theta60-renormalized-beta0.7-1rank",
+      "right": "menisci-H16-theta60-renormalized-beta0.7-wall-changes-1rank",
+      "max_absolute_differences": {
+        "r0": 0.0,
+        "r1": 0.0,
+        "v": 0.0
+      },
+      "bitwise_fields": true
+    },
+    {
+      "left": "menisci-H16-theta60-renormalized-beta0.7-csf-1rank",
+      "right": "menisci-H16-theta60-renormalized-beta0.7-csf-wall-changes-1rank",
+      "max_absolute_differences": {
+        "r0": 0.0,
+        "r1": 0.0,
+        "v": 0.0
+      },
+      "bitwise_fields": true
+    },
+    {
+      "left": "menisci-H16-theta90-legacy-beta0.7-1rank",
+      "right": "menisci-H16-theta90-legacy-beta0.7-wall-changes-1rank",
+      "max_absolute_differences": {
+        "r0": 0.0,
+        "r1": 0.0,
+        "v": 0.0
+      },
+      "bitwise_fields": true
+    },
+    {
+      "left": "menisci-H16-theta60-legacy-beta0.7-1rank",
+      "right": "menisci-H16-theta60-legacy-beta0.7-wall-changes-1rank",
+      "max_absolute_differences": {
+        "r0": 0.0,
+        "r1": 0.0,
+        "v": 0.0
+      },
+      "bitwise_fields": true
+    },
+    {
+      "left": "menisci-H16-theta90-renormalized-beta0.7-1rank",
+      "right": "menisci-H16-theta90-renormalized-beta0.7-wall-changes-1rank",
+      "max_absolute_differences": {
+        "r0": 0.0,
+        "r1": 0.0,
+        "v": 0.0
+      },
+      "bitwise_fields": true
+    },
+    {
+      "left": "menisci-H16-theta60-renormalized-beta0.7-tangential-normal-1rank",
+      "right": "menisci-H16-theta60-renormalized-beta0.7-tangential-normal-final-kernel-1rank",
+      "max_absolute_differences": {
+        "r0": 0.0,
+        "r1": 0.0,
+        "v": 0.0
+      },
+      "bitwise_fields": true
+    },
+    {
+      "left": "menisci-H16-theta60-renormalized-beta0.7-csf-tangential-normal-1rank",
+      "right": "menisci-H16-theta60-renormalized-beta0.7-csf-tangential-normal-final-kernel-1rank",
+      "max_absolute_differences": {
+        "r0": 0.0,
+        "r1": 0.0,
+        "v": 0.0
+      },
+      "bitwise_fields": true
+    },
+    {
+      "left": "menisci-H16-theta60-renormalized-beta0.7-csf-tangential-gradient-1rank",
+      "right": "menisci-H16-theta60-renormalized-beta0.7-csf-tangential-gradient-final-kernel-1rank",
+      "max_absolute_differences": {
+        "r0": 0.0,
+        "r1": 0.0,
+        "v": 0.0
+      },
+      "bitwise_fields": true
+    }
+  ],
+  "relocated_case_replay_bitwise": true,
+  "root_local_force_audit_mpi_bitwise": true
+}

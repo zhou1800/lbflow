@@ -186,6 +186,26 @@ matched-physics spatial convergence study.
 
 ## Rebuild Figures And PDFs
 
+The continued wall study adds `paper/data/wall-consistency.json` and
+`wall-study-validation.json`. It contains independent phase recurrences,
+neutral fixed points, rotation/parity and adjacent-step controls, matched
+bulk drops and retained nonneutral failures. The neutral correction is
+experimental; nonneutral and digital-rock wall accuracy are not established.
+
+```sh
+python3 scripts/phase_recurrence.py --output results/phase-recurrence.json
+python3 scripts/wall_consistency.py --solver build/bin/LBFlow --root results/neutral-wall
+python3 scripts/wall_consistency.py --solver build/bin/LBFlow --root results/neutral-refinement --heights 16 32 48 --betas 0.7 --methods tangential --sigmas 0.005 --curvature-stencils normal gradient
+python3 scripts/make_wall_figure.py --data research/drlab-publication/paper/data/wall-consistency.json --paper results/regenerated-paper
+```
+
+`scripts/replay_recorded_case.py` relocates an archived `input.prm`, raw
+geometry and outgoing seed into a fresh directory, with optional bitwise
+field comparison. Select the corresponding source kernel using the manifests
+and zero-context patches under `run-kernels/`; historical results do not
+silently acquire the current executable's hash. Numerical audit output
+identifies root-local dimensions and origin when inspecting a parallel state.
+
 The four original figures can be regenerated directly from the included measurements,
 without access to the original machine or simulation outputs:
 

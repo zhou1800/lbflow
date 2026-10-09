@@ -1,0 +1,28 @@
+--- a/solver/src/lbm/colorfluid.cpp
++++ b/solver/src/lbm/colorfluid.cpp
+@@ -465,8 +464,0 @@
+-        }
+-        if (tangentialRecoloring && abs(cAngle)<1e-14) {
+-            // A nonlinear tangent profile creates a false normal derivative
+-            // in a clipped stencil, including at zero-tangent extrema.
+-            // Preserve the bulk tangent magnitude and its active mask.
+-            for (size_t d=0;d<g.S.D;++d)
+-                if (g.S.Qi[wallTangent[i]][d]==0) gDens[d]=0.0;
+-            norm=sqrt(inner_product(begin(gDens),end(gDens),begin(gDens),0.0));
+--- a/solver/src/file/fileprm.cpp
++++ b/solver/src/file/fileprm.cpp
+@@ -135,2 +134,0 @@
+-            if (getWallGradient()!="renormalized")
+-                throw invalid_argument("Tangential wall recoloring requires wallGradient renormalized.");
+@@ -154,2 +151,0 @@
+-            if (getLSpeed()!=1.0)
+-                throw invalid_argument("Experimental CSF requires latticeSpeed=1 for Guo forcing.");
+--- a/solver/src/lbm/simulator.cpp
++++ b/solver/src/lbm/simulator.cpp
+@@ -259 +259,2 @@
+-    for (size_t d = 0; d < velocity.size(); ++d) {
++    for (size_t d = 0; d < velocity.size(); ++d)
++        {
+@@ -277 +278 @@
+-    }
++        }

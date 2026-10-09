@@ -159,7 +159,8 @@ the physical half-force velocity. Fresh incoming populations include the
 initial capillary half-force subtraction. Saved states remain outgoing.
 The default `perturbation` arithmetic and archived source are preserved.
 Initially admit only closed equal-density, standard-pressure-weight color
-flow with VD/GV labels; pressure/velocity reservoirs and selective films are
+flow with VD/GV labels and latticeSpeed=1, as required by the existing Guo
+source coefficients; reject unsupported speed units explicitly. Pressure/velocity reservoirs and selective films are
 unsupported for this experimental option and must be rejected explicitly.
 
 Verify zero-force plane equilibrium, signed slit pressure, Laplace pressure
@@ -167,3 +168,108 @@ of bulk drops, mass, both collision operators and lattices, MPI exchange,
 restart continuity and unchanged default fields. Report pressure/speed and
 late-time sensitivity together; lower spurious velocity alone does not
 establish an accurate or universally superior wetting model.
+
+### Discrete Wall Segregation Balance
+
+The author requests continued resolution of the residual wall inconsistency.
+First isolate the zero-force, unit-density phase dynamics with an independent
+D2Q9 recoloring/streaming recurrence. Reproduce the recorded zero-sigma wall
+profile before inferring a correction. Prior boundary-layer analyses, notably
+Ginzburg, Roux and Silva (2015), DOI 10.1016/j.crme.2015.03.004, and the
+zero-interfacial-force wetting approach of Yu et al. (2018), are direct
+comparisons; do not claim the general boundary-layer observation as new.
+
+For a neutral planar interface varying tangentially along a flat Cartesian
+wall, write coordinate and diagonal equilibrium weights as a=1/9, b=1/36.
+The bulk tangential diffusion coefficient is A=a+2b and the segregation
+coefficient is B=a+sqrt(2)*b. The wall receives A_w=a+b and B_w=a+b/sqrt(2).
+An optional `wallRecoloring "tangential"` multiplies recoloring only on the
+two wall-parallel coordinate links by
+`k=[(a+b)*(a+sqrt(2)*b)/(a+2b)-b/sqrt(2)]/a`.
+The wall's segregation/diffusion ratio then matches the bulk. For an exactly
+one-dimensional profile and a common active-gradient mask, its wall update
+residual is `(A_w/A)` times the bulk residual. This preserves the bulk
+discrete stationary profile, not the complete transient transport operator.
+
+Opposite links share the same factor: the added component mass sums to zero,
+and complementary recoloring leaves every total population unchanged.
+The optional rule initially supports closed equal-reference-density,
+standard-weight D2Q9 with flat Cartesian walls. Reject corners, curved or
+staircase wall stencils, open reservoirs and selective films. Nonneutral
+angles on supported flat walls are experimental tests of this extension;
+the neutral-plane derivation is not proof of their accuracy. The default
+recoloring and archived source remain unchanged. No pressure, velocity or
+surface-tension fitting parameter is introduced.
+
+An odd-length manufactured equilibrium exposes a further degenerate case:
+at a profile extremum the tangential gradient can vanish while the truncated
+nonlinear stencil creates a false normal derivative. The old rotation turns
+this derivative into an active tangential recoloring direction. The optional
+balanced rule therefore requires the renormalized wall stencil and, at a
+neutral Cartesian wall, removes the raw normal component before computing
+the projected magnitude and common cutoff. For a one-dimensional profile,
+the reconstructed tangent then equals the bulk central derivative, including
+its inactive mask. This is part of the neutral fixed-point correction, not
+a changed cutoff or a general nonneutral gradient reconstruction. Retain the
+failed odd-grid control in the research evidence and rerun it after the fix.
+
+Verify independent phase-recurrence agreement, stationary-profile residuals,
+zero/nonzero-sigma neutral controls, three beta values and slit widths,
+surface-force versus perturbation interaction, component mass, MPI/restart,
+invalid-stencil exits and unchanged defaults. Retain failed controls and
+cutoff sensitivity. Only then advance to dynamic pressure-boundary/throat
+tests; a static correction is not a contact-line mobility or trapping law.
+
+### Curvature Discretization Control
+
+The first correction eliminates the zero-sigma phase distortion, but normal
+differentiation leaves residual flow after a step-profile initialization.
+Compare the default `curvatureStencil "normal"` with an optional
+`"gradient"` form of the same continuum force:
+`F_s = -(sigma/2) n [(I-n*n):grad(g)]`, `g=grad(chi)`.
+For a smooth unit normal, this follows the product identity
+`(I-n*n):grad(g) = |g| (I-n*n):grad(n)`; it is not a new physical law.
+The discrete forms are distinct and must be measured separately.
+The gradient form differentiates neighboring unnormalized gradients, avoiding
+division by weak neighboring gradients. It uses the same local normal,
+wall moment reconstruction, force cutoff and Guo integration. Do not raise
+the cutoff to hide currents or fit a surface-tension multiplier.
+
+Test bulk Laplace pressure and neutral-wall phase/equilibrium controls before
+nonneutral use; retain any loss of curved-interface accuracy. The default
+normal form remains unchanged. New claims require mass, MPI/restart,
+independent profile controls and a documented resolution/interface sequence.
+The numerical-audit executable may inspect densities and capillary operators
+from an identified outgoing checkpoint through `--capillary-state`. It does
+not label post-collision momentum as physical velocity. Retain force and
+gradient fields so weak-gradient and boundary defects can be distinguished.
+
+### Adjacent-step Convergence and Staggered Modes
+
+Force-state inspection and a lifted discrete equilibrium must distinguish
+stationary force imbalance from an undamped temporal mode. An even reporting
+interval can alias a period-two velocity: equal reported fields do not prove
+stationarity. On a Cartesian lattice, the linearized equilibrium perturbation
+`delta f_q=3*w_q*e_qx*A*(-1)^x` is unchanged by a momentum-conserving collision
+and changes sign under streaming. Wall bounce-back also changes the sign of
+this wall-parallel perturbation. This known checkerboard mechanism is not a
+new mode or a new physical effect; compare Lallemand and Luo (2000) and the
+two-phase analysis of Guo, Shi and Zheng (2011).
+
+Save adjacent odd/even fields of the corrected slit, retain the raw speed,
+measure the spatial Nyquist projection and adjacent-step difference, and
+report an adjacent-step average only as a diagnostic. Do not filter the
+solver fields or call this average a mechanical-equilibrium solution.
+Manufactured phase equilibria must retain near-zero velocity under both
+curvature forms, with their independently generated population seed retained.
+
+Extend the existing convergence condition to require both report-to-report
+and adjacent-step velocity stability, and (for color flow) both phase-field
+conditions. Capture the previous physical velocity and phase only at a
+report step, before computing that step's macroscopic state. Use the existing
+absolute velocity floor and relative/phase tolerances; add no fitted damping.
+Restart resets report history as before. Verify a full nonlinear equilibrium
+checkerboard seed cannot falsely stop under even reports in SCSP and color,
+SRT and MRT, while stationary controls still stop. This changes early-stop
+decisions; fixed-duration collision, streaming and force arithmetic remain
+unchanged.

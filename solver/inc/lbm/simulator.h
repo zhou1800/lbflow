@@ -205,12 +205,16 @@ protected:
                          const va_val_t& force) const;
     bool updateConvergence(const vava_val_t& velocity, bool scalarsStable,
                            double tolerance, ostream& os,
-                           const va_val_t* phaseIndicator = nullptr);
+                           const va_val_t* phaseIndicator = nullptr,
+                           const vava_val_t* adjacentVelocity = nullptr,
+                           const va_val_t* adjacentPhase = nullptr);
     void validatePopulations(const vava_val_t& populations) const;
     void prepareRestart(const string& path);
     void saveRestartMetadata(const string& path, size_t time, size_t phases);
     void validateRestart(const string& path, size_t time, size_t phases);
     vava_val_t previousReportVelocity;
+    vava_val_t adjacentReportVelocity;
+    va_val_t adjacentReportPhase;
     va_val_t previousPhaseIndicator;
     size_t stableReports = 0;
     bool hasReportVelocity = false;

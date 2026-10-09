@@ -71,6 +71,7 @@ def main():
     for name,overrides in [('invalid-capillary',{'capillaryModel':'"missing"'}),
                            ('invalid-wall',{'wallGradient':'"missing"'}),
                            ('unsupported-density',{'density':'1 2'}),
+                           ('unsupported-speed',{'latticeSpeed':2}),
                            ('unsupported-pressure-weights',{'alpha0':.5})]:
         result=study.run(dict(base,name=name,overrides=overrides,expect_failure=True))
         failures.append(dict(name=name,exit=result['exit']))

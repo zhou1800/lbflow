@@ -21,9 +21,13 @@ ColorFluid::ColorFluid(const FilePrm &prm)
     : Simulator(prm)
     , renormalizedWall(p.getWallGradient()=="renormalized")
     , tanhWall(p.getWallGradient()=="tanh")
+    , tangentialRecoloring(p.getWallRecoloring()=="tangential")
+    , gradientCurvature(p.getCurvatureStencil()=="gradient")
+    , wallTangent(size_t(0),tangentialRecoloring ? g.LG.N : 0)
+    , wallRecolorFactor(1.0)
     , capillaryForce(p.getCapillaryModel()=="csf" ? g.S.D : 0)
     , capillaryGradient(capillaryForce.size())
-    , interfaceNormal(capillaryForce.size())
+    , capillaryField(capillaryForce.size())
     , SOLID_DENS_N(86)
     , f{vava_val_t(g.S.Q), vava_val_t(g.S.Q)}
     , fOld{vava_val_t(g.S.Q), vava_val_t(g.S.Q)}
@@ -50,11 +54,12 @@ ColorFluid::ColorFluid(const FilePrm &prm)
 
     for (size_t d=0; d<capillaryForce.size(); ++d) {
         capillaryForce[d] = capillaryGradient[d] = va_val_t(0.0,g.LG.N);
-        interfaceNormal[d] = va_val_t(0.0,g.LG.FG.N);
+        capillaryField[d] = va_val_t(0.0,g.LG.FG.N);
     }
     initPhi();
     calcTibNorm();
     calcWallGradientInverse();
+    calcWallRecoloring();
 
     output.AddScalar("r0", &dens[0]);
     output.AddScalar("r1", &dens[1]);
@@ -115,6 +120,12 @@ void ColorFluid::Run(std::ostream &logProc)
         zouHeBoundary();
 
         // 3. Calculate macroscopic variables.
+        if (p.getReportDir()!=0 && (t%p.getTStep()==0 || t%p.getTRpt()==0)) {
+            adjacentReportVelocity=v;
+            adjacentReportPhase=va_val_t(0.0,g.LG.N);
+            for (size_t i=0;i<g.LG.N;++i)
+                if (densT[i]>0.0) adjacentReportPhase[i]=(dens[0][i]-dens[1][i])/densT[i];
+        }
         calcMacroVar(t);
         bodyForce(t);
         seconds[NUMERICAL_TIME] += MPI_Wtime() - begin;
@@ -354,6 +365,9 @@ void ColorFluid::collision()
 
             // 4. recolor.
                     if (q != 0) angle /= g.S.Qnorm[q];
+                    if (tangentialRecoloring && ibI[i] &&
+                        (q==wallTangent[i] || q==g.S.Qop[wallTangent[i]]))
+                        angle *= wallRecolorFactor;
                     f[0][q][i] = dens0T * fT[q]
                             + betaDens01TT * angle * feq_u0[q];
                     f[1][q][i] = fT[q] - f[0][q][i];
@@ -449,6 +463,14 @@ va_val_t ColorFluid::colorGradient(size_t i, double& norm) const
             norm = sqrt(inner_product(begin(gDens), end(gDens),
                                        begin(gDens), 0.0));
         }
+        if (tangentialRecoloring && abs(cAngle)<1e-14) {
+            // A nonlinear tangent profile creates a false normal derivative
+            // in a clipped stencil, including at zero-tangent extrema.
+            // Preserve the bulk tangent magnitude and its active mask.
+            for (size_t d=0;d<g.S.D;++d)
+                if (g.S.Qi[wallTangent[i]][d]==0) gDens[d]=0.0;
+            norm=sqrt(inner_product(begin(gDens),end(gDens),begin(gDens),0.0));
+        }
         if (g.S.D == 3) {
             va_val_t gDensNorm = MatMulMat(TibNorm[ibI[i]], gDens,
                                             3, 3, 1);
@@ -482,11 +504,11 @@ void ColorFluid::calcCapillaryForce(size_t t)
             const va_val_t gradient = colorGradient(i,norm);
             for (size_t d=0; d<D; ++d) {
                 capillaryGradient[d][i] = gradient[d];
-                interfaceNormal[d][i2f[i]] = norm > 1e-9 ? gradient[d]/norm : 0.0;
+                capillaryField[d][i2f[i]] = gradientCurvature ? gradient[d] : (norm > 1e-9 ? gradient[d]/norm : 0.0);
             }
         }
     }
-    for (size_t d=0; d<D; ++d) syncBorder(&interfaceNormal[d],t);
+    for (size_t d=0; d<D; ++d) syncBorder(&capillaryField[d],t);
     for (size_t idx : p.getIdx({IT::VD,IT::GV})) {
         for (size_t i : gIdx[idx]) {
             double curvature = 0.0, norm2 = 0.0;
@@ -494,21 +516,27 @@ void ColorFluid::calcCapillaryForce(size_t t)
             if (norm2 > 1e-18) {
                 for (size_t a=0; a<D; ++a) {
                     va_val_t moment(0.0,D);
-                    const double center = interfaceNormal[a][i2f[i]];
+                    const double center = capillaryField[a][i2f[i]];
                     for (size_t q=1; q<g.S.Q; ++q) {
                         if (densN[adj[i2f[i]][q]]==SOLID_DENS_N) continue;
-                        const double difference = interfaceNormal[a][adj[i2f[i]][q]]-center;
+                        const double difference = capillaryField[a][adj[i2f[i]][q]]-center;
                         for (size_t b=0; b<D; ++b)
                             moment[b] += wi[q]*g.S.Qi[q][b]*difference;
                     }
                     const va_val_t derivative = ibI[i] ?
                         MatMulVec(wallGradientInv[ibI[i]],moment,D,D) : moment*3.0;
                     for (size_t b=0; b<D; ++b)
-                        curvature += (center*interfaceNormal[b][i2f[i]]-(a==b ? 1.0 : 0.0))*derivative[b];
+                        {
+                            const double normalA=gradientCurvature ? capillaryGradient[a][i]/sqrt(norm2) : center;
+                            const double normalB=gradientCurvature ? capillaryGradient[b][i]/sqrt(norm2) : capillaryField[b][i2f[i]];
+                            curvature += (normalA*normalB-(a==b ? 1.0 : 0.0))*derivative[b];
+                        }
                 }
             }
             for (size_t d=0; d<D; ++d) {
-                capillaryForce[d][i] = .5*p.getSTension()*curvature*capillaryGradient[d][i];
+                const double direction=gradientCurvature && norm2>1e-18 ?
+                    capillaryGradient[d][i]/sqrt(norm2) : capillaryGradient[d][i];
+                capillaryForce[d][i] = .5*p.getSTension()*curvature*direction;
                 if (!isfinite(capillaryForce[d][i])) throw runtime_error("Non-finite capillary force.");
             }
         }
@@ -803,7 +831,8 @@ bool ColorFluid::report(ostream &os, const va_val_t &r0, const va_val_t &r1,
         va_val_t indicator(0.0, r0.size());
         for (size_t i = 0; i < r0.size(); ++i)
             if (r0[i] + r1[i] > 0.0) indicator[i] = (r0[i] - r1[i]) / (r0[i] + r1[i]);
-        return updateConvergence(v, scalarsStable, MaxErr, os, &indicator);
+        return updateConvergence(v, scalarsStable, MaxErr, os, &indicator,
+                                 &adjacentReportVelocity,&adjacentReportPhase);
     }
     catch (exception& e) { os << e.what(); throw; }
     return false;
@@ -849,6 +878,36 @@ void ColorFluid::calcWallGradientInverse()
         for (size_t a = 0; a < D; ++a)
             for (size_t b = 0; b < D; ++b) inverse[a*D+b] = augmented[a][D+b];
         wallGradientInv[ibI[i]] = inverse;
+    }
+}
+
+void ColorFluid::calcWallRecoloring()
+{
+    if (!tangentialRecoloring) return;
+    const auto& i2f=g.LG.getI2fMap();
+    const auto& adjacent=g.LG.FG.getAdjI();
+    va_u8_t extended(g.LG.FG.N);
+    for (size_t i=0; i<g.LG.N; ++i) extended[i2f[i]]=raw[i];
+    syncBorder(&extended,0);
+    const double a=ai[0][1],b=ai[0][5];
+    wallRecolorFactor=((a+b)*(a+sqrt(2.0)*b)/(a+2*b)-b/sqrt(2.0))/a;
+    for (size_t i=0; i<g.LG.N; ++i) {
+        if (!ibI[i]) continue;
+        const auto& normal=ibNorm[ibI[i]];
+        size_t axis;
+        if (abs(normal[0])>0 && normal[1]==0) axis=0;
+        else if (abs(normal[1])>0 && normal[0]==0) axis=1;
+        else throw runtime_error("Tangential wall recoloring requires a flat Cartesian wall; corners and staircase stencils are unsupported.");
+        const double sign=normal[axis]>0 ? 1.0 : -1.0;
+        for (size_t q=1; q<g.S.Q; ++q) {
+            const auto type=p.getIVal(extended[adjacent[i2f[i]][q]]).Type;
+            const bool solid=type==IT::SD || type==IT::BB;
+            if (solid!=(g.S.Qi[q][axis]*sign<0))
+                throw runtime_error("Tangential wall recoloring requires a complete flat-wall stencil.");
+            if (g.S.Qnorm[q]==1.0 && g.S.Qi[q][axis]==0 &&
+                g.S.Qi[q][1-axis]==1) wallTangent[i]=q;
+        }
+        if (!wallTangent[i]) throw runtime_error("No tangential coordinate link at wall.");
     }
 }
 

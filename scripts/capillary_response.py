@@ -52,9 +52,10 @@ def measure(result):
     height, sigma, angle = p['height'], p['sigma'], p['angle']
     audit = closed_history(result)
     history=[]
-    for at in [m['step'] for m in audit['history']][1:]:
+    for frame_index,snapshot in enumerate(audit['history'][1:],1):
+        at=snapshot['step']
         _,rho,chi,velocity=geometry_fields(result,at)
-        prior=geometry_fields(result,at-p['write'])
+        prior=geometry_fields(result,audit['history'][frame_index-1]['step'])
         fluid=rho>0
         pressure=bulk_pressure(rho,chi,height,transverse_margin=height//4)
         entry=dict(audit['history'][len(history)+1])
@@ -96,6 +97,8 @@ def measure(result):
     final=history[-1]
     return dict(name=result['name'],height=height,angle=angle,wall_gradient=p['wall_gradient'],
                 capillary_model=p.get('capillary_model','perturbation'),
+                wall_recoloring=p.get('wall_recoloring','legacy'),
+                curvature_stencil=p.get('curvature_stencil','normal'),
                 beta=p['beta'],sigma=sigma,steps=p['steps'],ranks=result['ranks'],
                 reference_pressure_jump=reference,reference_pressure_coefficient=math.cos(math.radians(angle)),
                 signed_pressure_coefficient_error=final['pressure_coefficient']-math.cos(math.radians(angle)),

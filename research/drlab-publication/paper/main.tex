@@ -36,7 +36,10 @@ reduces flux by 9.19\%, whereas harmonic interpolation increases it by
 Wall-stencil analysis further distinguishes prescribed interface direction
 from capillary-stress magnitude. Contact-angle improvement does not uniformly
 reduce parasitic flow. Slit and square-tube displacement controls connect
-these concerns to capillary entry. On a public Bentheimer specimen,
+these concerns to capillary entry. A discrete phase recurrence identifies
+a neutral-wall segregation imbalance and gives a parameter-free correction
+that preserves a bulk planar fixed point. Adjacent-step checks distinguish
+remaining period-two velocity from stationary flow. On a public Bentheimer specimen,
 independent single-phase LBPM comparisons differ by at most
 \RockReferenceDifference\ percent, while voxel subdivision changes
 permeability by \RefinedKChange\ percent. Closed two-phase rock calculations
@@ -112,6 +115,14 @@ conditions \cite{reder2024}. Their work also cautions against extending a
 scalar viscosity comparison to arbitrary multidimensional stress fields.
 The present scope is a reproducible diagnosis of these effects in the
 recovered implementation and a bounded capillary-operator comparison.
+Boundary-induced changes in scalar transport already have analytical
+precedents \cite{ginzburg2015}, and color-gradient wetting has been designed
+to eliminate interfacial force at a contact line \cite{yu2018}.
+Our wall correction is consequently assessed as a specific discrete
+fixed-point condition, rather than a new boundary-layer concept.
+Recent phase-field calculations also compare discretizations of
+continuously equivalent surface forces \cite{sugimoto2026}; rewriting a
+curvature expression does not establish a new force theory.
 
 The source baseline is the reference solver, historical revision
 \texttt{1bef9bbe7047}. The full source identity is recorded in the supplement. The original archive is
@@ -231,7 +242,9 @@ and normal derivatives by $5/6$ and $1/2$ respectively.
 
 Steady termination requires finite state, stable requested scalar diagnostics,
 velocity convergence and, for color flow, convergence of the spatial color
-field, for three successive reports. Constant saturation cannot terminate a
+field, for three successive reports. Both report-to-report and adjacent-step
+changes must pass; an even reporting interval cannot certify a period-two
+oscillation as stationary. Constant saturation cannot terminate a
 translating phase field. Periodic acceleration benchmarks disable steady
 stopping; undefined pressure-based permeability is identified separately
 from invalid numerical state.
@@ -263,6 +276,19 @@ ablation or replication of a published complete model.
 The experimental force currently accepts closed VD/GV flow at equal reference
 density and standard pressure weights. Open pressure/velocity reservoirs and
 selective films are rejected. Neither option changes the legacy defaults.
+
+An optional gradient form evaluates the same continuum force as
+\begin{equation}
+ \vct F_s=-\frac{\sigma}{2}\vct n
+       [(I-\vct n\vct n):\nabla\vct g].
+\end{equation}
+It differentiates the unnormalized gradient with the same fluid stencil.
+The identity follows from
+$(I-\vct n\vct n):\nabla\vct g=|\vct g|(I-\vct n\vct n):\nabla\vct n$;
+its discrete realization differs from normal differentiation.
+Related Hessian forms and their discretization sensitivity are already
+studied in phase-field LBM \cite{sugimoto2026}. This control introduces
+neither an adjusted cutoff nor a fitted surface-tension coefficient.
 
 \subsection{Pore-scale observables}
 For $N$ total voxels, $N_f$ pore voxels, and $\varphi_0=\rho_0/\rho$,
@@ -529,7 +555,7 @@ less than \CapillaryHoldPressureChange\% of the sharp reference, with the
 late color RMS changes retained separately. The data do not establish a
 nonzero asymptotic legacy error from three widths or an entry threshold.
 The largest longer-hold color RMS change is $4.82\times10^{-9}$, and the
-maximum relative component/total mass drift across the slit histories is
+maximum relative component/total mass drift across those earlier slit histories is
 $4.03\times10^{-12}$.
 Neutral residual $\mu U_{max}/\sigma$ remains near $3.0\times10^{-3}$ for
 linear-reconstructed perturbation and $3.3\times10^{-4}$ for CSF over the
@@ -560,6 +586,113 @@ surface tension and measured bulk width. The joint refinement sequence
 reduces pressure error for reconstruction, while CSF reduces residual flow.
 It does not remove the wall-color distortion.}
 \label{fig:closedcapillary}\end{figure}
+
+\subsection{A discrete neutral-wall fixed point}
+The zero-sigma result permits an independent phase-only experiment.
+At unit total density and zero velocity, recoloring sets outgoing
+phase populations directly from $\varphi$ and the projected unit normal.
+For a one-dimensional profile along a Cartesian D2Q9 wall, denote coordinate
+and diagonal weights by $a=1/9$ and $b=1/36$, and set
+$J_j=s_j\varphi_j(1-\varphi_j)$, where $s_j$ is the sign of the active
+central color derivative. The bulk scalar recurrence is
+\begin{equation}\label{eq:phaserecurrence}
+ \varphi'_j-\varphi_j=A(\varphi_{j-1}-2\varphi_j+\varphi_{j+1})
+                 +\beta B(J_{j-1}-J_{j+1}),\qquad
+ A=a+2b,\quad B=a+\sqrt{2}b.
+\end{equation}
+Local bounce-back at a neutral wall instead gives
+$A_w=a+b$ and $B_w=a+b/\sqrt{2}$. Matching the interface direction does
+not match this segregation-to-diffusion ratio. The independent recurrence
+reproduces the full zero-sigma solver profile to within
+$8\times10^{-14}$ in phase fraction.
+
+Multiply only the two wall-parallel coordinate recoloring terms by
+\begin{equation}\label{eq:wallbalance}
+ k=\frac{(a+b)(a+\sqrt{2}b)/(a+2b)-b/\sqrt{2}}{a}
+   =0.9511844635\ldots .
+\end{equation}
+Then $B_w^{new}=ak+b/\sqrt{2}$ and $B_w^{new}/A_w=B/A$.
+For a lifted one-dimensional profile with a common active-gradient mask,
+the wall update residual is $A_w/A=5/6$ times the bulk residual.
+Thus a bulk discrete stationary profile remains stationary at the wall;
+the transient wall operator still differs from the bulk operator.
+Opposite links have the same multiplier, so component mass is conserved
+locally, and complementary recoloring preserves every total population.
+This lattice-weight relation contains no calibrated parameter.
+
+The common mask is substantive. At a tangent-profile extremum, the clipped
+nonlinear stencil can produce a false normal derivative even when the
+tangent derivative vanishes. A 65-cell manufactured control failed without
+addressing this defect. The optional rule uses the reconstructed tangent
+magnitude at a neutral wall, discarding the raw normal component before
+applying the unchanged $10^{-9}$ cutoff and angle projection.
+The tested fixed-point extension supports flat Cartesian D2Q9 walls and
+equal reference densities with standard weights. Corners, staircase walls,
+open reservoirs and selective films are rejected; a nonneutral angle is
+an exploratory use outside the derivation.
+
+\input{data/wall-numbers.tex}
+Across $\beta=0.35,0.7,0.9$, the zero-sigma wall-to-center color differences
+fall from $0.0085$--$0.0109$ to below \WallZeroColorBound.
+Independently generated outgoing equilibria, including odd/even periodic
+lengths, preserve color to within \WallFixedColorBound\ and maximum
+velocity below \WallFixedSpeedBound. Rotation and SRT, together with
+bitwise MPI and restart controls, test the implementation separately from
+the recurrence. These results establish a planar discrete fixed point,
+not dynamic contact-line or digital-rock wetting accuracy.
+
+\subsection{Temporal aliasing and the limits of the correction}
+From a step initialization, the corrected CSF slit still develops a small
+raw velocity. Adjacent fields reveal sign reversal rather than a stationary
+circulation (Fig.~\ref{fig:wallbalance}). For the H16, $\beta=0.7$ normal
+curvature case, the raw maximum speed is \WallRawSpeed, while its
+adjacent-step average is below \WallPairSpeedBound. The tangential staggered
+momentum projection accounts for more than \WallStaggeredEnergyPercent\%
+of that component's energy. Raw fields are retained; the average is a
+diagnostic and is not substituted for a solution.
+Across the three slit widths, its raw $\mu U_{max}/\sigma$ decreases from
+about $1.93\times10^{-6}$ to $2.14\times10^{-7}$ under the specified joint
+scaling, rather than retaining the uncorrected neutral value near
+$3.3\times10^{-4}$. This observation does not remove the period-two state
+or establish convergence at fixed physical interface width.
+
+This mode is established in LBM dispersion analysis \cite{lallemand2000}
+and related two-phase work \cite{guo2011}. In the linearized system,
+$\delta f_i=3w_i e_{ix}A(-1)^x$ is an equilibrium momentum perturbation.
+Collision preserves it, whereas streaming, including wall-parallel
+bounce-back, changes its sign. Its eigenvalue is $-1$ rather than a
+viscous decay factor. Manufactured nonlinear equilibrium seeds also
+propagate with period two in both SRT and MRT; switching between these
+operators is therefore not a damping remedy. The previous even-report
+stopping test accepted such a state. The adjacent-step criterion rejects
+it while retaining termination of stationary controls.
+
+The uncorrected CSF slit retains substantial velocity even after the
+adjacent-step average; its prior residual is not explained away by this
+mode. The gradient curvature form is likewise not uniformly superior:
+it lowers the corrected neutral raw velocity but increases bulk D2Q9
+Laplace discrepancies to approximately 1.78\% and 0.385\% at radii 12 and 24,
+compared with 1.39\% and 0.303\% for normal differentiation.
+Exploratory 60/120-degree controls also retain larger pressure bias and
+slower phase relaxation with the wall multiplier. After four initial
+durations, normal-CSF 60-degree pressure discrepancies are 9.34\%, 5.59\%
+and 4.37\% at $H=16,32,48$, with final color RMS changes below
+$10^{-9}$ and mass drift below $10^{-11}$. The corresponding uncorrected reconstructed-CSF discrepancies
+are 7.22\%, 3.12\% and 1.71\% after their documented longer holds.
+Those negative controls
+exclude treating a neutral fixed-point derivation as a generally validated
+wetting model. Full histories and longer holds are retained in
+\texttt{wall-consistency.json}; no entry pressure or trapping law is inferred.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.98\linewidth]{wall-balance.pdf}
+\caption{Discrete wall-phase correction and temporal checks. Zero-force
+color distortion is compared across segregation strengths. Nonzero-force
+raw and adjacent-averaged speeds are distinguished from manufactured
+equilibrium preservation. The alternating grid velocity is shown directly;
+no filtering is applied to solver fields. Corrected neutral results use
+the reconstructed tangent magnitude and normal-curvature CSF.}
+\label{fig:wallbalance}\end{figure}
 
 \section{Pore-scale application and computational evidence}
 \subsection{Analytic pore flux and capillary entry}
@@ -709,7 +842,10 @@ interface direction and capillary-stress magnitude.
 Direct closed-slit pressure and zero-sigma controls further show why
 surface-force, wetting and phase-boundary consistency must be considered
 together. The experimental CSF branch improves residual flow in its measured
-scope but retains pressure bias and wall-color distortion. This established
+scope but retains pressure bias and wall-color distortion before the
+phase-boundary correction. The derived neutral fixed point removes that
+phase defect in its tested geometry, while revealing period-two velocity
+and failing to establish nonneutral accuracy. This established
 force formulation is not evidence for a new bulk theory.
 
 Extending these findings to capillary trapping requires a different test.
@@ -751,6 +887,9 @@ At a wall, rotating a clipped gradient to the desired direction preserves
 its attenuated magnitude. Linear moment reconstruction addresses that
 specific issue; measured contact-angle improvement does not establish
 uniformly improved parasitic flow or dynamic capillary response. The
+neutral-wall phase recurrence supplies a parameter-free fixed-point
+correction; adjacent-step tests keep undamped lattice modes separate from
+stationary flow. Neither result supplies a general contact-line law. The
 public-rock application adds an independently checked geometric flow
 baseline and exposes inadequate interface separation and continued
 two-phase evolution. It supports neither a steady relative-permeability

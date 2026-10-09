@@ -26,6 +26,30 @@ Completed quantitative coverage is equal density, standard pressure weights, low
 
 ## Optional Capillary Research Operators
 
+The continued wall study derives an optional `wallRecoloring "tangential"`
+from the discrete D2Q9 segregation/diffusion ratio. It requires the
+renormalized gradient and preserves the bulk neutral-plane fixed point.
+At a neutral Cartesian wall it also removes the false raw normal derivative
+before projection, so degenerate extrema retain the bulk active mask.
+Corners, staircase walls, open reservoirs and nonstandard reference weights
+are rejected. Nonneutral tests show larger pressure bias; this is not a
+validated general wetting treatment.
+
+The optional `curvatureStencil "gradient"` differentiates the unnormalized
+color gradient. Its continuous force agrees with the default normal form,
+but its matched bulk-drop pressure errors are larger. Both CSF forms require
+unit lattice speed for the implemented Guo source. Scientific results use
+the frozen `f3b646a...` kernel; reconstruction patches and exact source hashes
+are in `run-kernels/`. The final unsupported-speed guard does not change
+valid unit-speed fields, as three bitwise comparisons verify.
+
+Convergence now checks adjacent physical velocity and phase values as well
+as report-to-report changes. Even report intervals can alias the established
+period-two checkerboard mode. Full nonlinear equilibrium seeds with SCSP and
+color, SRT and MRT, exercise the production stopping path; stationary controls
+still stop, while oscillatory controls complete their prescribed duration.
+See `wall-study-validation.json` and `paper/data/wall-consistency.json`.
+
 `wallGradient "tanh"` fits locally affine `atanh(chi)` on the available fluid
 stencil, continues it over a virtual full stencil, and applies the common
 geometric rotation. Color is clipped to `[-1+1e-8,1-1e-8]` for this transform.

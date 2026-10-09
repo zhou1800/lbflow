@@ -199,6 +199,8 @@ public:
     string getWallGradient() const;
     string getViscosityInterpolation() const;
     string getCapillaryModel() const;
+    string getWallRecoloring() const;
+    string getCurvatureStencil() const;
 
     /// \name Get functions for #grid mesh
     ///@{

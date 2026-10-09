@@ -11,6 +11,29 @@ class NumericalAudit {
         os << ']';
     }
 public:
+    static void capillaryState(ColorFluid& s,std::ostream& os) {
+        if (!s.p.getTStart() || !s.capillaryForce.size())
+            throw std::invalid_argument("Capillary-state audit requires an outgoing CSF checkpoint.");
+        s.loadRst(s.p.getTStart());
+        s.calcMacroVar(s.p.getTStart());
+        s.calcCapillaryForce(s.p.getTStart());
+        os<<std::setprecision(17)<<"CAPILLARY_STATE {\"size\":[";
+        for(size_t d=0;d<s.g.S.D;++d) {if(d) os<<',';os<<s.g.LG.Sz[d];}
+        os<<"],\"global_size\":[";
+        for(size_t d=0;d<s.g.S.D;++d) {if(d) os<<',';os<<s.g.Sz[d];}
+        os<<"],\"local_start\":[";
+        for(size_t d=0;d<s.g.S.D;++d) {if(d) os<<',';os<<s.g.LStart[d];}
+        os<<"],\"density\":";array(os,s.densT);
+        va_val_t color(0.0,s.g.LG.N);
+        const auto& i2f=s.g.LG.getI2fMap();
+        for(size_t i=0;i<s.g.LG.N;++i) color[i]=s.densN[i2f[i]];
+        os<<",\"color\":";array(os,color);
+        os<<",\"force\":[";
+        for(size_t d=0;d<s.g.S.D;++d) {if(d) os<<',';array(os,s.capillaryForce[d]);}
+        os<<"],\"gradient\":[";
+        for(size_t d=0;d<s.g.S.D;++d) {if(d) os<<',';array(os,s.capillaryGradient[d]);}
+        os<<"]}\n";
+    }
     static void dump(ColorFluid& s,std::ostream& os) {
         const size_t d=s.g.S.D,q=s.g.S.Q;
         va_val_t matrix=s.getMRTM();
@@ -56,11 +79,14 @@ public:
 
 int main(int argc,char** argv) {
     try {
-        if(argc!=2) throw std::invalid_argument("Provide a ColorFluid parameter file.");
+        if(argc!=2 && !(argc==3 && std::string(argv[2])=="--capillary-state"))
+            throw std::invalid_argument("Provide a ColorFluid parameter file and optional --capillary-state.");
         DRL::IO::FilePrm p(argv[1]);
         DRL::LBM::ColorFluid s(p);
-        if(DRL::mpi().getId()==0) DRL::LBM::NumericalAudit::dump(s,std::cout);
-        else {std::ostringstream sink;DRL::LBM::NumericalAudit::dump(s,sink);}
+        std::ostringstream sink;
+        std::ostream& output=DRL::mpi().getId()==0 ? std::cout : sink;
+        if(argc==3) DRL::LBM::NumericalAudit::capillaryState(s,output);
+        else DRL::LBM::NumericalAudit::dump(s,output);
         return 0;
     } catch(const std::exception& e) {
         std::cerr<<e.what()<<'\n';

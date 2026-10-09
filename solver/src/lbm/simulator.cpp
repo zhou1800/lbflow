@@ -242,7 +242,9 @@ va_val_t Simulator::forceSource(size_t i, const vava_val_t& velocity,
 
 bool Simulator::updateConvergence(const vava_val_t& velocity, bool scalarsStable,
                                   double tolerance, ostream& os,
-                                  const va_val_t* phaseIndicator)
+                                  const va_val_t* phaseIndicator,
+                                  const vava_val_t* adjacentVelocity,
+                                  const va_val_t* adjacentPhase)
 {
     if (!hasReportVelocity) {
         previousReportVelocity = velocity;
@@ -251,8 +253,12 @@ bool Simulator::updateConvergence(const vava_val_t& velocity, bool scalarsStable
         stableReports = 0;
         return false;
     }
-    double local[3] = {0.0, 0.0, 0.0};
-    for (size_t d = 0; d < velocity.size(); ++d)
+    if (adjacentVelocity && adjacentVelocity->size()!=velocity.size())
+        throw runtime_error("Adjacent velocity history has the wrong dimension.");
+    double local[4] = {0.0, 0.0, 0.0, 0.0};
+    for (size_t d = 0; d < velocity.size(); ++d) {
+        if (adjacentVelocity && (*adjacentVelocity)[d].size()!=velocity[d].size())
+            throw runtime_error("Adjacent velocity history has the wrong size.");
         for (size_t i = 0; i < velocity[d].size(); ++i) {
             const double value = velocity[d][i];
             if (!std::isfinite(value))
@@ -261,33 +267,54 @@ bool Simulator::updateConvergence(const vava_val_t& velocity, bool scalarsStable
             local[0] += delta * delta;
             local[1] += value * value;
             local[2] += 1.0;
+            if (adjacentVelocity) {
+                const double adjacent=(*adjacentVelocity)[d][i];
+                if (!std::isfinite(adjacent))
+                    throw runtime_error("Non-finite adjacent velocity.");
+                local[3] += (value-adjacent)*(value-adjacent);
+            }
         }
-    double global[3];
-    mpi().AllReduce(local, global, 3, MPI_DOUBLE, MPI_SUM);
-    if (!std::isfinite(global[0]) || !std::isfinite(global[1]) || global[2] <= 0.0)
+    }
+    double global[4];
+    mpi().AllReduce(local, global, 4, MPI_DOUBLE, MPI_SUM);
+    if (!std::isfinite(global[0]) || !std::isfinite(global[1]) ||
+        !std::isfinite(global[3]) || global[2] <= 0.0)
         throw runtime_error("Invalid global velocity residual.");
     const double rmsChange = sqrt(global[0] / global[2]);
     const double residual = global[1] > 0.0 ? sqrt(global[0] / global[1]) : 0.0;
     const bool velocityStable = rmsChange <= 1e-12 || residual < tolerance;
-    double phaseChange = 0.0;
+    const double adjacentRms=sqrt(global[3]/global[2]);
+    const double adjacentResidual=global[1]>0.0 ? sqrt(global[3]/global[1]) : 0.0;
+    const bool adjacentStable=!adjacentVelocity || adjacentRms<=1e-12 || adjacentResidual<tolerance;
+    double phaseChange[2] = {0.0,0.0};
     if (phaseIndicator) {
-        if (phaseIndicator->size() != previousPhaseIndicator.size())
+        if (phaseIndicator->size() != previousPhaseIndicator.size() ||
+            (adjacentPhase && adjacentPhase->size()!=phaseIndicator->size()))
             throw runtime_error("Phase-indicator convergence history has the wrong size.");
-        double localChange = 0.0;
+        double localChange[2] = {0.0,0.0};
         for (size_t i = 0; i < phaseIndicator->size(); ++i) {
             if (!std::isfinite((*phaseIndicator)[i]))
                 throw runtime_error("Non-finite phase indicator in convergence report.");
-            localChange = max(localChange, abs((*phaseIndicator)[i] - previousPhaseIndicator[i]));
+            localChange[0] = max(localChange[0], abs((*phaseIndicator)[i] - previousPhaseIndicator[i]));
+            if (adjacentPhase) {
+                if (!std::isfinite((*adjacentPhase)[i]))
+                    throw runtime_error("Non-finite adjacent phase indicator.");
+                localChange[1]=max(localChange[1],abs((*phaseIndicator)[i]-(*adjacentPhase)[i]));
+            }
         }
-        mpi().AllReduce(&localChange, &phaseChange, 1, MPI_DOUBLE, MPI_MAX);
+        mpi().AllReduce(localChange, phaseChange, 2, MPI_DOUBLE, MPI_MAX);
         previousPhaseIndicator = *phaseIndicator;
     }
     previousReportVelocity = velocity;
-    stableReports = scalarsStable && velocityStable && phaseChange < tolerance ? stableReports + 1 : 0;
+    stableReports = scalarsStable && velocityStable && adjacentStable &&
+                    max(phaseChange[0],phaseChange[1]) < tolerance ? stableReports + 1 : 0;
     if (mpi().getId() == 0)
         os << " - velocityResidual = " << residual
            << ", velocityRmsChange = " << rmsChange
-           << ", maxPhaseChange = " << phaseChange
+           << ", adjacentVelocityResidual = " << adjacentResidual
+           << ", adjacentVelocityRmsChange = " << adjacentRms
+           << ", maxPhaseChange = " << phaseChange[0]
+           << ", adjacentMaxPhaseChange = " << phaseChange[1]
            << ", stableReports = " << stableReports << "/3" << endl;
     return stableReports >= 3;
 }

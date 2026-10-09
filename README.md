@@ -124,12 +124,24 @@ draft and has not been submitted or accepted.
   it does not uniformly improve the measured controls. `capillaryModel "csf"`
   selects the experimental curvature/Guo force instead of the default
   `"perturbation"`. CSF accepts only equal reference densities, standard
-  pressure weights and closed VD/GV flow with SD/BB walls. Pressure/velocity
+  pressure weights, `latticeSpeed 1` and closed VD/GV flow with SD/BB walls. Pressure/velocity
   reservoirs and selective films are rejected. New quantitative capillary
   measurements use equal viscosity, tau=1; moving/curved 3D contact-line
   accuracy remains unverified.
+- `wallRecoloring "tangential"` selects an experimental D2Q9 flat-wall
+  correction with `wallGradient "renormalized"`. At 90 degrees it preserves
+  the bulk discrete planar phase profile using a lattice-weight-derived
+  factor and the true tangent-gradient mask. Equal reference densities and
+  standard weights are required; corners, staircase walls and open boundaries
+  are rejected. Nonneutral tests are exploratory and show larger pressure
+  bias. This option is not validated for digital-rock wall geometry.
+- `curvatureStencil "gradient"` is an optional CSF discretization of the same
+  continuum force; `"normal"` remains the default. The gradient form lowers
+  neutral residual speed but worsens the tested bulk Laplace pressure error.
 - `reportDir 0` requests a prescribed run duration. Automatic convergence
-  requires three stable velocity/color reports and applicable scalar diagnostics.
+  requires three stable velocity/color reports and applicable scalar diagnostics,
+  including changes from the adjacent time step. Even reporting intervals
+  can conceal period-two lattice modes; adjacent checks prevent false stopping.
   Legacy K is a reference-viscosity mobility diagnostic, not verified phase
   permeability. Axisymmetric `AB` boundaries and Shan--Chen are unsupported.
 - Restart populations are post-collision. Keep the `.rst.meta` sidecar, geometry
