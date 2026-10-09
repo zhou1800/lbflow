@@ -1,0 +1,25 @@
+{
+  "source_revision_before_patch": "a383c8e439c55621b3b248885b56611d48292447",
+  "patch": "published-core.patch",
+  "apply_option": "--unidiff-zero",
+  "patch_sha256": "516d56c32e476fc6ea87f244bdd07541b8719493d4e02471dcab148f843060bf",
+  "solver_sha256": "3b22763efaaee4a3e633a222f959f423903be7d50621f0324e4f252fa72a6031",
+  "audit_driver_sha256": "f6b7bae4111ea8051a2da9e2cf1932310035c9789eea0c9b2dc1346f864c7025",
+  "files_before_patch": {
+    "solver/inc/file/fileprm.h": "93c41811bfd6a220ab9ba3be083875a01761caf59cae43db1a422f885c75f764",
+    "solver/inc/lbm/simulator.h": "ab620fb8577f323a1fad0cb70ca15ea96038dae1176db0197d3a2643e9c767ed",
+    "solver/inc/lbm/colorfluid.h": "78fee67791e329feecf76bb86c5baf914fdd27593044195a8a92ac5a0c6af8f8",
+    "solver/src/file/fileprm.cpp": "d8d0df827a83b28bc9f01ea75a96762f037e09ea7b20d063cf6a5b6b203bfdd5",
+    "solver/src/lbm/simulator.cpp": "adcc90709346eaa7fecbbb2e225802292937343f7f466583ca1a378c0fb67390",
+    "solver/src/lbm/colorfluid.cpp": "5193fc66993bb08811453e87c1687f420eb875aae777edc94b3c94667ad3e5e0"
+  },
+  "files_after_patch": {
+    "solver/inc/file/fileprm.h": "13b4748355e9ae03a29f3ff026ee042d79f960a01c248a50cab3e57f67b98bc3",
+    "solver/inc/lbm/simulator.h": "4de67fc1f1019b7b2fd17698d8eec2412d154d7449a89e311a785e6109ce7ff1",
+    "solver/inc/lbm/colorfluid.h": "0fb48ff996eb84e7e194178e832d1644ab18a3f5ce6ffd5047168a1594c5c0b9",
+    "solver/src/file/fileprm.cpp": "85d29ddd4e9bb5ddd02c01ea05d9e4946b78f1f7454b3239804581ef6eced872",
+    "solver/src/lbm/simulator.cpp": "0da687500a47eea21a43bb8b668225ba3fa73d607d9f3efb2f408deb2458187c",
+    "solver/src/lbm/colorfluid.cpp": "f9ace5577cf7c81d5725899aac61c1cf6722a1d97e13bc5e9774f190aa6d0ac5"
+  },
+  "scope": "Independent projection/cosine recoloring and published MRT controls; no open CSF extension in this frozen kernel."
+}

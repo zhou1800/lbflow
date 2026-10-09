@@ -1,5 +1,5 @@
-Finite-interface viscosity can alter transport despite stable conserved flow.
-Continuum-reference sensitivity is measured alongside transport bias.
-Harmonic viscosity can overestimate flux when the interface is confined.
-Curvature-force controls reduce residual flow but retain capillary bias.
-Public digital-rock tests retain measured resolution and transient limits.
+Finite-interface viscosity alters pore transport despite mass conservation.
+Core and wall controls separate capillary-pressure bias from front mobility.
+Exact axial matching distinguishes published recoloring operators.
+Guarded reservoir budgets connect closed pressure to bidirectional drift.
+Digital-rock tests retain measured resolution and transient limits.

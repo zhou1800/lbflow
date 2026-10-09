@@ -92,6 +92,10 @@ class Study:
             params['curvatureStencil']=f'"{s["curvature_stencil"]}"'
         if 'phase_boundary' in s:
             params['phaseBoundary']=f'"{s["phase_boundary"]}"'
+        if 'recoloring_model' in s:
+            params['recoloringModel']=f'"{s["recoloring_model"]}"'
+        if 'mrt_spectrum' in s:
+            params['mrtSpectrum']=f'"{s["mrt_spectrum"]}"'
         params.update(s.get('overrides',{}))
         text = '\n'.join(f'{key} {val};' for key,val in params.items())
         text += '\n'+'\n'.join(s['indices'])+'\n'

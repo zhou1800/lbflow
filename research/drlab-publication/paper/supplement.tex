@@ -4,7 +4,8 @@
 \emergencystretch=3em
 \title{Supplement: operator derivation and reproducibility for LBFlow}
 \author{Yu Zhou\\Independent Researcher\\\texttt{[private contact omitted]}}
-\date{Research snapshot: 8 October 2026}
+\date{Research snapshot: 9 October 2026}
+\input{data/core-reservoir-numbers.tex}
 \begin{document}\maketitle
 \section{Source identity and scope}
 The reference solver source revision is:\\
@@ -517,7 +518,8 @@ bitwise unchanged with phase transfer. Nonneutral short-time MPI/restart
 checks compare both macroscopic fields and every outgoing population byte.
 Rotation is checked separately; an outgoing-state gradient audit compares
 the ghost implementation with an independent full-grid calculation.
-The six CTest groups retain the earlier default and checkerboard controls.
+The eight CTest groups retain the earlier default and checkerboard controls,
+and add published-core and guarded pressure-reservoir checks.
 
 The halfway cosine control uses an interior unprojected gradient with the
 unchanged $10^{-9}$ mask. Below that cutoff it explicitly continues the
@@ -531,7 +533,9 @@ virtual solid color. All color-stencil entries are then included without
 angle rotation. Prepared row derivatives and fluid-associated ghost values
 are exchanged to avoid requiring a second halo layer. The cited formula
 is reproduced with this paper's phase convention, but the remaining
-recoloring and MRT operators retain LBFlow's definitions.
+recoloring and MRT operators in those original controls retain LBFlow's
+definitions. The independent published-core controls below change them
+explicitly and retain the remaining normal-derivative choice.
 
 Each method uses the same equal reference densities, tau=1, input sigma,
 physical halfway walls and bulk recoloring widths. The H16 comparison
@@ -555,14 +559,17 @@ approximately $4.18\times10^{-5}$ and $4.27\times10^{-5}$.
 These are pressure-stable finite-time controls, not complete mechanical
 equilibria. The supplied adjacent-step diagnostics preserve raw
 velocities; they do not hide these currents with temporal averaging.
-Corners, staircase or curved walls, open reservoirs and selective films
-are explicitly rejected for the experimental flat-wall operators. These
-static tests do not establish a quantitative invasion/retraction interval.
+Corners, staircase or curved walls and selective films are explicitly
+rejected for the experimental flat-wall operators. Open CSF requires the
+separate pure-collar pressure extension assessed below. These static tests
+alone do not establish a quantitative invasion/retraction interval.
+
+\input{core-reservoirs.tex}
 
 \section{Scientific limits and publication status}
 Only equal-density, low-speed flow in the documented parameter range is
-verified. Curved-wall and three-dimensional wetting accuracy, contact-line
-dynamics, hysteresis, high density ratio, arbitrary pressure weights, and
+verified. Curved-wall and three-dimensional wetting accuracy, general contact-line
+laws, hysteresis, high density ratio, arbitrary pressure weights, and
 steady rock phase-specific Darcy permeability are not established. The
 isolated-pore normalization is independently verified within its stated geometry. The two viscosity
 rules represent alternative finite-interface closures. The geometrical

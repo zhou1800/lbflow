@@ -75,7 +75,9 @@ def measure(result):
     # Fit only the left interface and retain its extrapolation sensitivity.
     circles=[]
     if abs(angle-90)>1e-8:
-        width={.7:4.765235021842287,.35:9.376436760977107,.9:3.929187708575192}.get(p['beta'])
+        width=p.get('planar_width_09')
+        if width is None and p.get('recoloring_model','cosine')=='cosine':
+            width={.7:4.765235021842287,.35:9.376436760977107,.9:3.929187708575192}.get(p['beta'])
         if width is not None:
             points=interface_points(chi,0.,rho>0)
             for exclusion in (.5,.75,1.):
@@ -99,6 +101,9 @@ def measure(result):
                 capillary_model=p.get('capillary_model','perturbation'),
                 wall_recoloring=p.get('wall_recoloring','legacy'),
                 phase_boundary=p.get('phase_boundary','bounce'),
+                recoloring_model=p.get('recoloring_model','cosine'),
+                mrt_spectrum=p.get('mrt_spectrum','legacy'),
+                planar_width_09=p.get('planar_width_09'),
                 curvature_stencil=p.get('curvature_stencil','normal'),
                 beta=p['beta'],sigma=sigma,steps=p['steps'],ranks=result['ranks'],
                 reference_pressure_jump=reference,reference_pressure_coefficient=math.cos(math.radians(angle)),

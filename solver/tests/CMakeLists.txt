@@ -36,3 +36,14 @@ set_tests_properties(simulator_contracts PROPERTIES PROCESSORS 2)
 set_tests_properties(capillary_contracts PROPERTIES TIMEOUT 180 PROCESSORS 2)
 set_tests_properties(wall_equilibria PROPERTIES TIMEOUT 180 PROCESSORS 2)
 set_tests_properties(wall_flux_contracts PROPERTIES TIMEOUT 180 PROCESSORS 2)
+add_test(NAME published_core_contracts
+    COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/published_core_checks.py"
+        --solver $<TARGET_FILE:LBFlow> --root "${PROJECT_BINARY_DIR}/verification"
+        --audit-driver $<TARGET_FILE:NumericalAudit>
+        --mpiexec "${MPIEXEC_EXECUTABLE}" --numproc-flag=${MPIEXEC_NUMPROC_FLAG})
+set_tests_properties(published_core_contracts PROPERTIES TIMEOUT 180 PROCESSORS 2)
+add_test(NAME pressure_reservoir_contracts
+    COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/pressure_reservoir_checks.py"
+        --solver $<TARGET_FILE:LBFlow> --root "${PROJECT_BINARY_DIR}/verification"
+        --mpiexec "${MPIEXEC_EXECUTABLE}" --numproc-flag=${MPIEXEC_NUMPROC_FLAG})
+set_tests_properties(pressure_reservoir_contracts PROPERTIES TIMEOUT 180 PROCESSORS 2)

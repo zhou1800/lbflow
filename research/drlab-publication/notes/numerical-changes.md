@@ -95,7 +95,8 @@ their outgoing stage. This follows Lishchuk/Guo as used by Sedahmed and Coelho
 (2024); our retained wall/color operators differ from their complete scheme.
 
 The option rejects unequal reference densities, nonstandard pressure weights,
-open reservoirs and selective films. Direct slit and bulk-drop measurements
+velocity reservoirs and selective films. Pressure reservoirs use the separate
+guarded flat ghost/flux extension described below. Direct slit and bulk-drop measurements
 use equal viscosity, tau=1. CTest additionally verifies SRT/MRT, D2Q9/D3Q19,
 normal MPI exchange, initial bulk-plane equilibrium, uniform acceleration and
 bitwise restart. These contracts do not transfer high-density-ratio or curved
@@ -127,3 +128,29 @@ Profiling reports numerical work, initialization, fields/diagnostics and
 checkpoint I/O separately, along with completed updates and physical fluid
 voxel counts. Numerical work includes communication and finite checks.
 Category maxima across ranks are not added to infer a wall duration.
+
+
+## Published Core And Guarded Pressure Reservoirs (9 October 2026)
+
+`recoloringModel "projection"` omits the link-length cosine normalization;
+`mrtSpectrum "liu2015"` supplies the explicitly published D2Q9 raw rates.
+Defaults remain cosine/legacy. Both require equal-density standard weights;
+the fixed spectrum requires color MRT/CSF and cannot inherit the legacy
+perturbation tension mapping. Projection rejects the cosine-derived tangent
+multiplier. Exact axial beta matching is analytic, not a pressure fit.
+
+CSF pressure requires ghost color, relative-phase transfer, two opposed axial
+PB faces, flat parallel walls and no external forcing. Runtime checks retain
+the prescribed pure phase on PB and two strips, and zero-force gradient in
+the first strip. Transfers touching PB are skipped symmetrically. The
+interior component mass budget integrates outgoing PB/interior kinetic links;
+checkpoint loads reset only this accounting baseline. A rotated two-rank
+control, bitwise MPI/restart populations and separate fraction/gradient
+failure cases exercise these paths. Eight closed/default combinations retain
+bitwise fields and native populations against the frozen prior core.
+
+The two historical source patches are independently rebuilt byte-identically.
+Long physical fronts cover theta60/equal tau1/H16/H32, rather than arbitrary
+contact-line, curved-wall or throat geometries. Raw nonneutral currents and
+alternating phase states remain visible. No damping, velocity filter or
+surface-tension calibration is added.

@@ -34,6 +34,17 @@ class ColorFluid : public Simulator
 private:
     const bool renormalizedWall, tanhWall, tangentialRecoloring, tangentWall, phaseFlux, halfwayWall, ghostWall;
     const bool gradientCurvature;
+    const bool projectionRecoloring;
+    const bool pressureReservoirs;
+    size_t reservoirAxis, boundaryBudgetReference;
+    va_u8_t reservoirTypes;
+    va_idx_t reservoirPhase;
+    double boundaryInitialMass[2], boundaryNetMass[2], boundaryCompensation[2];
+    void initPressureReservoirs();
+    void checkPressureCollar(bool outgoing) const;
+    void initializeBoundaryBudget();
+    void accumulateBoundaryBudget();
+    void reportBoundaryBudget(size_t t, std::ostream& os) const;
     va_idx_t wallTangent;
     double wallRecolorFactor;
     vava_val_t wallOutgoing0, wallOutgoingTotal;

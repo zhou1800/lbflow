@@ -187,6 +187,43 @@ matched-physics spatial convergence study.
 
 ## Rebuild Figures And PDFs
 
+The latest campaign is `paper/data/core-reservoirs.json`: 209 recorded
+executions distinguish alternating force response, published core operators
+and guarded pressure-driven fronts. Projection beta is matched to the entire
+axial bulk recurrence, independently of pressure. Published projection
+already preserves the neutral stationary ratio, so the older tangent
+multiplier is cosine-specific. Signed pressure errors retain the unfavorable
+refinement trend. Both source-kernel manifests in `run-kernels/` reconstruct
+their frozen executables byte-identically in the original toolchain.
+
+The flat pressure extension checks a pure force-free collar and exact
+component link-flux budgets. H16/H32 pressure pairs remain bidirectional
+after four durations; estimated zero drift differs from closed pressure
+by at most 0.0066% of the Young reference. Front mobility is 11.3--17.8%
+below separately measured pure-channel conductance. This difference is
+not assigned entirely to numerical error or to a new contact-line law.
+The fixed-beta refinement also shrinks physical interface thickness.
+These controls do not establish a throat trapping threshold or curved-rock
+wetting accuracy.
+
+```sh
+python3 scripts/published_core.py calibrate --solver build/bin/LBFlow --root results/core-calibration
+python3 scripts/published_core.py slits --solver build/bin/LBFlow --root results/core-slits --calibration results/core-calibration/calibration.json --heights 16 32 48 --angles 60
+python3 scripts/published_core.py channels --solver build/bin/LBFlow --root results/core-channels
+python3 scripts/published_core.py drops --solver build/bin/LBFlow --root results/core-drops
+python3 scripts/pressure_reservoirs.py channels --solver build/bin/LBFlow --root results/pressure-channels --tau 1
+python3 scripts/make_core_reservoir_figures.py --data research/drlab-publication/paper/data/core-reservoirs.json --paper results/regenerated-core
+```
+
+`pressure_reservoirs.py fronts --seeds <held-receipts> --ratios .98 1 1.02`
+uses recorded closed donors; `--closed-centered-halfwidth .00025` defines
+the narrower pressure pair. `hold-fronts --seeds <front-receipts>` extends
+fourfold with a fresh mass-budget baseline. `--force-removed` explicitly
+changes sigma to zero as a diagnostic. `parity_forcing.py` uses the supplied
+historical ghost audit/executable; `staggered_diagnostics.py` retains raw
+adjacent fields. The collector documents the corrected width diagnostic in
+copies of receipts while preserving all original metadata and populations.
+
 The continued wall study adds `paper/data/wall-consistency.json` and
 `wall-study-validation.json`. It contains independent phase recurrences,
 neutral fixed points, rotation/parity and adjacent-step controls, matched
@@ -209,7 +246,7 @@ python3 scripts/make_wall_flux_figure.py --data research/drlab-publication/paper
 
 Use `wall_flux_checks.py --solver build/bin/LBFlow --audit-driver
 build/bin/NumericalAudit --root results/contracts` for independent transient,
-virtual-gradient, pure-phase, MPI and restart checks. Six CTest groups include
+virtual-gradient, pure-phase, MPI and restart checks. Eight CTest groups include
 this suite. The two new source-kernel manifests pin the frozen wall-flux/
 location and ghost-comparison executables to their exact pre-patch revision;
 the source patches must be applied to that revision in a separate copy.

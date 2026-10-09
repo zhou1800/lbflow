@@ -103,6 +103,26 @@ string FilePrm::getPhaseBoundary() const
     return result;
 }
 
+string FilePrm::getRecoloringModel() const
+{
+    const auto value=iPrm.find("recoloringModel");
+    if (value==iPrm.end()) return "cosine";
+    string result;
+    if (!parse(value->second,&result))
+        throw invalid_argument("recoloringModel must be a quoted string.");
+    return result;
+}
+
+string FilePrm::getMrtSpectrum() const
+{
+    const auto value=iPrm.find("mrtSpectrum");
+    if (value==iPrm.end()) return "legacy";
+    string result;
+    if (!parse(value->second,&result))
+        throw invalid_argument("mrtSpectrum must be a quoted string.");
+    return result;
+}
+
 void FilePrm::ValidateSimulation() const
 {
     const size_t ndim = dimension.size();
@@ -137,7 +157,25 @@ void FilePrm::ValidateSimulation() const
         if (!isfinite(rexlationTime[k]) || rexlationTime[k] <= 0.5 ||
             !isfinite(density[k]) || density[k] <= 0.0)
             throw invalid_argument("Densities must be positive; relaxation times must exceed 0.5.");
+    const string recoloringModel=getRecoloringModel(),spectrum=getMrtSpectrum();
+    if (recoloringModel!="cosine" && recoloringModel!="projection")
+        throw invalid_argument("recoloringModel must be cosine or projection.");
+    if (spectrum!="legacy" && spectrum!="liu2015")
+        throw invalid_argument("mrtSpectrum must be legacy or liu2015.");
+    if (recoloringModel!="cosine" || spectrum!="legacy") {
+        if (model!="color" || ndim!=2 || density[0]!=density[1] || abs(getAlpha0()-4.0/9.0)>1e-14)
+            throw invalid_argument("Published core controls require equal-density standard-weight color D2Q9.");
+        if (spectrum=="liu2015" && getEquilModel()!="MRT")
+            throw invalid_argument("The published MRT spectrum requires equilModel MRT.");
+        if (spectrum=="liu2015" && getCapillaryModel()!="csf")
+            throw invalid_argument("The published MRT spectrum requires capillaryModel csf; its perturbation tension mapping is not supported.");
+        if (recoloringModel=="projection" && getWallRecoloring()!="legacy")
+            throw invalid_argument("Projection recoloring cannot also use the cosine-derived wall multiplier.");
+    }
     if (model == "color") {
+        const bool pressureCsf=getCapillaryModel()=="csf" && !getIdx({IT::PB}).empty();
+        if (pressureCsf && (ndim!=2 || getWallGradient()!="ghost" || getPhaseBoundary()!="flux"))
+            throw invalid_argument("Pressure CSF requires flat D2Q9 ghost walls and phaseBoundary flux.");
         const string phaseBoundary=getPhaseBoundary();
         if (phaseBoundary!="bounce" && phaseBoundary!="flux")
             throw invalid_argument("phaseBoundary must be bounce or flux.");
@@ -150,8 +188,8 @@ void FilePrm::ValidateSimulation() const
                 throw invalid_argument("Wall phase flux requires renormalized, tangent, halfway or ghost wall gradients.");
             for (const auto& item : idx) {
                 const IT type=item.second->Type;
-                if (type!=IT::VD && type!=IT::GV && type!=IT::SD && type!=IT::BB)
-                    throw invalid_argument("Experimental wall phase/gradient operators initially support closed VD/GV flow with SD/BB walls.");
+                if (type!=IT::VD && type!=IT::GV && type!=IT::SD && type!=IT::BB && !(pressureCsf && type==IT::PB))
+                    throw invalid_argument("Wall operators require closed flow or guarded ghost/flux pressure CSF.");
             }
         }
         const string recoloring=getWallRecoloring();
@@ -184,8 +222,8 @@ void FilePrm::ValidateSimulation() const
                 throw invalid_argument("Experimental CSF requires equal reference densities and standard pressure weights.");
             for (const auto& item : idx) {
                 const IT type = item.second->Type;
-                if (type != IT::VD && type != IT::GV && type != IT::SD && type != IT::BB)
-                    throw invalid_argument("Experimental CSF supports only closed VD/GV flow with SD/BB walls.");
+                if (type != IT::VD && type != IT::GV && type != IT::SD && type != IT::BB && !(pressureCsf && type==IT::PB))
+                    throw invalid_argument("CSF requires closed flow or guarded flat ghost/flux pressure reservoirs.");
             }
         }
         if (getViscosityInterpolation() != "arithmetic" && getViscosityInterpolation() != "harmonic")
@@ -378,6 +416,9 @@ void FilePrm::parseAll()
         }
         else if (a.first == "phaseBoundary") {
             // Optional conservative wall phase transport.
+        }
+        else if (a.first == "recoloringModel" || a.first == "mrtSpectrum") {
+            // Independent published core-operator controls.
         }
         else if (a.first == "interfaceThickness")
             parse(a.second, &iThickness);

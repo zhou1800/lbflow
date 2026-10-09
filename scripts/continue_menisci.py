@@ -36,7 +36,8 @@ def main():
             if p.get('phase_boundary','bounce') not in args.phase_boundaries:continue
             identity=(p['height'],p['angle'],p['wall_gradient'],p.get('capillary_model','perturbation'),
                       p['beta'],p.get('phase_boundary','bounce'),p.get('wall_recoloring','legacy'),
-                      p.get('curvature_stencil','normal'),p['eq'],tuple(p['tau']),tuple(p['size']),p['sigma'])
+                      p.get('curvature_stencil','normal'),p['eq'],tuple(p['tau']),tuple(p['size']),p['sigma'],
+                      p.get('recoloring_model','cosine'),p.get('mrt_spectrum','legacy'))
             if identity in identities:raise ValueError('Duplicate seed configuration')
             if receipt['exit']!=0 or not receipt['finished']:raise ValueError('Incomplete seed')
             identities.add(identity)

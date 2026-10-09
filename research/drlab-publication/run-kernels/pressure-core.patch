@@ -1,0 +1,285 @@
+diff --git a/solver/inc/file/fileprm.h b/solver/inc/file/fileprm.h
+index ba7d8f0..d67639e 100644
+--- a/solver/inc/file/fileprm.h
++++ b/solver/inc/file/fileprm.h
+@@ -204,0 +205,2 @@ public:
++    string getRecoloringModel() const;
++    string getMrtSpectrum() const;
+diff --git a/solver/inc/lbm/colorfluid.h b/solver/inc/lbm/colorfluid.h
+index c64bc20..772ee2e 100644
+--- a/solver/inc/lbm/colorfluid.h
++++ b/solver/inc/lbm/colorfluid.h
+@@ -36,0 +37,11 @@ private:
++    const bool projectionRecoloring;
++    const bool pressureReservoirs;
++    size_t reservoirAxis, boundaryBudgetReference;
++    va_u8_t reservoirTypes;
++    va_idx_t reservoirPhase;
++    double boundaryInitialMass[2], boundaryNetMass[2], boundaryCompensation[2];
++    void initPressureReservoirs();
++    void checkPressureCollar(bool outgoing) const;
++    void initializeBoundaryBudget();
++    void accumulateBoundaryBudget();
++    void reportBoundaryBudget(size_t t, std::ostream& os) const;
+diff --git a/solver/inc/lbm/simulator.h b/solver/inc/lbm/simulator.h
+index 76e86bc..cd81548 100644
+--- a/solver/inc/lbm/simulator.h
++++ b/solver/inc/lbm/simulator.h
+@@ -40,0 +41 @@ protected:
++    const bool publishedMrtSpectrum;
+diff --git a/solver/src/file/fileprm.cpp b/solver/src/file/fileprm.cpp
+index 7bffe1e..2e64f53 100644
+--- a/solver/src/file/fileprm.cpp
++++ b/solver/src/file/fileprm.cpp
+@@ -105,0 +106,20 @@ string FilePrm::getPhaseBoundary() const
++string FilePrm::getRecoloringModel() const
++{
++    const auto value=iPrm.find("recoloringModel");
++    if (value==iPrm.end()) return "cosine";
++    string result;
++    if (!parse(value->second,&result))
++        throw invalid_argument("recoloringModel must be a quoted string.");
++    return result;
++}
++
++string FilePrm::getMrtSpectrum() const
++{
++    const auto value=iPrm.find("mrtSpectrum");
++    if (value==iPrm.end()) return "legacy";
++    string result;
++    if (!parse(value->second,&result))
++        throw invalid_argument("mrtSpectrum must be a quoted string.");
++    return result;
++}
++
+@@ -139,0 +160,15 @@ void FilePrm::ValidateSimulation() const
++    const string recoloringModel=getRecoloringModel(),spectrum=getMrtSpectrum();
++    if (recoloringModel!="cosine" && recoloringModel!="projection")
++        throw invalid_argument("recoloringModel must be cosine or projection.");
++    if (spectrum!="legacy" && spectrum!="liu2015")
++        throw invalid_argument("mrtSpectrum must be legacy or liu2015.");
++    if (recoloringModel!="cosine" || spectrum!="legacy") {
++        if (model!="color" || ndim!=2 || density[0]!=density[1] || abs(getAlpha0()-4.0/9.0)>1e-14)
++            throw invalid_argument("Published core controls require equal-density standard-weight color D2Q9.");
++        if (spectrum=="liu2015" && getEquilModel()!="MRT")
++            throw invalid_argument("The published MRT spectrum requires equilModel MRT.");
++        if (spectrum=="liu2015" && getCapillaryModel()!="csf")
++            throw invalid_argument("The published MRT spectrum requires capillaryModel csf; its perturbation tension mapping is not supported.");
++        if (recoloringModel=="projection" && getWallRecoloring()!="legacy")
++            throw invalid_argument("Projection recoloring cannot also use the cosine-derived wall multiplier.");
++    }
+@@ -140,0 +176,3 @@ void FilePrm::ValidateSimulation() const
++        const bool pressureCsf=getCapillaryModel()=="csf" && !getIdx({IT::PB}).empty();
++        if (pressureCsf && (ndim!=2 || getWallGradient()!="ghost" || getPhaseBoundary()!="flux"))
++            throw invalid_argument("Pressure CSF requires flat D2Q9 ghost walls and phaseBoundary flux.");
+@@ -153,2 +191,2 @@ void FilePrm::ValidateSimulation() const
+-                if (type!=IT::VD && type!=IT::GV && type!=IT::SD && type!=IT::BB)
+-                    throw invalid_argument("Experimental wall phase/gradient operators initially support closed VD/GV flow with SD/BB walls.");
++                if (type!=IT::VD && type!=IT::GV && type!=IT::SD && type!=IT::BB && !(pressureCsf && type==IT::PB))
++                    throw invalid_argument("Wall operators require closed flow or guarded ghost/flux pressure CSF.");
+@@ -187,2 +225,2 @@ void FilePrm::ValidateSimulation() const
+-                if (type != IT::VD && type != IT::GV && type != IT::SD && type != IT::BB)
+-                    throw invalid_argument("Experimental CSF supports only closed VD/GV flow with SD/BB walls.");
++                if (type != IT::VD && type != IT::GV && type != IT::SD && type != IT::BB && !(pressureCsf && type==IT::PB))
++                    throw invalid_argument("CSF requires closed flow or guarded flat ghost/flux pressure reservoirs.");
+@@ -381,0 +420,3 @@ void FilePrm::parseAll()
++        else if (a.first == "recoloringModel" || a.first == "mrtSpectrum") {
++            // Independent published core-operator controls.
++        }
+diff --git a/solver/src/lbm/colorfluid.cpp b/solver/src/lbm/colorfluid.cpp
+index 2722725..75a6cea 100644
+--- a/solver/src/lbm/colorfluid.cpp
++++ b/solver/src/lbm/colorfluid.cpp
+@@ -29,0 +30,6 @@ ColorFluid::ColorFluid(const FilePrm &prm)
++    , projectionRecoloring(p.getRecoloringModel()=="projection")
++    , pressureReservoirs(p.getCapillaryModel()=="csf" && !p.getIdx({IT::PB}).empty())
++    , reservoirAxis(0), boundaryBudgetReference(p.getTStart())
++    , reservoirTypes(pressureReservoirs ? g.LG.FG.N : 0)
++    , reservoirPhase(size_t(2),pressureReservoirs ? g.LG.N : 0)
++    , boundaryInitialMass{0.,0.}, boundaryNetMass{0.,0.}, boundaryCompensation{0.,0.}
+@@ -73,0 +80 @@ ColorFluid::ColorFluid(const FilePrm &prm)
++    if (pressureReservoirs) initPressureReservoirs();
+@@ -90 +97 @@ ColorFluid::ColorFluid(const FilePrm &prm)
+-            if (g.S.Qnorm[q]>1.0)
++            if (pressureReservoirs || g.S.Qnorm[q]>1.0)
+@@ -130,0 +138 @@ void ColorFluid::Run(std::ostream &logProc)
++    if (pressureReservoirs) initializeBoundaryBudget();
+@@ -137,0 +146 @@ void ColorFluid::Run(std::ostream &logProc)
++        if (pressureReservoirs) accumulateBoundaryBudget();
+@@ -166,0 +176,2 @@ void ColorFluid::Run(std::ostream &logProc)
++        if (pressureReservoirs && (t%p.getTStep()==0 || t%p.getTRpt()==0))
++            reportBoundaryBudget(t,logProc);
+@@ -275,0 +287 @@ void ColorFluid::calcMacroVar(size_t t)
++    if (pressureReservoirs) checkPressureCollar(false);
+@@ -400 +412 @@ void ColorFluid::collision()
+-                    if (q != 0) angle /= g.S.Qnorm[q];
++                    if (q != 0 && !projectionRecoloring) angle /= g.S.Qnorm[q];
+@@ -1027 +1039,2 @@ void ColorFluid::prepareWallPhaseFlux(size_t t)
+-    for (size_t idx : p.getIdx({IT::VD,IT::GV}))
++    if (pressureReservoirs) checkPressureCollar(true);
++    for (size_t idx : p.getIdx(pressureReservoirs ? initializer_list<IT>{IT::VD,IT::GV,IT::PB} : initializer_list<IT>{IT::VD,IT::GV}))
+@@ -1037 +1050 @@ void ColorFluid::prepareWallPhaseFlux(size_t t)
+-        if (g.S.Qnorm[q]<=1.0) continue;
++        if (!pressureReservoirs && g.S.Qnorm[q]<=1.0) continue;
+@@ -1058,0 +1072 @@ void ColorFluid::applyWallPhaseFlux()
++            if (pressureReservoirs && (reservoirTypes[i2f[i]]==IT::PB || reservoirTypes[j]==IT::PB)) continue;
+diff --git a/solver/src/lbm/simulator.cpp b/solver/src/lbm/simulator.cpp
+index f61923d..0dfedd6 100644
+--- a/solver/src/lbm/simulator.cpp
++++ b/solver/src/lbm/simulator.cpp
+@@ -18,0 +19 @@ Simulator::Simulator(const FilePrm &prm)
++    , publishedMrtSpectrum(p.getMrtSpectrum()=="liu2015")
+@@ -203,0 +205,4 @@ va_val_t Simulator::getMRTS(double relaxationTime)
++    if (publishedMrtSpectrum) {
++        if (g.S.Q!=9) throw invalid_argument("Published MRT spectrum requires D2Q9.");
++        return va_val_t({1,1.63,1.14,1,1.92,1,1.92,su,su});
++    }
+diff --git a/solver/src/lbm/colorreservoir.cpp b/solver/src/lbm/colorreservoir.cpp
+new file mode 100644
+index 0000000..e99e669
+--- /dev/null
++++ b/solver/src/lbm/colorreservoir.cpp
+@@ -0,0 +1,143 @@
++// Guarded flat, pure-collar CSF pressure experiment. Original Zou--He
++// populations and closed numerical operators are retained in colorfluid.cpp.
++#include "colorfluid.h"
++#include <iomanip>
++#include <sstream>
++
++namespace DRL { namespace LBM {
++
++void ColorFluid::initPressureReservoirs()
++{
++    const auto& i2f=g.LG.getI2fMap();
++    bool first=true, defined[2]={false,false};
++    size_t phase[2]={0,0}; double density[2]={0.,0.};
++    for (size_t idx : p.getIdx({IT::PB})) {
++        const auto& value=p.getIVal(idx);
++        if (!value.Dir || g.S.Qnorm[value.Dir]!=1.0 || value.Value<=0.0)
++            throw std::invalid_argument("CSF pressure reservoirs require positive density and an axial inward direction.");
++        const size_t axis=g.S.Qaxis[value.Dir];
++        if (first) {reservoirAxis=axis;first=false;}
++        if (axis!=reservoirAxis)
++            throw std::invalid_argument("CSF pressure reservoirs must share one axis.");
++        const size_t side=g.S.Qsign[value.Dir]>0 ? 0 : 1;
++        if (defined[side] && (phase[side]!=value.Phase || density[side]!=value.Value))
++            throw std::invalid_argument("Each CSF pressure face must prescribe one phase and density.");
++        defined[side]=true;phase[side]=value.Phase;density[side]=value.Value;
++    }
++    if (!defined[0] || !defined[1] || g.Sz[reservoirAxis]<8)
++        throw std::invalid_argument("CSF pressure experiments need two opposite faces and distinct interior collars.");
++    double localCount[2]={0.,0.},globalCount[2]={0.,0.};
++    for (size_t i=0;i<g.LG.N;++i) {
++        const auto& value=p.getIVal(raw[i]);
++        reservoirTypes[i2f[i]]=value.Type;
++        const bool fluid=value.Type==IT::VD || value.Type==IT::GV || value.Type==IT::PB;
++        if (!fluid) continue;
++        if (value.Type==IT::GV && value.Value!=0.0)
++            throw std::invalid_argument("Guarded CSF pressure experiments do not combine external body forcing.");
++        const size_t coordinate=(i/g.LG.Stride[reservoirAxis])%g.LG.Sz[reservoirAxis]+g.LStart[reservoirAxis];
++        const bool end=coordinate==0 || coordinate+1==g.Sz[reservoirAxis];
++        if ((value.Type==IT::PB)!=end)
++            throw std::invalid_argument("CSF pressure nodes must cover both outer fluid faces and have no interior nodes.");
++        if (value.Type==IT::PB) {
++            const size_t side=coordinate==0 ? 0 : 1;
++            const size_t directionSide=g.S.Qsign[value.Dir]>0 ? 0 : 1;
++            if (side!=directionSide)
++                throw std::invalid_argument("CSF pressure face direction must point inward.");
++            ++localCount[side];
++        }
++        if (ibI[i] && ibNorm[ibI[i]][reservoirAxis]!=0.0)
++            throw std::invalid_argument("CSF pressure experiments require walls parallel to the reservoir axis.");
++        if (coordinate<=2) reservoirPhase[i]=phase[0];
++        if (coordinate+3>=g.Sz[reservoirAxis]) reservoirPhase[i]=phase[1];
++    }
++    mpi().AllReduce(localCount,globalCount,2,MPI_DOUBLE,MPI_SUM);
++    if (globalCount[0]==0.0 || globalCount[0]!=globalCount[1])
++        throw std::invalid_argument("CSF pressure experiments require two complete equal-area fluid faces.");
++    syncBorder(&reservoirTypes,0);
++}
++
++void ColorFluid::checkPressureCollar(bool outgoing) const
++{
++    for (size_t i=0;i<g.LG.N;++i) {
++        if (reservoirPhase[i]>1) continue;
++        double rho0=0.,rho1=0.;
++        if (outgoing) {
++            for (size_t q=0;q<g.S.Q;++q) {rho0+=f[0][q][i];rho1+=f[1][q][i];}
++        } else {rho0=dens[0][i];rho1=dens[1][i];}
++        if (!std::isfinite(rho0+rho1) || rho0+rho1<=0.0 ||
++            std::abs((reservoirPhase[i]==0 ? rho1 : rho0)/(rho0+rho1))>1e-9)
++            throw std::runtime_error("CSF pressure collar lost its prescribed pure phase; interface too close to reservoir.");
++        if (!outgoing && reservoirTypes[g.LG.getI2fMap()[i]]!=IT::PB) {
++            const size_t coordinate=(i/g.LG.Stride[reservoirAxis])%g.LG.Sz[reservoirAxis]+g.LStart[reservoirAxis];
++            if (coordinate==1 || coordinate+2==g.Sz[reservoirAxis]) {
++                double norm=0.;colorGradient(i,norm);
++                if (norm>1e-9)
++                    throw std::runtime_error("CSF pressure reconstruction requires a force-free first interior strip.");
++            }
++        }
++    }
++}
++
++void ColorFluid::initializeBoundaryBudget()
++{
++    checkPressureCollar(true);
++    for (size_t ph=0;ph<2;++ph) {
++        double compensation=0.;
++        for (size_t idx : p.getIdx({IT::VD,IT::GV}))
++            for (size_t i : gIdx[idx])
++                for (size_t q=0;q<g.S.Q;++q) {
++                    const double increment=f[ph][q][i]-compensation;
++                    const double sum=boundaryInitialMass[ph]+increment;
++                    compensation=(sum-boundaryInitialMass[ph])-increment;
++                    boundaryInitialMass[ph]=sum;
++                }
++    }
++}
++
++void ColorFluid::accumulateBoundaryBudget()
++{
++    const auto& i2f=g.LG.getI2fMap();const auto& adj=g.LG.FG.getAdjI();
++    double net[2]={0.,0.};
++    for (size_t idx : p.getIdx({IT::VD,IT::GV}))
++        for (size_t i : gIdx[idx])
++            for (size_t q=1;q<g.S.Q;++q) {
++                const size_t source=adj[i2f[i]][g.S.Qop[q]],target=adj[i2f[i]][q];
++                if (reservoirTypes[source]==IT::PB) {
++                    const double zero=wallOutgoing0[q][source];
++                    net[0]+=zero;net[1]+=wallOutgoingTotal[q][source]-zero;
++                }
++                if (reservoirTypes[target]==IT::PB)
++                    for (size_t ph=0;ph<2;++ph) net[ph]-=f[ph][q][i];
++            }
++    for (size_t ph=0;ph<2;++ph) {
++        const double increment=net[ph]-boundaryCompensation[ph];
++        const double sum=boundaryNetMass[ph]+increment;
++        boundaryCompensation[ph]=(sum-boundaryNetMass[ph])-increment;
++        boundaryNetMass[ph]=sum;
++    }
++}
++
++void ColorFluid::reportBoundaryBudget(size_t t,std::ostream& os) const
++{
++    double local[6]={boundaryInitialMass[0],boundaryInitialMass[1],boundaryNetMass[0],boundaryNetMass[1],0.,0.};
++    for (size_t idx : p.getIdx({IT::VD,IT::GV})) {
++        const auto found=gIdx.find(idx);
++        if (found==gIdx.end()) continue;
++        for (size_t i : found->second) {local[4]+=dens[0][i];local[5]+=dens[1][i];}
++    }
++    double global[6]={};mpi().AllReduce(local,global,6,MPI_DOUBLE,MPI_SUM);
++    const double residual[2]={global[4]-global[0]-global[2],global[5]-global[1]-global[3]};
++    if (std::abs(residual[0])+std::abs(residual[1])>1e-9*std::max(1.0,global[0]+global[1]))
++        throw std::runtime_error("CSF pressure interior mass does not balance the recorded reservoir links.");
++    if (mpi().getId()==0) {
++        std::ostringstream line;line<<std::setprecision(17)
++            <<"LBFlowBoundaryBudget {\"step\":"<<t<<",\"reference_step\":"<<boundaryBudgetReference
++            <<",\"initial_mass\":["<<global[0]<<','<<global[1]
++            <<"],\"integrated_net_mass\":["<<global[2]<<','<<global[3]
++            <<"],\"current_mass\":["<<global[4]<<','<<global[5]
++            <<"],\"residual\":["<<residual[0]<<','<<residual[1]<<"]}";
++        os<<line.str()<<'\n';
++    }
++}
++
++}}

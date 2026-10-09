@@ -47,8 +47,10 @@ physical velocity reporting, checkpoint time/stage semantics, field-based
 convergence and numerical failure exits. The color-gradient
 perturbation and recoloring remain the bulk mechanism. Optional harmonic
 viscosity and wall-gradient reconstruction have separate measured tradeoffs.
-An experimental curvature surface force is available for closed equal-density
-color flow. It reduces residual velocities in the recorded slit controls,
+An experimental curvature surface force supports closed equal-density color
+flow and guarded flat pressure-reservoir experiments. Independently matched
+published recoloring/MRT controls separate core and wall effects. The force
+reduces residual velocities in the recorded slit controls,
 with remaining pressure and wall-profile errors documented explicitly.
 See the [numerical change log](research/drlab-publication/notes/numerical-changes.md).
 
@@ -124,8 +126,10 @@ draft and has not been submitted or accepted.
   it does not uniformly improve the measured controls. `capillaryModel "csf"`
   selects the experimental curvature/Guo force instead of the default
   `"perturbation"`. CSF accepts only equal reference densities, standard
-  pressure weights, `latticeSpeed 1` and closed VD/GV flow with SD/BB walls. Pressure/velocity
-  reservoirs and selective films are rejected. New quantitative capillary
+  pressure weights and `latticeSpeed 1`. Closed VD/GV flow uses SD/BB walls.
+  Pressure CSF additionally requires the guarded flat D2Q9 ghost/flux
+  combination described below. Velocity reservoirs and selective films
+  remain unsupported. New quantitative capillary
   measurements use equal viscosity, tau=1; moving/curved 3D contact-line
   accuracy remains unverified.
 - `wallRecoloring "tangential"` selects an experimental D2Q9 flat-wall
@@ -142,7 +146,8 @@ draft and has not been submitted or accepted.
   flat D2Q9 walls; `"bounce"` remains the default. It restores the complete
   neutral bulk phase recurrence and preserves pure-phase no-slip reflection.
   It requires `wallRecoloring "legacy"`, equal reference densities, standard
-  weights, closed VD/GV flow and a supported reconstructed wall gradient.
+  weights and a supported reconstructed wall gradient. Open CSF requires
+  the separately validated pure-collar pressure configuration below.
   Transport consistency alone does not improve nonneutral pressure accuracy.
 - `wallGradient "tangent"` preserves the central wall-tangent derivative;
   `"halfway"` extrapolates the inward normal component to the physical wall;
@@ -152,8 +157,25 @@ draft and has not been submitted or accepted.
   nonsingular angles; halfway/ghost also require an interior fluid layer.
   The ghost option retains LBFlow's other operators, so it is not the full
   published model. Measured pressure improvement retains nonneutral flow
-  and two-step oscillations. Curved digital-rock walls and reservoirs are
-  unsupported for these options.
+  and two-step oscillations. Curved digital-rock walls remain unsupported.
+- `recoloringModel "projection"` uses the published link projection in
+  place of the recovered `"cosine"` normalization. It requires equal-density,
+  standard-weight D2Q9 and cannot combine with the cosine-derived tangent
+  multiplier. Exact axial transport matching at cosine beta 0.7 gives
+  projection beta 0.6316582489435276; equal beta changes the interface width.
+- `mrtSpectrum "liu2015"` selects the published D2Q9 rates with matching
+  Guo forcing; `"legacy"` remains the default. It requires color MRT and
+  `capillaryModel "csf"`. Its fixed odd-moment rate changes the hydraulic
+  wall offset; do not inherit the legacy pure-channel reference.
+- Pressure CSF is experimental: use two complete opposite inward axial PB
+  planes, `wallGradient "ghost"`, `phaseBoundary "flux"`, flat parallel
+  walls and no external body force. The prescribed phase must remain pure
+  within 1e-9 at PB and two interior strips; the first strip must have
+  gradient below 1e-9. The run fails when an interface reaches this collar.
+  `LBFlowBoundaryBudget` records interior component mass and exact kinetic
+  inflow/outflow, with a new baseline on restart. Long physical validation
+  covers theta60, equal tau1 and H16/H32. These are flat-slit drift controls,
+  not validated curved-pore entry thresholds or contact-line laws.
 - `reportDir 0` requests a prescribed run duration. Automatic convergence
   requires three stable velocity/color reports and applicable scalar diagnostics,
   including changes from the adjacent time step. Even reporting intervals

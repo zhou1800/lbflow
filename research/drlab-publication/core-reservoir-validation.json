@@ -1,0 +1,1015 @@
+{
+  "date": "2026-10-09",
+  "base_source_revision": "a383c8e439c55621b3b248885b56611d48292447",
+  "solver_sha256": "a1ff678f4fb72ddc9716dca3fce336aada514ca5ebe7285f8c6addfde6e58d80",
+  "physical_executions": 209,
+  "closed_measurements": 56,
+  "pressure_front_measurements": 69,
+  "verified_raw_provenance": true,
+  "original_archive_unchanged": 82,
+  "historical_c_files_unchanged": 66,
+  "core_kernel_reconstruction": "3b22763efaaee4a3e633a222f959f423903be7d50621f0324e4f252fa72a6031",
+  "pressure_kernel_reconstruction": "a1ff678f4fb72ddc9716dca3fce336aada514ca5ebe7285f8c6addfde6e58d80",
+  "closed_bitwise_field_population_comparisons": 8,
+  "core_contracts": {
+    "recoloring": [
+      {
+        "name": "population-cosine-1rank",
+        "max_population_error": 5.551115123125783e-17
+      },
+      {
+        "name": "population-projection-1rank",
+        "max_population_error": 5.551115123125783e-17
+      }
+    ],
+    "matched_transients": [
+      {
+        "name": "transient-legacy-1rank",
+        "max_color_error": 1.4432899320127035e-15,
+        "max_speed": 2.1171254514269446e-16
+      },
+      {
+        "name": "transient-liu2015-1rank",
+        "max_color_error": 7.771561172376096e-16,
+        "max_speed": 3.1155339108679e-16
+      }
+    ],
+    "published_fixed_points": [
+      {
+        "name": "bounce-fixed-legacy-1rank",
+        "color_error": 4.0745185003743245e-14,
+        "max_speed": 1.2037987355243639e-16
+      },
+      {
+        "name": "bounce-fixed-liu2015-1rank",
+        "color_error": 3.430589146091734e-14,
+        "max_speed": 3.6182664370738195e-16
+      }
+    ],
+    "forcing": [
+      {
+        "name": "force-legacy-1rank",
+        "error": 3.7052609244692114e-17
+      },
+      {
+        "name": "force-liu2015-1rank",
+        "error": 8.782037597132586e-17
+      }
+    ],
+    "parity": [
+      {
+        "name": "checkerboard-legacy-1rank",
+        "error": 1.4878133718521785e-17,
+        "completed_steps": 15
+      },
+      {
+        "name": "checkerboard-liu2015-1rank",
+        "error": 1.4878557234995413e-17,
+        "completed_steps": 15
+      }
+    ],
+    "mrt_audit": {
+      "max_rate_error": 0.0,
+      "driver_sha256": "3c06da3991d6aa27b7641bbb04a54cab05f212e1370fa096ccdbb11d8731d5ce",
+      "input_sha256": "a1016ffdaf825cd20b03d07fafbfcf81c04aa677a730d20eeca012694f1b3ea5"
+    },
+    "comparisons": [
+      {
+        "left": "nonneutral-core-1rank",
+        "right": "nonneutral-core-parallel-2rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "nonneutral-core-1rank",
+        "right": "nonneutral-core-resumed-1-1rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "nonneutral-core-1rank",
+        "right": "nonneutral-core-resumed-2-2rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      }
+    ],
+    "bitwise_population_comparisons": 3,
+    "guards": [
+      {
+        "name": "bad-recoloring",
+        "exit": 1
+      },
+      {
+        "name": "bad-spectrum",
+        "exit": 1
+      },
+      {
+        "name": "srt-spectrum",
+        "exit": 1
+      },
+      {
+        "name": "perturbation-spectrum",
+        "exit": 1
+      },
+      {
+        "name": "wrong-weights",
+        "exit": 1
+      },
+      {
+        "name": "wrong-density",
+        "exit": 1
+      },
+      {
+        "name": "three-dimensions",
+        "exit": 1
+      },
+      {
+        "name": "duplicate-multiplier",
+        "exit": 1
+      },
+      {
+        "name": "single-component",
+        "exit": 1
+      }
+    ],
+    "solver_sha256": "a1ff678f4fb72ddc9716dca3fce336aada514ca5ebe7285f8c6addfde6e58d80"
+  },
+  "pressure_contracts": {
+    "hydraulic": [
+      {
+        "name": "pressure-H8-legacy-phase0-sign-1-1rank",
+        "height": 8,
+        "tau": 1.0,
+        "mrt_spectrum": "legacy",
+        "measured_pressure_gradient": -3.2265001296642265e-07,
+        "nominal_pressure_gradient": -3.2258064516129035e-07,
+        "relative_gradient_difference": 0.00021504019591023216,
+        "constant_offset": 0.0,
+        "profile": [
+          -3.6298108864466247e-06,
+          -9.43750830496253e-06,
+          -1.3309306605542696e-05,
+          -1.5245205773473155e-05,
+          -1.5245205773469686e-05,
+          -1.330930660551841e-05,
+          -9.437508304913962e-06,
+          -3.629810886443156e-06
+        ],
+        "reference": [
+          -3.629810889135445e-06,
+          -9.437508311752234e-06,
+          -1.3309306593496783e-05,
+          -1.5245205734369037e-05,
+          -1.5245205734369037e-05,
+          -1.3309306593496783e-05,
+          -9.437508311752239e-06,
+          -3.629810889135446e-06
+        ],
+        "relative_profile_error": 2.5650108396102123e-09,
+        "budget": {
+          "max_relative_budget_residual": 6.249326866177481e-15,
+          "history": [
+            {
+              "step": 1000,
+              "reference_step": 0,
+              "initial_mass": [
+                240,
+                0
+              ],
+              "integrated_net_mass": [
+                -6.201877900124941e-11,
+                0
+              ],
+              "current_mass": [
+                239.99999999993818,
+                0
+              ],
+              "residual": [
+                2.0156099012069717e-13,
+                0
+              ]
+            },
+            {
+              "step": 2000,
+              "reference_step": 0,
+              "initial_mass": [
+                240,
+                0
+              ],
+              "integrated_net_mass": [
+                -6.22819365525551e-11,
+                0
+              ],
+              "current_mass": [
+                239.99999999993832,
+                0
+              ],
+              "residual": [
+                6.068270885783988e-13,
+                0
+              ]
+            },
+            {
+              "step": 3000,
+              "reference_step": 0,
+              "initial_mass": [
+                240,
+                0
+              ],
+              "integrated_net_mass": [
+                -6.260848089967297e-11,
+                0
+              ],
+              "current_mass": [
+                239.9999999999384,
+                0
+              ],
+              "residual": [
+                1.018636563987485e-12,
+                0
+              ]
+            },
+            {
+              "step": 4000,
+              "reference_step": 0,
+              "initial_mass": [
+                240,
+                0
+              ],
+              "integrated_net_mass": [
+                -6.284074996476541e-11,
+                0
+              ],
+              "current_mass": [
+                239.99999999993844,
+                0
+              ],
+              "residual": [
+                1.2793273385103276e-12,
+                0
+              ]
+            },
+            {
+              "step": 5000,
+              "reference_step": 0,
+              "initial_mass": [
+                240,
+                0
+              ],
+              "integrated_net_mass": [
+                -6.308968278356808e-11,
+                0
+              ],
+              "current_mass": [
+                239.9999999999384,
+                0
+              ],
+              "residual": [
+                1.4998384478825955e-12,
+                0
+              ]
+            }
+          ],
+          "convention": "VD/GV interior excludes PB and solid nodes; restart establishes a new outgoing baseline."
+        },
+        "max_transverse_speed": 2.4983475409647047e-14
+      },
+      {
+        "name": "pressure-H8-legacy-phase1-sign1-1rank",
+        "height": 8,
+        "tau": 1.0,
+        "mrt_spectrum": "legacy",
+        "measured_pressure_gradient": 3.226500129479189e-07,
+        "nominal_pressure_gradient": 3.2258064516129035e-07,
+        "relative_gradient_difference": 0.0002150401385485612,
+        "constant_offset": 0.0,
+        "profile": [
+          3.6298144008711333e-06,
+          9.437517440891663e-06,
+          1.3309319489274554e-05,
+          1.5245220531004078e-05,
+          1.5245220531035303e-05,
+          1.3309319489232917e-05,
+          9.437517440895132e-06,
+          3.629814400815622e-06
+        ],
+        "reference": [
+          3.6298144024046297e-06,
+          9.437517446251962e-06,
+          1.3309319475483495e-05,
+          1.524522049009928e-05,
+          1.524522049009928e-05,
+          1.3309319475483492e-05,
+          9.437517446251962e-06,
+          3.62981440240463e-06
+        ],
+        "relative_profile_error": 2.6851709522607864e-09,
+        "budget": {
+          "max_relative_budget_residual": 6.515245519015759e-15,
+          "history": [
+            {
+              "step": 1000,
+              "reference_step": 0,
+              "initial_mass": [
+                0,
+                240
+              ],
+              "integrated_net_mass": [
+                0,
+                -6.201525404314623e-11
+              ],
+              "current_mass": [
+                0,
+                239.9999999999382
+              ],
+              "residual": [
+                0,
+                2.264577414479163e-13
+              ]
+            },
+            {
+              "step": 2000,
+              "reference_step": 0,
+              "initial_mass": [
+                0,
+                240
+              ],
+              "integrated_net_mass": [
+                0,
+                -6.229018689740684e-11
+              ],
+              "current_mass": [
+                0,
+                239.99999999993827
+              ],
+              "residual": [
+                0,
+                5.582340145693365e-13
+              ]
+            },
+            {
+              "step": 3000,
+              "reference_step": 0,
+              "initial_mass": [
+                0,
+                240
+              ],
+              "integrated_net_mass": [
+                0,
+                -6.258461804353743e-11
+              ],
+              "current_mass": [
+                0,
+                239.99999999993844
+              ],
+              "residual": [
+                0,
+                1.023195417282352e-12
+              ]
+            },
+            {
+              "step": 4000,
+              "reference_step": 0,
+              "initial_mass": [
+                0,
+                240
+              ],
+              "integrated_net_mass": [
+                0,
+                -6.287504544788547e-11
+              ],
+              "current_mass": [
+                0,
+                239.99999999993844
+              ],
+              "residual": [
+                0,
+                1.3136228216303891e-12
+              ]
+            },
+            {
+              "step": 5000,
+              "reference_step": 0,
+              "initial_mass": [
+                0,
+                240
+              ],
+              "integrated_net_mass": [
+                0,
+                -6.312508155081886e-11
+              ],
+              "current_mass": [
+                0,
+                239.99999999993844
+              ],
+              "residual": [
+                0,
+                1.5636589245637822e-12
+              ]
+            }
+          ],
+          "convention": "VD/GV interior excludes PB and solid nodes; restart establishes a new outgoing baseline."
+        },
+        "max_transverse_speed": 2.3821234301002445e-14
+      },
+      {
+        "name": "pressure-H8-liu2015-phase0-sign-1-1rank",
+        "height": 8,
+        "tau": 1.0,
+        "mrt_spectrum": "liu2015",
+        "measured_pressure_gradient": -3.218972796092956e-07,
+        "nominal_pressure_gradient": -3.2258064516129035e-07,
+        "relative_gradient_difference": -0.002118433211183768,
+        "constant_offset": -0.23611111111111108,
+        "profile": [
+          -3.393368738915421e-06,
+          -9.187509133044357e-06,
+          -1.3050298793326427e-05,
+          -1.4981720617231757e-05,
+          -1.4981720617290738e-05,
+          -1.3050298793368057e-05,
+          -9.187509133040888e-06,
+          -3.3933687389327682e-06
+        ],
+        "reference": [
+          -3.3933321846572553e-06,
+          -9.187480420808047e-06,
+          -1.3050245914280449e-05,
+          -1.4981628664418733e-05,
+          -1.4981628664418733e-05,
+          -1.3050245914280447e-05,
+          -9.187480420808047e-06,
+          -3.3933321846572553e-06
+        ],
+        "relative_profile_error": 6.13770866070018e-06,
+        "budget": {
+          "max_relative_budget_residual": 6.831637396990477e-14,
+          "history": [
+            {
+              "step": 1000,
+              "reference_step": 0,
+              "initial_mass": [
+                240.00000000000006,
+                0
+              ],
+              "integrated_net_mass": [
+                -9.448314700066796e-11,
+                0
+              ],
+              "current_mass": [
+                239.9999999999089,
+                0
+              ],
+              "residual": [
+                3.3347248573623034e-12,
+                0
+              ]
+            },
+            {
+              "step": 2000,
+              "reference_step": 0,
+              "initial_mass": [
+                240.00000000000006,
+                0
+              ],
+              "integrated_net_mass": [
+                -9.767722394804501e-11,
+                0
+              ],
+              "current_mass": [
+                239.999999999909,
+                0
+              ],
+              "residual": [
+                6.614066933030571e-12,
+                0
+              ]
+            },
+            {
+              "step": 3000,
+              "reference_step": 0,
+              "initial_mass": [
+                240.00000000000006,
+                0
+              ],
+              "integrated_net_mass": [
+                -1.0095336719362358e-10,
+                0
+              ],
+              "current_mass": [
+                239.9999999999091,
+                0
+              ],
+              "residual": [
+                1.0003897016330754e-11,
+                0
+              ]
+            },
+            {
+              "step": 4000,
+              "reference_step": 0,
+              "initial_mass": [
+                240.00000000000006,
+                0
+              ],
+              "integrated_net_mass": [
+                -1.0422398014076073e-10,
+                0
+              ],
+              "current_mass": [
+                239.999999999909,
+                0
+              ],
+              "residual": [
+                1.316082312574629e-11,
+                0
+              ]
+            },
+            {
+              "step": 5000,
+              "reference_step": 0,
+              "initial_mass": [
+                240.00000000000006,
+                0
+              ],
+              "integrated_net_mass": [
+                -1.0745908676779159e-10,
+                0
+              ],
+              "current_mass": [
+                239.999999999909,
+                0
+              ],
+              "residual": [
+                1.639592975277715e-11,
+                0
+              ]
+            }
+          ],
+          "convention": "VD/GV interior excludes PB and solid nodes; restart establishes a new outgoing baseline."
+        },
+        "max_transverse_speed": 4.2183506102001066e-10
+      },
+      {
+        "name": "pressure-H8-liu2015-phase1-sign1-1rank",
+        "height": 8,
+        "tau": 1.0,
+        "mrt_spectrum": "liu2015",
+        "measured_pressure_gradient": 3.2189727968331045e-07,
+        "nominal_pressure_gradient": 3.2258064516129035e-07,
+        "relative_gradient_difference": -0.00211843298173775,
+        "constant_offset": -0.23611111111111108,
+        "profile": [
+          3.3933720149384154e-06,
+          9.187518003914406e-06,
+          1.3050311385008226e-05,
+          1.4981735067663878e-05,
+          1.4981735067643063e-05,
+          1.305031138499782e-05,
+          9.187518003931755e-06,
+          3.393372015042499e-06
+        ],
+        "reference": [
+          3.3933354612205042e-06,
+          9.187489292347352e-06,
+          1.3050258510393363e-05,
+          1.4981643116017727e-05,
+          1.498164311601773e-05,
+          1.3050258510393366e-05,
+          9.187489292347353e-06,
+          3.3933354612205042e-06
+        ],
+        "relative_profile_error": 6.137620916460081e-06,
+        "budget": {
+          "max_relative_budget_residual": 6.849486255955382e-14,
+          "history": [
+            {
+              "step": 1000,
+              "reference_step": 0,
+              "initial_mass": [
+                0,
+                240.00000000000006
+              ],
+              "integrated_net_mass": [
+                0,
+                -9.44405977032492e-11
+              ],
+              "current_mass": [
+                0,
+                239.9999999999089
+              ],
+              "residual": [
+                0,
+                3.2921755599435443e-12
+              ]
+            },
+            {
+              "step": 2000,
+              "reference_step": 0,
+              "initial_mass": [
+                0,
+                240.00000000000006
+              ],
+              "integrated_net_mass": [
+                0,
+                -9.768057196435365e-11
+              ],
+              "current_mass": [
+                0,
+                239.99999999990897
+              ],
+              "residual": [
+                0,
+                6.5889932399088025e-12
+              ]
+            },
+            {
+              "step": 3000,
+              "reference_step": 0,
+              "initial_mass": [
+                0,
+                240.00000000000006
+              ],
+              "integrated_net_mass": [
+                0,
+                -1.0106401479581528e-10
+              ],
+              "current_mass": [
+                0,
+                239.99999999990914
+              ],
+              "residual": [
+                0,
+                1.0142966327952863e-11
+              ]
+            },
+            {
+              "step": 4000,
+              "reference_step": 0,
+              "initial_mass": [
+                0,
+                240.00000000000006
+              ],
+              "integrated_net_mass": [
+                0,
+                -1.0418658644151257e-10
+              ],
+              "current_mass": [
+                0,
+                239.99999999990902
+              ],
+              "residual": [
+                0,
+                1.3151851135928538e-11
+              ]
+            },
+            {
+              "step": 5000,
+              "reference_step": 0,
+              "initial_mass": [
+                0,
+                240.00000000000006
+              ],
+              "integrated_net_mass": [
+                0,
+                -1.0738823719158574e-10
+              ],
+              "current_mass": [
+                0,
+                239.9999999999091
+              ],
+              "residual": [
+                0,
+                1.643876701429292e-11
+              ]
+            }
+          ],
+          "convention": "VD/GV interior excludes PB and solid nodes; restart establishes a new outgoing baseline."
+        },
+        "max_transverse_speed": 4.2183522885996475e-10
+      }
+    ],
+    "comparisons": [
+      {
+        "left": "pressure-front-short-1rank",
+        "right": "pressure-front-short-parallel-2rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "pressure-front-short-1rank",
+        "right": "pressure-front-short-resumed-1-1rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "pressure-front-short-1rank",
+        "right": "pressure-front-short-resumed-2-2rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      }
+    ],
+    "bitwise_population_comparisons": 3,
+    "budgets": [
+      {
+        "max_relative_budget_residual": 1.8942026206966985e-15,
+        "history": [
+          {
+            "step": 128,
+            "reference_step": 0,
+            "initial_mass": [
+              496.0000000000001,
+              496.0000000000001
+            ],
+            "integrated_net_mass": [
+              -0.007197409123359802,
+              0.003110258479424241
+            ],
+            "current_mass": [
+              495.992802590877,
+              496.00311025848043
+            ],
+            "residual": [
+              2.229796208785828e-13,
+              8.95075680240609e-13
+            ]
+          },
+          {
+            "step": 256,
+            "reference_step": 0,
+            "initial_mass": [
+              496.0000000000001,
+              496.0000000000001
+            ],
+            "integrated_net_mass": [
+              -0.025494778581165552,
+              0.02164549088140725
+            ],
+            "current_mass": [
+              495.9745052214208,
+              496.0216454908831
+            ],
+            "residual": [
+              1.8790489997311255e-12,
+              1.5673781716962765e-12
+            ]
+          }
+        ],
+        "convention": "VD/GV interior excludes PB and solid nodes; restart establishes a new outgoing baseline."
+      },
+      {
+        "max_relative_budget_residual": 1.6649917891541744e-15,
+        "history": [
+          {
+            "step": 128,
+            "reference_step": 0,
+            "initial_mass": [
+              496.0000000000001,
+              496.0000000000001
+            ],
+            "integrated_net_mass": [
+              -0.007197409123359801,
+              0.003110258479424151
+            ],
+            "current_mass": [
+              495.99280259087726,
+              496.00311025848055
+            ],
+            "residual": [
+              5.071958478208849e-13,
+              1.0088527235829758e-12
+            ]
+          },
+          {
+            "step": 256,
+            "reference_step": 0,
+            "initial_mass": [
+              496.0000000000001,
+              496.0000000000001
+            ],
+            "integrated_net_mass": [
+              -0.02549477858116555,
+              0.021645490881407256
+            ],
+            "current_mass": [
+              495.9745052214206,
+              496.02164549088315
+            ],
+            "residual": [
+              1.6516718548409415e-12,
+              1.6242146516631806e-12
+            ]
+          }
+        ],
+        "convention": "VD/GV interior excludes PB and solid nodes; restart establishes a new outgoing baseline."
+      },
+      {
+        "max_relative_budget_residual": 1.0391071407737863e-15,
+        "history": [
+          {
+            "step": 256,
+            "reference_step": 128,
+            "initial_mass": [
+              495.9928025908776,
+              496.00311025848055
+            ],
+            "integrated_net_mass": [
+              -0.01829736945780575,
+              0.018535232401983008
+            ],
+            "current_mass": [
+              495.9745052214208,
+              496.0216454908831
+            ],
+            "residual": [
+              1.0307900366601785e-12,
+              5.586156537340514e-13
+            ]
+          }
+        ],
+        "convention": "VD/GV interior excludes PB and solid nodes; restart establishes a new outgoing baseline."
+      },
+      {
+        "max_relative_budget_residual": 7.525967926739946e-16,
+        "history": [
+          {
+            "step": 256,
+            "reference_step": 128,
+            "initial_mass": [
+              495.99280259087766,
+              496.00311025848055
+            ],
+            "integrated_net_mass": [
+              -0.01829736945780575,
+              0.018535232401983105
+            ],
+            "current_mass": [
+              495.9745052214206,
+              496.02164549088315
+            ],
+            "residual": [
+              7.465729423561385e-13,
+              6.153619280802047e-13
+            ]
+          }
+        ],
+        "convention": "VD/GV interior excludes PB and solid nodes; restart establishes a new outgoing baseline."
+      },
+      {
+        "max_relative_budget_residual": 1.6915687320855209e-15,
+        "history": [
+          {
+            "step": 128,
+            "reference_step": 0,
+            "initial_mass": [
+              496.0000000000001,
+              496.0000000000001
+            ],
+            "integrated_net_mass": [
+              -0.007197409123354857,
+              0.0031102584794349686
+            ],
+            "current_mass": [
+              495.99280259087675,
+              496.0031102584806
+            ],
+            "residual": [
+              -9.338883832921141e-15,
+              1.0548784068475925e-12
+            ]
+          },
+          {
+            "step": 256,
+            "reference_step": 0,
+            "initial_mass": [
+              496.0000000000001,
+              496.0000000000001
+            ],
+            "integrated_net_mass": [
+              -0.025494778581248757,
+              0.02164549088138096
+            ],
+            "current_mass": [
+              495.97450522142054,
+              496.021645490883
+            ],
+            "residual": [
+              1.678036182228837e-12,
+              1.479979333529613e-12
+            ]
+          }
+        ],
+        "convention": "VD/GV interior excludes PB and solid nodes; restart establishes a new outgoing baseline."
+      }
+    ],
+    "guards": [
+      {
+        "name": "unsupported-wall",
+        "exit": 1
+      },
+      {
+        "name": "unsupported-phase",
+        "exit": 1
+      },
+      {
+        "name": "velocity-reservoir",
+        "exit": 1
+      },
+      {
+        "name": "missing-face",
+        "exit": 1
+      },
+      {
+        "name": "outward-face",
+        "exit": 1
+      },
+      {
+        "name": "interior-pressure",
+        "exit": 1
+      },
+      {
+        "name": "incomplete-face",
+        "exit": 1
+      },
+      {
+        "name": "mixed-collar",
+        "exit": 1
+      },
+      {
+        "name": "body-force",
+        "exit": 1
+      },
+      {
+        "name": "wrong-axis",
+        "exit": 1
+      },
+      {
+        "name": "outgoing-mixed-collar-1rank",
+        "exit": 1
+      },
+      {
+        "name": "incoming-force-collar-1rank",
+        "exit": 1
+      }
+    ],
+    "rotation_errors": {
+      "r0": 2.1094237467877974e-15,
+      "r1": 2.1094237467877974e-15,
+      "v": 8.985740550617773e-16
+    },
+    "solver_sha256": "a1ff678f4fb72ddc9716dca3fce336aada514ca5ebe7285f8c6addfde6e58d80",
+    "scope": "Flat pure-collar D2Q9 pressure CSF; quantitative contact-line/throat accuracy is a separate physical experiment."
+  },
+  "ctest": {
+    "passed": 8,
+    "failed": 0,
+    "verification": "Groups 1--7 passed in the final full run; group 8 passed separately after its synthetic cutoff probe was corrected from 15 to 1 degree. No numerical source change occurred between these runs.",
+    "full_run_log_sha256": "5479808663e4152d11e99dd92f1246cf850c77be57576016642a086c9e944df6",
+    "pressure_rerun_log_sha256": "a43c4a8a48c2c32a23816169e536b40b8456dae7cf3e59b0d072dc137a6e8fac"
+  },
+  "dataset_sha256": "838cb29ab770d9f588071ec44341cff4691bdafae00feb3f2f0b3f1c2f6407d4",
+  "scope": "Equal-density D2Q9, flat nonsingular walls; long physical fronts at equal viscosities and theta60, independently matched beta. Joint grid/sharp-interface sequence. No full 2015 algorithm replica, dynamic contact-line law, curved-3D wetting, throat trapping or hysteresis claim.",
+  "manuscripts": [
+    {
+      "file": "main.pdf",
+      "pages": 32,
+      "sha256": "6cb66732f4504efcd4cc2b7adb2e589660a22f85c2d7b4e3bd1745c229a32a9c",
+      "unresolved_references": false,
+      "text_outside_page": false
+    },
+    {
+      "file": "supplement.pdf",
+      "pages": 14,
+      "sha256": "820a7b929bc745cf307000e68df17cacd2299f31511a4acbe49a1146aef479cb",
+      "unresolved_references": false,
+      "text_outside_page": false
+    }
+  ],
+  "figures_regenerated_png_bitwise": 3,
+  "highlights_max_characters": 76,
+  "abstract_whitespace_words": 233
+}

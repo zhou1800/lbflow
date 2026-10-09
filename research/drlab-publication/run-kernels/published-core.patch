@@ -1,0 +1,82 @@
+diff --git a/solver/inc/file/fileprm.h b/solver/inc/file/fileprm.h
+index ba7d8f0..d67639e 100644
+--- a/solver/inc/file/fileprm.h
++++ b/solver/inc/file/fileprm.h
+@@ -204,0 +205,2 @@ public:
++    string getRecoloringModel() const;
++    string getMrtSpectrum() const;
+diff --git a/solver/inc/lbm/colorfluid.h b/solver/inc/lbm/colorfluid.h
+index c64bc20..89f0b0a 100644
+--- a/solver/inc/lbm/colorfluid.h
++++ b/solver/inc/lbm/colorfluid.h
+@@ -36,0 +37 @@ private:
++    const bool projectionRecoloring;
+diff --git a/solver/inc/lbm/simulator.h b/solver/inc/lbm/simulator.h
+index 76e86bc..cd81548 100644
+--- a/solver/inc/lbm/simulator.h
++++ b/solver/inc/lbm/simulator.h
+@@ -40,0 +41 @@ protected:
++    const bool publishedMrtSpectrum;
+diff --git a/solver/src/file/fileprm.cpp b/solver/src/file/fileprm.cpp
+index 7bffe1e..6b2ffd8 100644
+--- a/solver/src/file/fileprm.cpp
++++ b/solver/src/file/fileprm.cpp
+@@ -105,0 +106,20 @@ string FilePrm::getPhaseBoundary() const
++string FilePrm::getRecoloringModel() const
++{
++    const auto value=iPrm.find("recoloringModel");
++    if (value==iPrm.end()) return "cosine";
++    string result;
++    if (!parse(value->second,&result))
++        throw invalid_argument("recoloringModel must be a quoted string.");
++    return result;
++}
++
++string FilePrm::getMrtSpectrum() const
++{
++    const auto value=iPrm.find("mrtSpectrum");
++    if (value==iPrm.end()) return "legacy";
++    string result;
++    if (!parse(value->second,&result))
++        throw invalid_argument("mrtSpectrum must be a quoted string.");
++    return result;
++}
++
+@@ -139,0 +160,13 @@ void FilePrm::ValidateSimulation() const
++    const string recoloringModel=getRecoloringModel(),spectrum=getMrtSpectrum();
++    if (recoloringModel!="cosine" && recoloringModel!="projection")
++        throw invalid_argument("recoloringModel must be cosine or projection.");
++    if (spectrum!="legacy" && spectrum!="liu2015")
++        throw invalid_argument("mrtSpectrum must be legacy or liu2015.");
++    if (recoloringModel!="cosine" || spectrum!="legacy") {
++        if (model!="color" || ndim!=2 || density[0]!=density[1] || abs(getAlpha0()-4.0/9.0)>1e-14)
++            throw invalid_argument("Published core controls require equal-density standard-weight color D2Q9.");
++        if (spectrum=="liu2015" && getEquilModel()!="MRT")
++            throw invalid_argument("The published MRT spectrum requires equilModel MRT.");
++        if (recoloringModel=="projection" && getWallRecoloring()!="legacy")
++            throw invalid_argument("Projection recoloring cannot also use the cosine-derived wall multiplier.");
++    }
+@@ -381,0 +415,3 @@ void FilePrm::parseAll()
++        else if (a.first == "recoloringModel" || a.first == "mrtSpectrum") {
++            // Independent published core-operator controls.
++        }
+diff --git a/solver/src/lbm/colorfluid.cpp b/solver/src/lbm/colorfluid.cpp
+index 2722725..67a27a0 100644
+--- a/solver/src/lbm/colorfluid.cpp
++++ b/solver/src/lbm/colorfluid.cpp
+@@ -29,0 +30 @@ ColorFluid::ColorFluid(const FilePrm &prm)
++    , projectionRecoloring(p.getRecoloringModel()=="projection")
+@@ -400 +401 @@ void ColorFluid::collision()
+-                    if (q != 0) angle /= g.S.Qnorm[q];
++                    if (q != 0 && !projectionRecoloring) angle /= g.S.Qnorm[q];
+diff --git a/solver/src/lbm/simulator.cpp b/solver/src/lbm/simulator.cpp
+index f61923d..0dfedd6 100644
+--- a/solver/src/lbm/simulator.cpp
++++ b/solver/src/lbm/simulator.cpp
+@@ -18,0 +19 @@ Simulator::Simulator(const FilePrm &prm)
++    , publishedMrtSpectrum(p.getMrtSpectrum()=="liu2015")
+@@ -203,0 +205,4 @@ va_val_t Simulator::getMRTS(double relaxationTime)
++    if (publishedMrtSpectrum) {
++        if (g.S.Q!=9) throw invalid_argument("Published MRT spectrum requires D2Q9.");
++        return va_val_t({1,1.63,1.14,1,1.92,1,1.92,su,su});
++    }

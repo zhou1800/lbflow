@@ -13,6 +13,7 @@
 \newcommand{\vct}[1]{\bm{#1}}
 \input{data/cpc-numbers.tex}
 \input{data/wall-flux-numbers.tex}
+\input{data/core-reservoir-numbers.tex}
 \begin{document}
 \begin{frontmatter}
 \title{Finite-interface transport and wetting effects in pore-scale lattice Boltzmann simulations with LBFlow}
@@ -21,38 +22,35 @@
 \ead{[private contact omitted]}
 \cortext[cor1]{Corresponding author.}
 \begin{abstract}
-Finite numerical interfaces can alter pore-scale transport even when a
-two-phase calculation conserves mass and remains stable. We use the C++/MPI
-program LBFlow to distinguish diffuse constitutive bias, discrepancies
-against reconstructed continuum references and wall-wetting effects in
-equal-density color-gradient simulations.
-A continuum momentum balance expresses slit conductance through three
-moments of inverse viscosity. For a centered tanh interface, arithmetic and
-harmonic interpolation produce leading flux shifts linear and quadratic
-in interface thickness, respectively. Eighteen layered-flow calculations
-at viscosity ratio 9:1 test these mechanisms using separately calibrated
-interface widths. In the thickest tested interface, arithmetic interpolation
-reduces flux by 9.19\%, whereas harmonic interpolation increases it by
-21.59\%; continuum predictions account for most of both shifts.
-Wall-stencil analysis further distinguishes prescribed interface direction
-from capillary-stress magnitude. Contact-angle improvement does not uniformly
-reduce parasitic flow. Slit and square-tube displacement controls connect
-these concerns to capillary entry. A discrete phase recurrence identifies
-a neutral-wall segregation imbalance and gives a parameter-free correction
-that preserves a bulk planar fixed point. Adjacent-step checks distinguish
-remaining period-two velocity from stationary flow. A conservative wall
-phase transfer restores the complete neutral transient and avoids resolved
-flow in that control. Separating phase transfer from contact-angle location,
-and comparing a published ghost-color formula, reduces the tested
-60-degree pressure discrepancies while retaining nonneutral parasitic flow.
-On a public Bentheimer specimen,
-independent single-phase LBPM comparisons differ by at most
-\RockReferenceDifference\ percent, while voxel subdivision changes
-permeability by \RefinedKChange\ percent. Closed two-phase rock calculations
-remain transient and do not establish relative-permeability curves.
-The accompanying verified operators, recorded inputs and MPI/restart checks
-support reproducible investigation of finite-interface and wetting effects;
-capillary trapping thresholds and a new multiphase model are not established.
+Finite numerical interfaces and wall treatment can change pore-scale
+transport despite stable, mass-conserving two-phase simulations.
+We use LBFlow, a recovered C++/MPI color-gradient lattice Boltzmann program,
+to distinguish diffuse constitutive bias, core-operator effects and wetting
+response. An inverse-viscosity conductance relation and eighteen layered-flow
+controls separate continuum transition effects from discrepancies against
+reconstructed references. At viscosity ratio 9:1, the thickest tested
+arithmetic and harmonic interfaces change flux by $-9.19$\% and $+21.59$\%,
+respectively.
+A discrete wall recurrence identifies a stationary imbalance specific to
+cosine-normalized recoloring. Published projection recoloring already
+preserves that stationary ratio; exact axial transport matching permits an
+independent comparison. Conservative relative-phase wall transfer restores
+the complete neutral transient. Signed nonneutral pressure, raw parasitic
+flow and an established alternating lattice mode remain separately measured.
+The published MRT spectrum also changes pure-channel hydraulic response.
+Guarded pressure reservoirs then connect bidirectional front drift to closed
+capillary pressure, with independently checked component link-flux budgets.
+Estimated zero-drift pressure agrees with closed pressure within
+\CoreMaxZeroClosedPercent\% of the Young reference, while front mobility is
+11.3--17.8\% below separately measured pure-channel mobility. A zero-sigma
+control recovers the pure-channel response; a general contact-line law is
+not established.
+Independent LBPM comparisons on a public Bentheimer specimen check the
+single-phase geometric baseline. Two-phase rock cases retain their measured
+transient and resolution limits. Recorded inputs, source kernels and
+MPI/restart checks support reproduction. A new bulk multiphase model,
+curved-rock wetting accuracy and pore-throat trapping thresholds are not
+claimed.
 \end{abstract}
 \begin{keyword}
 lattice Boltzmann \sep two-phase flow \sep digital rock \sep diffuse interface \sep viscosity interpolation \sep wetting
@@ -286,9 +284,11 @@ velocity; incoming initialization subtracts its capillary half-force before
 the initial collision. Recoloring and the selected wall projection remain
 common. This is a separate force-operator comparison, not a wall-only
 ablation or replication of a published complete model.
-The experimental force currently accepts closed VD/GV flow at equal reference
-density and standard pressure weights. Open pressure/velocity reservoirs and
-selective films are rejected. Neither option changes the legacy defaults.
+The experimental force accepts closed VD/GV flow at equal reference
+density and standard pressure weights. A guarded flat D2Q9 pressure
+extension is assessed below: it requires ghost color, conservative phase
+transfer and a pure force-free reservoir collar. Velocity reservoirs and
+selective films remain unsupported. Neither option changes the legacy defaults.
 
 An optional gradient form evaluates the same continuum force as
 \begin{equation}
@@ -600,7 +600,7 @@ reduces pressure error for reconstruction, while CSF reduces residual flow.
 It does not remove the wall-color distortion.}
 \label{fig:closedcapillary}\end{figure}
 
-\subsection{A discrete neutral-wall fixed point}
+\subsection{A discrete neutral-wall fixed point for cosine recoloring}
 The zero-sigma result permits an independent phase-only experiment.
 At unit total density and zero velocity, recoloring sets outgoing
 phase populations directly from $\varphi$ and the projected unit normal.
@@ -632,6 +632,9 @@ the transient wall operator still differs from the bulk operator.
 Opposite links have the same multiplier, so component mass is conserved
 locally, and complementary recoloring preserves every total population.
 This lattice-weight relation contains no calibrated parameter.
+It concerns the recovered cosine normalization. Projection recoloring
+specified in published work already gives the stationary wall/bulk ratio;
+the matched comparison below bounds the significance of this correction.
 
 The common mask is substantive. At a tangent-profile extremum, the clipped
 nonlinear stencil can produce a false normal derivative even when the
@@ -793,6 +796,172 @@ phase-only plot floors exact zeros at $10^{-17}$ for display. Neutral
 equilibrium preservation does not imply negligible nonneutral flow.}
 \label{fig:wallflux}\end{figure}
 
+\subsection{Published core controls at matched phase transport}
+The ghost-color comparison initially retains the recovered recoloring and
+MRT definitions. To separate these from wall treatment, two independent
+controls reproduce the explicitly specified core operators of
+Liu et al. \cite{liu2015}. Projection recoloring uses
+\begin{equation}
+ R_i=\beta_p\rho\varphi(1-\varphi)w_i(\vct e_i\cdot\vct n),
+\end{equation}
+instead of dividing this projection by $|\vct e_i|$.
+The published D2Q9 raw-moment spectrum, in the existing row order, is
+$(1,1.63,1.14,1,1.92,1,1.92,1/\tau,1/\tau)$.
+The matching Guo source and physical half-force velocity preserve the
+momentum increment even when its relaxation rate is one.
+Only CSF is admitted with this spectrum: its energy rates do not justify
+reusing the legacy perturbation-tension mapping. The fluid-only
+normal derivative at walls remains an explicit LBFlow choice; these
+controls are not a full replication of an incompletely specified scheme.
+
+For an axial rest profile, projection segregation has $B_p=A=a+2b$,
+and local bounce-back has $B_{p,w}=A_w=a+b$. It already preserves the
+bulk stationary ratio without the cosine-derived multiplier.
+To compare transport independently of pressure, set
+\begin{equation}
+ \beta_p=\beta_c\frac{a+\sqrt{2}b}{a+2b}
+             =\CoreMatchedBeta\quad(\beta_c=0.7).
+\end{equation}
+This matches the complete axial bulk recurrence, not just a fitted width.
+Independent 128-cell planar profiles agree within
+$\CoreMatchedProfileError$; both have $W_{0.9}=4.765235$.
+Projection with the unadjusted $\beta_p=0.7$ instead has width 4.450814.
+The cosine weights $w_i/|\vct e_i|$ have a fourth-order isotropy defect
+$T_{xxxx}-3T_{xxyy}=0.0650874$, whereas standard projection weights
+give zero to roundoff. Equal axial recurrence therefore does not make
+the multidimensional discrete operators identical. The supplied oblique
+width diagnostic also retains its different sampling interval and
+interpolation bias; its full difference is not attributed to this tensor.
+
+With ghost color and phase transfer, the matched projection/legacy-MRT
+pressure discrepancies are $+0.517$, $-0.336$ and $-0.702$\% at
+$H=16,32,48$ after four initial durations. The published-MRT values are
+$+0.551$, $-0.341$ and $-0.716$\% (Fig.~\ref{fig:core}).
+The sign reversal and larger final discrepancy preclude using the close
+H16 result as uniform accuracy evidence. Raw nonneutral speeds decrease,
+but adjacent color still differs from its two-step state. At H16 the
+one-step change is approximately $6.66\times10^{-7}$, compared with
+$3.47\times10^{-12}$ over two steps. Projection and a different kinetic
+spectrum do not eliminate the conserved-momentum lattice mode.
+
+Its force coupling can be checked exactly. On an even periodic axis, or
+the reflecting wall-normal axis, let $P_t$ be the fluid-node mean of
+physical momentum times the alternating spatial sign, and $G_t$ the same
+projection of force density. Outgoing momentum is $P_t+G_t/2$; streaming
+or reflection changes its sign. Hence
+\begin{equation}\label{eq:parityforce}
+ P_{t+1}=-P_t+\frac{G_{t+1}-G_t}{2}.
+\end{equation}
+Physical fields, native outgoing populations and the actual force audit
+satisfy this relation within $5.1\times10^{-19}$ in the original held
+nonneutral control. Explicitly setting $\sigma=0$ makes circulation
+decay while alternating momentum remains; this diagnostic changes the
+physics and does not filter production velocities. Odd-periodic-domain
+and exact-translation controls are distinguished in the supplement.
+
+The MRT change also affects wall hydraulics. In a pure low-speed slit,
+define $\Lambda=(\tau-1/2)(1/s_q-1/2)$ and
+$C=4\Lambda/3-1/4$. The midpoint profile is
+\begin{equation}
+ u(y)=\frac{F}{2\nu}[y(H-y)+C],\qquad y=j+\tfrac12.
+\end{equation}
+Legacy rates give $\Lambda=3/16$ and $C=0$;
+the published $s_q=1.92$ gives $\Lambda=(\tau-1/2)/48$.
+Eighteen pure-channel controls match this independent reference within
+relative profile error $\CoreMaxHydraulicError$.
+The largest unshifted flux discrepancy is approximately $-2.30$\% at
+$H=8$, $\tau=0.6$. A lower static current cannot be interpreted as
+unchanged dynamic wall response. Bulk droplet controls at matched
+transport likewise retain their measured pressure and residual velocity.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.98\linewidth]{published-core.pdf}
+\caption{Independently matched core controls. (a) Axial planar profiles;
+matched projection overlaps cosine, while equal beta changes the width.
+(b) Signed 60-degree pressure discrepancies after longer holds.
+(c) Corresponding unfiltered residual capillary numbers.
+(d) Pure-channel flux offsets of the published MRT spectrum: symbols are
+measurements and lines are the independent midpoint prediction.}
+\label{fig:core}\end{figure}
+
+\subsection{Guarded pressure-driven fronts}
+A pressure boundary introduces component mass, so closed-mass conservation
+alone cannot validate it. The new experiment admits two opposed axial PB
+planes only with flat ghost-color walls and phase transfer. At every
+incoming/outgoing state, each prescribed phase must remain pure within
+$10^{-9}$ on its PB plane and two interior strips. The actual first-strip
+gradient must be below the existing $10^{-9}$ cutoff, keeping the
+uncorrected Zou--He reconstruction force-free. The solver fails when the
+interface reaches this collar. Phase-only wall transfers on faces touching
+PB nodes are disabled, including the wrap between opposite reservoirs.
+Velocity reservoirs, films and irregular walls are outside this extension.
+
+For interior VD/GV nodes, independently integrate every outgoing kinetic
+population entering from or leaving for PB. Solid links return by reflection
+and are excluded. The exact accounting is
+\begin{equation}
+ M_k(t)-M_k(t_0)=\sum_{n=t_0}^{t-1}
+   [\mathcal J_{k,\mathrm{PB}\to\mathrm{int}}(n)
+    -\mathcal J_{k,\mathrm{int}\to\mathrm{PB}}(n)]+\epsilon_k.
+\end{equation}
+The boundary-node sum of $\rho u$ is not substituted for these link fluxes.
+Restart establishes a new accounting baseline while retaining the same
+outgoing numerical state. Two-phase fields and populations are bitwise
+identical across the tested rank/restart changes. Across the pressure
+campaign, the largest budget residual relative to initial interior mass
+is $\CoreMaxPressureBudget$.
+
+Pure-channel pressure controls use both flow directions, both phases and
+both spectra, at $H=8,16,32$ and $\tau=1,1.55$. The independently measured
+central pressure gradient and specified midpoint offset reproduce the
+central profiles within $1.92\times10^{-5}$. The central gradient differs
+slightly from the nominal endpoint pressure divided by length, so measured
+pure-channel conductance is retained separately.
+
+A recorded crop of the held closed meniscus produces a single front in
+a $4H$ slit. Remote corridors explicitly combine donor phase populations
+into the prescribed pure phase, preserving each total population and its
+momentum. No damping or surface-tension fit is applied. Equal viscosities,
+60-degree walls and independently matched beta are used at H16/H32;
+$\sigma$ and duration scale as in the closed controls.
+The volume-equivalent front coordinate is
+$X_V=1/2+H^{-1}\sum_{\mathrm{int}}\varphi$; centerline and first-fluid-row
+crossings are retained as separate diagnostics.
+
+Reservoir differences $0.98,1,1.02$ times
+$p_Y=2\sigma\cos\theta/H$ give both motion directions. Increasing the
+duration fourfold to 32000/128000 steps changes the three-point linear
+zero-drift pressure ratio by at most $\CoreMaxDurationRatioChange$.
+Additional pressure pairs, prespecified at the separately measured closed
+pressure plus/minus $0.00025p_Y$, still give opposite drift signs at
+both durations. The linear zero-drift estimate differs from the closed
+pressure by at most \CoreMaxZeroClosedPercent\% of $p_Y$
+(Fig.~\ref{fig:fronts}; supplementary table). This is a finite-time flat-slit
+consistency check, not a geometric pore-throat trapping threshold.
+
+The measured slope of front speed against pressure remains approximately
+11.3--17.8\% lower than pure-channel conductance. A zero-sigma diagnostic at unchanged reservoir
+pressure recovers the pure-channel mean velocity within relative
+$6.1\times10^{-6}$ and front speed within $5.9\times10^{-5}$,
+supporting total-fluid decoupling rather than interpreting phase segregation
+alone as hydraulic resistance. Contact-line dissipation and its
+regularization are established physical issues \cite{huh1971,akai2018};
+these comparisons do not isolate a physical slip length, a constitutive
+contact-line law or a general numerical-error mechanism. Static pressure
+agreement alone is insufficient evidence for quantitative displacement
+rates in digital-rock pores.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.98\linewidth]{pressure-fronts.pdf}
+\caption{Pressure-driven single-front controls after four durations.
+(a,b) Both drift directions at H16/H32.
+(c) Estimated zero-drift pressure and independently measured closed pressure.
+(d) Front mobility relative to pure-channel conductance. Ghost color and
+phase transfer are shared; projection beta is independently matched.
+The narrower prespecified sign brackets and all raw mass budgets remain
+in the supplied data. No trapped pore or hysteresis loop is simulated.}
+\label{fig:fronts}\end{figure}
+
 \section{Pore-scale application and computational evidence}
 \subsection{Analytic pore flux and capillary entry}
 Two parallel, isolated slit pores have widths $H_0=8s$ and $H_1=16s$,
@@ -942,27 +1111,30 @@ Direct closed-slit pressure and zero-sigma controls further show why
 surface-force, wetting and phase-boundary consistency must be considered
 together. The experimental CSF branch improves residual flow in its measured
 scope but retains pressure bias and wall-color distortion before the
-phase-boundary correction. The derived neutral fixed point removes that
+phase-boundary correction. The cosine-specific neutral fixed point removes that
 phase defect in its tested geometry, while revealing period-two velocity
 and failing to establish nonneutral accuracy. Complete-transient phase
 reflection avoids that plane-control excitation; separating the contact-angle
-location further improves measured slit pressure, while nonneutral
+location and independently matched published core controls further improve
+measured slit pressure, while nonneutral
 currents and contour sensitivity remain. This established
 force formulation is not evidence for a new bulk theory.
 
+The guarded flat-slit pressure experiments connect closed capillary pressure
+to bidirectional front drift, while revealing a separate mobility difference.
 Extending these findings to capillary trapping requires a different test.
 Quasistatic invasion and retraction in a specified pore throat must resolve
 the pressure interval, contact-line rate dependence, interface width and
 wall representation before a change in occupancy is called physical
-pinning or hysteresis. Such thresholds are not measured by the current
-half/one-and-a-half-entry-pressure direction checks. The controlled viscous
+pinning or hysteresis. Such thresholds are not measured by either the earlier
+direction checks or the new uniform-slit drift brackets. The controlled viscous
 asymptotics also cannot be assigned directly to a curved interface in rock.
 The accompanying code, exact inputs and checks support that next physical
 study; current external adoption or cluster performance is not inferred
 from source history.
 
 The validation covers equal density, standard pressure weights and the
-reported viscosity range. Higher density contrast, moving contact lines,
+reported viscosity range. Higher density contrast, general moving contact-line laws,
 curved three-dimensional wetting accuracy, material-junction pinning and thermodynamic
 consistency remain unvalidated. Enhanced equilibria and central-moment
 developments address wider-density and Galilean-invariance issues
@@ -989,12 +1161,16 @@ At a wall, rotating a clipped gradient to the desired direction preserves
 its attenuated magnitude. Linear moment reconstruction addresses that
 specific issue; measured contact-angle improvement does not establish
 uniformly improved parasitic flow or dynamic capillary response. The
-neutral-wall phase recurrence supplies a parameter-free fixed-point
-correction; adjacent-step tests keep undamped lattice modes separate from
+cosine-normalized phase recurrence supplies a parameter-free fixed-point
+correction; published projection recoloring already preserves that
+stationary ratio. Exact axial transport matching permits a controlled
+multidimensional comparison. Adjacent-step tests keep undamped lattice modes separate from
 stationary flow. Conservative phase transfer additionally restores the
 complete neutral recurrence. A physical-wall location and published
 ghost-color comparison show that this transport condition alone does not
-establish nonneutral pressure accuracy. None supplies a general contact-line law. The
+establish nonneutral pressure accuracy. The guarded pressure experiment
+connects zero drift to the measured closed pressure while separating front
+mobility from pure-channel conductance. None supplies a general contact-line law. The
 public-rock application adds an independently checked geometric flow
 baseline and exposes inadequate interface separation and continued
 two-phase evolution. It supports neither a steady relative-permeability

@@ -202,6 +202,8 @@ public:
     string getWallRecoloring() const;
     string getCurvatureStencil() const;
     string getPhaseBoundary() const;
+    string getRecoloringModel() const;
+    string getMrtSpectrum() const;
 
     /// \name Get functions for #grid mesh
     ///@{

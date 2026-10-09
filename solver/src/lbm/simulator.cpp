@@ -16,6 +16,7 @@ using namespace std;
 
 Simulator::Simulator(const FilePrm &prm)
     : p((prm.ValidateSimulation(), prm))
+    , publishedMrtSpectrum(p.getMrtSpectrum()=="liu2015")
     , g(p.getD(), p.getQ())
     , raw(FileRaw<uint8_t>(p.getGFile()).Load(g))
     , gIdx(ROI::getRawIdx(raw))
@@ -201,6 +202,10 @@ va_val_t Simulator::getMRTS(double relaxationTime)
     if (!std::isfinite(rt) || rt <= 0.5)
         throw invalid_argument("Relaxation time must be finite and greater than 0.5.");
     const double su = 1.0 / rt;
+    if (publishedMrtSpectrum) {
+        if (g.S.Q!=9) throw invalid_argument("Published MRT spectrum requires D2Q9.");
+        return va_val_t({1,1.63,1.14,1,1.92,1,1.92,su,su});
+    }
     const double sq = 8.0 * (2.0 - su) / (8.0 - su);
     if (g.S.Q == 9)
         return va_val_t({0, su, su, 0, sq, 0, sq, su, su});

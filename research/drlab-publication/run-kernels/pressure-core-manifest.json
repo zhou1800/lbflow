@@ -1,0 +1,29 @@
+{
+  "source_revision_before_patch": "a383c8e439c55621b3b248885b56611d48292447",
+  "patch": "pressure-core.patch",
+  "apply_option": "--unidiff-zero",
+  "patch_sha256": "30630dba1f154d8d2c48f13e4046fedb5947a5d5761af9365390950e971e4f84",
+  "solver_sha256": "a1ff678f4fb72ddc9716dca3fce336aada514ca5ebe7285f8c6addfde6e58d80",
+  "audit_driver_sha256": "3c06da3991d6aa27b7641bbb04a54cab05f212e1370fa096ccdbb11d8731d5ce",
+  "files_before_patch": {
+    "solver/inc/file/fileprm.h": "93c41811bfd6a220ab9ba3be083875a01761caf59cae43db1a422f885c75f764",
+    "solver/inc/lbm/simulator.h": "ab620fb8577f323a1fad0cb70ca15ea96038dae1176db0197d3a2643e9c767ed",
+    "solver/inc/lbm/colorfluid.h": "78fee67791e329feecf76bb86c5baf914fdd27593044195a8a92ac5a0c6af8f8",
+    "solver/src/file/fileprm.cpp": "d8d0df827a83b28bc9f01ea75a96762f037e09ea7b20d063cf6a5b6b203bfdd5",
+    "solver/src/lbm/simulator.cpp": "adcc90709346eaa7fecbbb2e225802292937343f7f466583ca1a378c0fb67390",
+    "solver/src/lbm/colorfluid.cpp": "5193fc66993bb08811453e87c1687f420eb875aae777edc94b3c94667ad3e5e0"
+  },
+  "files_after_patch": {
+    "solver/inc/file/fileprm.h": "13b4748355e9ae03a29f3ff026ee042d79f960a01c248a50cab3e57f67b98bc3",
+    "solver/inc/lbm/simulator.h": "4de67fc1f1019b7b2fd17698d8eec2412d154d7449a89e311a785e6109ce7ff1",
+    "solver/inc/lbm/colorfluid.h": "8982b9b658c4548fdbe63f5393f40f5c2db425ffde22d3bbb4863dd668cec169",
+    "solver/src/file/fileprm.cpp": "95d26a1e8d8512063046c4d65d1414a4d27048388d7450d21971d23ec7f21bd3",
+    "solver/src/lbm/simulator.cpp": "0da687500a47eea21a43bb8b668225ba3fa73d607d9f3efb2f408deb2458187c",
+    "solver/src/lbm/colorfluid.cpp": "4d0fe6ffd4110df35559497495dab1db4273b2e5133d6ea52ca2dff40cbd8485",
+    "solver/src/lbm/colorreservoir.cpp": "04d66d37868376533e74e70c506da1b438d5bd12cdeb906cd8ca121b61112f3d"
+  },
+  "new_files": [
+    "solver/src/lbm/colorreservoir.cpp"
+  ],
+  "scope": "Published core controls plus guarded flat pure-collar pressure CSF and kinetic component mass budget; closed fields/populations unchanged in eight comparisons."
+}

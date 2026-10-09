@@ -27,6 +27,12 @@ ColorFluid::ColorFluid(const FilePrm &prm)
     , halfwayWall(p.getWallGradient()=="halfway")
     , ghostWall(p.getWallGradient()=="ghost")
     , gradientCurvature(p.getCurvatureStencil()=="gradient")
+    , projectionRecoloring(p.getRecoloringModel()=="projection")
+    , pressureReservoirs(p.getCapillaryModel()=="csf" && !p.getIdx({IT::PB}).empty())
+    , reservoirAxis(0), boundaryBudgetReference(p.getTStart())
+    , reservoirTypes(pressureReservoirs ? g.LG.FG.N : 0)
+    , reservoirPhase(size_t(2),pressureReservoirs ? g.LG.N : 0)
+    , boundaryInitialMass{0.,0.}, boundaryNetMass{0.,0.}, boundaryCompensation{0.,0.}
     , wallTangent(size_t(0),(tangentialRecoloring || tangentWall || phaseFlux || halfwayWall || ghostWall) ? g.LG.N : 0)
     , wallRecolorFactor(1.0)
     , wallOutgoing0(phaseFlux ? g.S.Q : 0)
@@ -71,6 +77,7 @@ ColorFluid::ColorFluid(const FilePrm &prm)
     calcTibNorm();
     calcWallGradientInverse();
     calcWallRecoloring();
+    if (pressureReservoirs) initPressureReservoirs();
     for (size_t d=0;d<wallBulkGradient.size();++d)
         wallBulkGradient[d]=va_val_t(0.0,g.LG.FG.N);
     if (phaseFlux) {
@@ -87,7 +94,7 @@ ColorFluid::ColorFluid(const FilePrm &prm)
             }
         }
         for (size_t q=1;q<g.S.Q;++q)
-            if (g.S.Qnorm[q]>1.0)
+            if (pressureReservoirs || g.S.Qnorm[q]>1.0)
                 wallOutgoing0[q]=wallOutgoingTotal[q]=va_val_t(0.0,g.LG.FG.N);
     }
 
@@ -128,6 +135,7 @@ void ColorFluid::Run(std::ostream &logProc)
         collision();
         seconds[INIT_TIME] += MPI_Wtime() - begin;
     }
+    if (pressureReservoirs) initializeBoundaryBudget();
     procLog.Log("Done!\t");
 
     for (size_t t = p.getTStart() + 1; t <= p.getTEnd(); ++t) {
@@ -135,6 +143,7 @@ void ColorFluid::Run(std::ostream &logProc)
         double begin = MPI_Wtime();
         // 1. Streaming.
         if (phaseFlux) prepareWallPhaseFlux(t);
+        if (pressureReservoirs) accumulateBoundaryBudget();
         streaming(&(f[0]), &(fOld[0]),t);
         streaming(&(f[1]), &(fOld[1]),t);
 
@@ -164,6 +173,8 @@ void ColorFluid::Run(std::ostream &logProc)
         begin = MPI_Wtime();
 
         // 4. Saves macro variable.
+        if (pressureReservoirs && (t%p.getTStep()==0 || t%p.getTRpt()==0))
+            reportBoundaryBudget(t,logProc);
         if (t % p.getTStep() == 0) {
             stringstream ss;
             ss << "Step " << t << " - ";
@@ -273,6 +284,7 @@ void ColorFluid::calcMacroVar(size_t t)
 
     syncBorder(&densN, t);
     if (halfwayWall || ghostWall) prepareWallGradient(t);
+    if (pressureReservoirs) checkPressureCollar(false);
 }
 
 void ColorFluid::collision()
@@ -397,7 +409,7 @@ void ColorFluid::collision()
                     if (!csf) fT[q] += AkNorm * (wi[q]*angle*angle - bi[q]);
 
             // 4. recolor.
-                    if (q != 0) angle /= g.S.Qnorm[q];
+                    if (q != 0 && !projectionRecoloring) angle /= g.S.Qnorm[q];
                     if (tangentialRecoloring && ibI[i] &&
                         (q==wallTangent[i] || q==g.S.Qop[wallTangent[i]]))
                         angle *= wallRecolorFactor;
@@ -1024,7 +1036,8 @@ void ColorFluid::prepareWallGradient(size_t t)
 void ColorFluid::prepareWallPhaseFlux(size_t t)
 {
     const auto& i2f=g.LG.getI2fMap();
-    for (size_t idx : p.getIdx({IT::VD,IT::GV}))
+    if (pressureReservoirs) checkPressureCollar(true);
+    for (size_t idx : p.getIdx(pressureReservoirs ? initializer_list<IT>{IT::VD,IT::GV,IT::PB} : initializer_list<IT>{IT::VD,IT::GV}))
         for (size_t i : gIdx[idx]) {
             double rho0=0.0,rho1=0.0;
             for (size_t q=0;q<g.S.Q;++q) {rho0+=f[0][q][i];rho1+=f[1][q][i];}
@@ -1034,7 +1047,7 @@ void ColorFluid::prepareWallPhaseFlux(size_t t)
         }
     syncBorder(&wallFraction,t);
     for (size_t q=1;q<g.S.Q;++q) {
-        if (g.S.Qnorm[q]<=1.0) continue;
+        if (!pressureReservoirs && g.S.Qnorm[q]<=1.0) continue;
         for (size_t i=0;i<g.LG.N;++i) {
             wallOutgoing0[q][i2f[i]]=f[0][q][i];
             wallOutgoingTotal[q][i2f[i]]=f[0][q][i]+f[1][q][i];
@@ -1056,6 +1069,7 @@ void ColorFluid::applyWallPhaseFlux()
             if (g.S.Qnorm[q]<=1.0 || g.S.Qi[q][normalAxis]*ibNorm[ibI[i]][normalAxis]<=0.0) continue;
             const size_t tangentNeighbor=g.S.Qi[q][1-normalAxis]>0 ? g.S.Qop[tangent] : tangent;
             const size_t j=adj[i2f[i]][tangentNeighbor],opposite=g.S.Qop[q];
+            if (pressureReservoirs && (reservoirTypes[i2f[i]]==IT::PB || reservoirTypes[j]==IT::PB)) continue;
             const size_t mirror=wallMirror[normalAxis][q];
             const double fraction=.5*(wallFraction[i2f[i]]+wallFraction[j]);
             const double transfer=wallOutgoing0[mirror][j]-wallOutgoing0[opposite][i2f[i]]

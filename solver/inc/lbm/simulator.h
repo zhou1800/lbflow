@@ -38,6 +38,7 @@ protected:
     /// \name Constants and parameters.
     ///@{
     const FilePrm& p;                           //!< Parameters.
+    const bool publishedMrtSpectrum;
 
     enum EQUILFN{
         SRT, MRT

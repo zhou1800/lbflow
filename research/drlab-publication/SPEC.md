@@ -367,3 +367,104 @@ model: that paper's link-length segregation weights and MRT spectrum differ.
 Verify the ghost formula independently, signed pressure, neutral equilibrium,
 angle/shape, speed, mass, MPI/restart and default preservation. Keep negative
 results; do not infer a general curved-wall or dynamic contact-line result.
+
+### Nonneutral Forcing And Published Core Operators
+
+Separate transient lattice-mode excitation from maintained circulation.
+For an even periodic Cartesian length with complete no-slip reflection,
+let P be the spatially alternating physical momentum and G the corresponding
+force projection. Streaming/reflection reverses the raw-momentum projection,
+and local collision adds G. With physical half-force velocity, test the exact
+relation `P(t+1)=-P(t)+[G(t+1)-G(t)]/2`. Independently read native outgoing
+populations, physical VTI fields and the production force audit. Record
+normalization, component, parity, storage stage and arithmetic residual.
+Odd periodic lengths do not satisfy the even-periodic relation at the wrap.
+
+Continue a held state with sigma set to zero as a diagnostic change of
+physics. At equal densities, standard weights and equal tau, total-fluid
+evolution then decouples from phase segregation. Compare decaying circulation
+and surviving alternating momentum against unchanged-sigma continuations.
+This is not a production velocity filter or a static-equilibrium result.
+Compare even/odd domains and an exactly translated even geometry; retain
+the small odd-domain geometry difference explicitly.
+
+Provide independent optional controls `recoloringModel "projection"` and
+`mrtSpectrum "liu2015"`, preserving defaults `"cosine"` and `"legacy"`.
+Projection uses the published link-length-weighted segregation term
+`beta*rho*phi*(1-phi)*w_i*(e_i dot n)` at standard weights. The D2Q9 MRT
+spectrum in the existing row order is
+`[1,1.63,1.14,1,1.92,1,1.92,1/tau,1/tau]`; all entries, including
+conserved ones, act with the matching Guo factor and physical half-force
+velocity. Admit only color, standard-weight equal-density unit-speed D2Q9;
+the published spectrum requires MRT. Projection cannot combine with the
+earlier cosine-derived tangential multiplier. Existing closed capillary
+and flat-wall guards remain applicable.
+
+At a neutral one-dimensional rest state, cosine segregation has
+`B=a+sqrt(2)*b`, whereas projection has `B=A=a+2b`. An independent match
+`beta_projection=beta_cosine*B/A` gives exactly the same bulk recurrence;
+do not fit beta to pressure or velocity. Compare both the published beta
+and this independently matched transport strength. Recalibrate the bulk
+width for comparisons where exact one-dimensional matching does not apply.
+
+Match every published operator that is explicitly specified, and identify
+remaining boundary-normal/curvature continuation choices rather than
+claiming a complete replica when details are unspecified. Verify force and
+recoloring moments, pure-phase forcing, neutral transients, bulk Laplace,
+signed nonneutral pressure/shape/speed, adjacent fields, translation,
+MPI/restart and unchanged defaults. Existing checkerboard seeds must still
+propagate their undamped mode: changing kinetic relaxation does not prove
+that a conserved-momentum eigenmode has disappeared. Keep negative controls.
+The fixed published MRT spectrum is supported with CSF only. Its energy
+relaxation differs from the shear relaxation; do not reuse the legacy
+perturbation-to-surface-tension mapping with that spectrum.
+Pressure-reservoir and throat extensions depend on the measured gate.
+
+For the published fixed odd-moment rate, also verify the hydraulic wall
+response rather than inheriting the legacy magic-parameter result. At
+low force in a pure D2Q9 channel, define
+`Lambda=(tau-1/2)*(1/s_q-1/2)` and `C=4*Lambda/3-1/4`.
+The midpoint Poiseuille profile is
+`u=F*[y*(H-y)+C]/(2*nu)`, with y measured from the physical halfway wall.
+Legacy rates give Lambda=3/16 and C=0; the published s_q=1.92 gives
+Lambda=(tau-1/2)/48. Verify the constant offset and its decreasing relative
+influence under refinement. A lower static current with a different MRT
+spectrum is not proof of unchanged dynamic wall response.
+
+### Guarded flat pressure-reservoir experiment
+
+Extend CSF only for the explicit combination `wallGradient "ghost"`,
+`phaseBoundary "flux"`, equal-density standard-weight D2Q9, flat Cartesian
+walls and two opposite inward-facing axial PB planes. Reject velocity,
+selective-film, interior pressure nodes, incomplete faces and externally
+forced reservoir experiments. Each face prescribes a consistent phase and
+positive density. Keep capillary force zero on PB nodes and require the
+adjacent first fluid strip to be force-free; do not apply the uncorrected
+Zou--He reconstruction through a forced interfacial layer.
+
+At every incoming/outgoing state require the PB plane and two interior
+strips to remain in their prescribed pure phase, within 1e-9 in phase
+fraction. Also check the actual reconstructed color-gradient norm in the
+first interior strip against the existing 1e-9 gradient cutoff. Fail if
+the interface reaches this collar. Disable phase-only wall transfers on
+every face touching a PB node, including the periodic wrap between opposite
+PB planes. Preserve closed/default arithmetic.
+
+Independently account for interior (VD/GV) component mass. Before each
+stream, sum outgoing populations across PB-to-interior links as inflow and
+interior-to-PB links as outflow. Exclude solid links, which return by
+reflection. The interior mass change must equal the integrated net kinetic
+flux; the boundary nodal velocity sum is not an exact replacement. Record
+the initial interior mass, integrated flux, current mass and residual in
+structured diagnostics. Reset this accounting baseline on restart and
+state that reset; numerical populations themselves retain the exact stage.
+
+Before reporting two-phase dynamics, check pure pressure-driven channels
+against the selected MRT hydraulic response, two-direction mass budgets,
+MPI/restart, and invalid geometry/collar guards. A closed held meniscus may
+seed a single-front experiment by a recorded crop/translation and explicit
+pure remote corridors while preserving every donor total population.
+Surface tension and beta remain independently specified. Compare front
+drift for pressure brackets, two durations and grid refinement. Call these
+finite-time drift brackets, not a converged throat trapping or hysteresis
+law. Adjacent-step averaging is diagnostic only; never filter solver state.
