@@ -1,0 +1,172 @@
+\section{Additional operator definitions}
+\subsection{Architecture and workflow}
+The code separates lattice/grid geometry, MPI exchange, parameter and field
+I/O, and fluid collision operators. A byte-valued voxel file assigns initial
+phases and solid or boundary labels. A parameter file selects the lattice,
+relaxation operator, relaxation times, forcing and wetting. D2Q9 and D3Q19,
+SRT and raw-moment MRT, and the single-component and color-fluid executables
+are exercised here as configurations of the same executable. The Shan--Chen
+placeholder is rejected explicitly.
+
+Directional populations reside in arrays; streaming exchanges the required
+neighbor data between MPI subdomains. Macroscopic fields are written as VTI
+pieces that the analysis reconstructs into a complete global lattice.
+Restart files contain outgoing populations and a sidecar recording the time,
+lattice, phase count and next streaming action. Historical checkpoints
+without an identifiable stage are rejected. A fresh convergence history is
+required after restart. Exceptions and invalid populations cause a nonzero
+MPI failure status.
+
+The reproducibility scripts generate every geometry, record inputs and
+executable hashes, preserve raw output and calculate independent reference
+solutions. Each study uses a frozen executable so a later build cannot alter
+an ongoing batch. Algebraic checks are available through CTest.
+The public-rock preparation additionally pins the source DOI, data license,
+checksums, crop coordinates, voxel scale and periodic connectivity. Numerical
+timers include exchange and finite checks, while field/diagnostic output and
+checkpoint I/O are counted separately.
+
+\subsection{Bulk dynamics, forcing and viscosity}
+In lattice units, the component densities and color field are
+\begin{equation}
+ \rho_k=\sum_i f_i^k,\quad \rho=\rho_0+\rho_1,\quad
+ \chi=(\rho_0-\rho_1)/\rho,\quad
+ \rho\vct u=\sum_i\vct e_i(f_i^0+f_i^1)+\vct F/2.
+\end{equation}
+Here $\vct F$ is force per unit volume. The mixture equilibrium is
+\begin{equation}
+ f_i^{eq}=\rho_0\phi_i^0+\rho_1\phi_i^1+
+ \rho w_i[3\vct e_i\!\cdot\!\vct u+
+ 4.5(\vct e_i\!\cdot\!\vct u)^2-1.5|\vct u|^2].
+\end{equation}
+The phase weights give $c_{p,k}^2=3(1-\alpha_k)/5$ in D2Q9 and
+$(1-\alpha_k)/2$ in D3Q19. The present quantitative tests use equal reference
+densities and the standard pressure weights, so $p=\rho/3$.
+
+The legacy arithmetic rule interpolates $\tau$ by component density fraction.
+For $\varphi=\rho_0/\rho$ and $\nu_k=(\tau_k-1/2)/3$, the optional harmonic
+kinematic-viscosity rule is
+\begin{equation}
+ \nu^{-1}=\varphi/\nu_0+(1-\varphi)/\nu_1,\qquad \tau=1/2+3\nu.
+\end{equation}
+The two rules are compared at equal density; equivalence to a dynamic-viscosity
+law is not assumed at unequal density.
+
+With $\vct m=M\vct f$, collision and body-force insertion become
+\begin{equation}
+ \vct m^*=\vct m-S(\vct m-\vct m^{eq})+(I-S/2)M\vct G,
+ \quad G_i=w_i[3(\vct e_i-\vct u)+9(\vct e_i\!\cdot\!\vct u)\vct e_i]\!\cdot\!\vct F.
+\end{equation}
+This uses established discrete forcing and moment relaxation
+\cite{guo2002,lallemand2000}. Conserved rates are zero. The retained
+nonconserved rates are $s_u=1/\tau$ and $s_q=8(2-s_u)/(8-s_u)$, with
+$(1/s_u-1/2)(1/s_q-1/2)=3/16$ \cite{ginzburg2003}.
+
+Interfacial perturbation and recoloring retain the recovered structure:
+\begin{align}
+ \Delta_i&=\frac{9\sigma |\vct g|}{4\tau}
+ \left[w_i(\vct e_i\!\cdot\!\vct n)^2-B_i\right],\quad
+ \vct n=\vct g/|\vct g|,\\
+ f_i^{0,*}&=\frac{\rho_0}{\rho}f_i^{post}+
+ \beta\frac{\rho_0\rho_1}{\rho^2}\cos\varphi_i f_i^{eq}(\vct u=0),\qquad
+ f_i^{1,*}=f_i^{post}-f_i^{0,*}.
+\end{align}
+The actual arrays satisfy zero perturbation mass and momentum and
+$\sum_i\vct e_i\vct e_i\Delta_i=\sigma|\vct g|(\vct n\vct n-I)/(2\tau)$.
+Every nonzero capillary moment is coupled to a mode with rate $s_u$.
+
+Initialization constructs incoming rest populations with $-\vct G/2$ and
+applies the normal collision kernel once. The stored state is then outgoing
+at time zero. After streaming, a uniform forced domain has physical velocity
+$\vct u(t)=t\vct F/\rho$. The same state convention is used for routine and
+convergence-triggered checkpoints.
+
+\subsection{Wetting and termination}
+At a wall-adjacent fluid node, the historical gradient skips solid neighbors.
+Writing $\mathcal F$ for the remaining stencil,
+\begin{equation}
+ \vct b=\sum_{i\in\mathcal F}w_i\vct e_i(\chi_i-\chi),\quad
+ A=\sum_{i\in\mathcal F}w_i\vct e_i\vct e_i,
+ \quad\vct g_{legacy}=3\vct b,\quad\vct g_{ren}=A^{-1}\vct b.
+\end{equation}
+The second expression is a standard weighted linear reconstruction, not a
+new wetting model. It agrees with the bulk stencil and exactly reproduces
+linear fields when $A$ has full rank. Unsupported rank-deficient stencils
+are rejected. Both variants apply the same recovered angle rotation and
+wall normal. On a flat lower wall, the legacy stencil scales the tangential
+and normal derivatives by $5/6$ and $1/2$ respectively.
+
+Steady termination requires finite state, stable requested scalar diagnostics,
+velocity convergence and, for color flow, convergence of the spatial color
+field, for three successive reports. Both report-to-report and adjacent-step
+changes must pass; an even reporting interval cannot certify a period-two
+oscillation as stationary. Constant saturation cannot terminate a
+translating phase field. Periodic acceleration benchmarks disable steady
+stopping; undefined pressure-based permeability is identified separately
+from invalid numerical state.
+
+\subsection{Experimental capillary operators}
+Two optional controls examine limitations exposed by the static tests.
+The first fits $\psi=\operatorname{atanh}(\chi)$ on available fluid neighbors
+with the same moment tensor $A$, continues $\tanh(\psi+\vct e_i\cdot\nabla\psi)$
+over a virtual full stencil, then applies the common angle rotation.
+Color is clipped to $\pm(1-10^{-8})$ for this transform. Equilibrium-profile
+continuation has prior work \cite{bhattacharya2026}; this local fit is not
+an exact implementation of that paper's global ghost-node scheme.
+
+The second replaces perturbation with established continuum surface forcing
+\cite{lishchuk2003,sedahmed2024}:
+\begin{equation}
+ \vct F_s=\frac{\sigma}{2}\kappa\vct g,\qquad
+ \kappa=-(I-\vct n\vct n):\nabla\vct n,\quad
+ \vct n=\vct g/|\vct g|.
+\end{equation}
+Normal derivatives use the weighted fluid stencil and $A^{-1}$ at walls.
+An additional MPI exchange supplies neighboring normals. Below
+$|\vct g|=10^{-9}$, normal and capillary force are zero. The combined external
+and capillary force enters both Guo collision and physical half-force
+velocity; incoming initialization subtracts its capillary half-force before
+the initial collision. Recoloring and the selected wall projection remain
+common. This is a separate force-operator comparison, not a wall-only
+ablation or replication of a published complete model.
+The experimental force accepts closed VD/GV flow at equal reference
+density and standard pressure weights. A guarded flat D2Q9 pressure
+extension is assessed below: it requires ghost color, conservative phase
+transfer and a pure force-free reservoir collar. Velocity reservoirs and
+selective films remain unsupported. Neither option changes the legacy defaults.
+
+An optional gradient form evaluates the same continuum force as
+\begin{equation}
+ \vct F_s=-\frac{\sigma}{2}\vct n
+       [(I-\vct n\vct n):\nabla\vct g].
+\end{equation}
+It differentiates the unnormalized gradient with the same fluid stencil.
+The identity follows from
+$(I-\vct n\vct n):\nabla\vct g=|\vct g|(I-\vct n\vct n):\nabla\vct n$;
+its discrete realization differs from normal differentiation.
+Related Hessian forms and their discretization sensitivity are already
+studied in phase-field LBM \cite{sugimoto2026}. This control introduces
+neither an adjusted cutoff nor a fitted surface-tension coefficient.
+
+\subsection{Pore-scale observables}
+For $N$ total voxels, $N_f$ pore voxels, and $\varphi_0=\rho_0/\rho$,
+$\varphi_1=1-\varphi_0$ in the fluid, the analysis defines
+\begin{equation}
+ S_k=\frac{1}{N_f}\sum_{fluid}\varphi_k,\qquad
+ q_k=\frac{1}{N}\sum_{fluid}\varphi_k u_x,\qquad q=q_0+q_1.
+\end{equation}
+These are phase-fraction-weighted \emph{advective} Darcy fluxes of the common
+mixture velocity. They do not include the component segregation momentum
+introduced by recoloring. Component masses $\sum\rho_k$ are monitored
+separately; in a weakly compressible closed domain, fixed mass does not make
+the volume-fraction saturation exactly constant.
+
+At unit reference density, the single-phase body-force estimate is
+$K=\nu_{ref}q_{ref}/F_x$, and a phase normalization is
+$k_{r,k}=\nu_kq_k/(F_xK)$. The latter is independently verified only for the
+isolated pure-phase pore bundle below. The SCSP output $\vct u_{ref}$ uses
+reference-density momentum and equilibrium, whereas color flow divides
+momentum by local total density. A pure-phase comparison consequently uses
+$\vct u_{ref}/\rho$ at unit reference density. The rock comparison retains
+this convention and its small finite-density differences explicitly.
+

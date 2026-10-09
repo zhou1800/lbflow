@@ -183,12 +183,19 @@ def projection_rest(phi,beta,cutoff=1e-9):
     return result
 
 
-def transverse_relaxation_rhs(phi,h,strength):
+def transverse_relaxation_rhs(phi,h,strength,localization='uniform'):
     """Selective neutral-wall biharmonic diagnostic; not a physical phase law."""
     if not np.isfinite(h) or h<=0 or not np.isfinite(strength) or not 0<=strength<=1:
         raise ValueError('Use positive grid spacing and diagnostic strength in [0,1]')
+    if localization not in ('uniform','wall','bulk'):
+        raise ValueError('Use uniform, wall or bulk transverse mobility')
     extended=np.vstack((phi[0],phi,phi[-1]))
     laplacian=(extended[2:]-2*phi+extended[:-2])/h**2
+    if localization!='uniform':
+        y=(np.arange(len(phi))+.5)*h;height=len(phi)*h
+        wall=np.exp(-(y/2)**2)+np.exp(-((height-y)/2)**2)
+        if wall.max()>1:raise ValueError('Two-unit wall windows overlap too strongly for a nonnegative bulk partition')
+        laplacian*=((wall if localization=='wall' else 1-wall)[:,None])
     extended=np.vstack((laplacian[0],laplacian,laplacian[-1]))
     biharmonic=(extended[2:]-2*laplacian+extended[:-2])/h**2
     return -strength*h*h*biharmonic/24
@@ -203,13 +210,15 @@ def observation(phi,u,v,h,clock):
         phase_range=[float(phi.min()),float(phi.max())])
 
 
-def evolve(ny,force,end=2000.,dt_factor=1.,sigma=.005,width=WIDTH_REFERENCE,save=None,write=250.,transformed=False,slip=0.,phase_stencil='fv',initial_profile='auto',transverse_relaxation=0.,fast_stokes=False):
+def evolve(ny,force,end=2000.,dt_factor=1.,sigma=.005,width=WIDTH_REFERENCE,save=None,write=250.,transformed=False,slip=0.,phase_stencil='fv',initial_profile='auto',transverse_relaxation=0.,fast_stokes=False,transverse_localization='uniform'):
     if ny<4 or ny%2 or not all(np.isfinite(x) for x in (force,end,dt_factor,sigma,width,write,slip,transverse_relaxation)):
         raise ValueError('Use an even height >=4 and finite parameters')
     if min(end,dt_factor,width,write)<=0 or min(sigma,slip)<0:
         raise ValueError('Duration, time factor, width and output interval must be positive; sigma and slip nonnegative')
     if not 0<=transverse_relaxation<=1 or (transverse_relaxation and (phase_stencil!='fv' or not transformed)):
         raise ValueError('Transverse diagnostic requires transformed FV and strength in [0,1]')
+    if transverse_localization not in ('uniform','wall','bulk'):
+        raise ValueError('Unrecognized transverse localization')
     solver=StokesSlit(ny,slip=slip,fast=fast_stokes);h=solver.h;beta=match_beta(width/h);b=beta/h
     if transformed and phase_stencil=='fv':b=match_logistic_width(width,h)
     profile=logistic_bridge(solver.nx,h,b) if transformed and phase_stencil=='fv' else planar_bridge(solver.nx,beta)
@@ -224,7 +233,7 @@ def evolve(ny,force,end=2000.,dt_factor=1.,sigma=.005,width=WIDTH_REFERENCE,save
         if phase_stencil=='projection':
             rate=phase_rhs(field,u,v,h,b,diffusion=0.)+(projection_rest(field,beta)-field)/h**2
         else:rate=phase_rhs(field,u,v,h,b,transformed=transformed)
-        if transverse_relaxation:rate+=transverse_relaxation_rhs(field,h,transverse_relaxation)
+        if transverse_relaxation:rate+=transverse_relaxation_rhs(field,h,transverse_relaxation,transverse_localization)
         return rate,u,v
     for step in range(steps+1):
         rate,u,v=rhs(phi);clock=step*dt
@@ -242,9 +251,10 @@ def evolve(ny,force,end=2000.,dt_factor=1.,sigma=.005,width=WIDTH_REFERENCE,save
             raise ArithmeticError(f'Invalid phase fraction at step {step+1}: {phi.min()}, {phi.max()}')
     positions=np.unwrap([row['centroid_modulo']*2*np.pi/(solver.nx*h) for row in history])*solver.nx*h/(2*np.pi)
     for row,x in zip(history,positions):row['centroid_unwrapped']=float(x)
-    first,last=history[len(history)//2],history[-1]
+    late_start=min(len(history)//2,max(0,len(history)-2))
+    first,last=history[late_start],history[-1]
     speed=(last['centroid_unwrapped']-first['centroid_unwrapped'])/(last['time']-first['time']) if end else 0.
-    return dict(parameters=dict(ny=ny,nx=solver.nx,h=h,dt=dt,end=end,force=force,sigma=sigma,nu=1/6,diffusion=1/6,beta=None if transformed and phase_stencil=='fv' else beta,b=b,width_target=width,angle=90,transformed=transformed,slip=slip,phase_stencil=phase_stencil,initial_profile=initial_profile,transverse_relaxation=transverse_relaxation,fast_stokes=fast_stokes),
+    return dict(parameters=dict(ny=ny,nx=solver.nx,h=h,dt=dt,end=end,force=force,sigma=sigma,nu=1/6,diffusion=1/6,beta=None if transformed and phase_stencil=='fv' else beta,b=b,width_target=width,angle=90,transformed=transformed,slip=slip,phase_stencil=phase_stencil,initial_profile=initial_profile,transverse_relaxation=transverse_relaxation,fast_stokes=fast_stokes,transverse_localization=transverse_localization),
         history=history,late_centroid_speed=speed,seconds=time.monotonic()-started,
         source_sha256=LOADED_SOURCE_SHA256,
         scope=('Independent hydrodynamics with a retained discrete phase stencil; kinetic ablation, not independent continuum validation.' if phase_stencil=='projection' else 'Selective transverse fourth-order phase intervention with theoretical coefficient; numerical mechanism diagnostic, not a physical phase law or the full projection stencil.' if transverse_relaxation else 'Independent periodic neutral-wall creeping-flow/finite-volume phase reference. No physical slip calibration or nonneutral wall equivalence implied.'))
@@ -262,6 +272,7 @@ def main():
     parser.add_argument('--initial-profile',choices=['auto','projection','logistic'],default='auto')
     parser.add_argument('--transverse-relaxation',type=float,default=0.,help='Selective numerical diagnostic strength [0,1]; coefficient h^2/24, default off.')
     parser.add_argument('--fast-stokes',action='store_true',help='Equivalent sine-basis/rank-two inversion; default keeps the original dense solve.')
+    parser.add_argument('--transverse-localization',choices=['uniform','wall','bulk'],default='uniform',help='Partition diagnostic mobility using a fixed two-unit wall window.')
     args=parser.parse_args();root=Path(args.root);root.mkdir(parents=True,exist_ok=False)
     source=root/'source';source.mkdir()
     for name in ('stokes_phase_reference.py','front_mobility.py','phase_recurrence.py'):
@@ -269,7 +280,7 @@ def main():
     hashes={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in source.iterdir()}
     if hashes['stokes_phase_reference.py']!=LOADED_SOURCE_SHA256:
         raise RuntimeError('Reference source changed between import and freezing')
-    result=evolve(args.ny,args.force,args.end,args.dt_factor,args.sigma,width=args.width,save=root,transformed=args.transformed,slip=args.slip,phase_stencil=args.phase_stencil,initial_profile=args.initial_profile,transverse_relaxation=args.transverse_relaxation,fast_stokes=args.fast_stokes)
+    result=evolve(args.ny,args.force,args.end,args.dt_factor,args.sigma,width=args.width,save=root,transformed=args.transformed,slip=args.slip,phase_stencil=args.phase_stencil,initial_profile=args.initial_profile,transverse_relaxation=args.transverse_relaxation,fast_stokes=args.fast_stokes,transverse_localization=args.transverse_localization)
     result['source_files_sha256']=hashes
     (root/'result.json').write_text(json.dumps(result,indent=2)+'\n')
 

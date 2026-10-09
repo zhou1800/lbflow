@@ -1,5 +1,5 @@
-The discrete phase spectrum predicts interface-shape decay without fitting.
-Matched width and diffusion leave a distinct discrete interface kinetics.
-A shared-phase ablation isolates its contribution to capillary resistance.
-Independent force and hydraulic controls bound dynamic interpretation.
-LBFlow supplies reproducible pore-flow and digital-rock experiments.
+Exact phase spectra predict three-mode and width-control full-solver decay.
+A theoretical fourth-order intervention explains numerical capillary resistance.
+A low-force response model predicts mobility without fitting front velocities.
+Wall/bulk and surface-tension controls test the numerical resistance mechanism.
+Coupled verification and full-field audits bound the interpretation.

@@ -40,12 +40,12 @@ No differentiability claim at the cutoff transition itself is made.
 The neutral reflected transverse modes have $q=m\pi/H$. We select the
 real positive eigenvalue whose eigenvector has the greatest normalized
 overlap with the central derivative of $p$. This overlap is above 0.9979
-in the measured cases. The physical rate is $-\log\mu/h^2$, not
+in the original five grid/mode cases. The physical rate is $-\log\mu/h^2$, not
 $(1-\mu)/h^2$. Numerical differentiation of $P$ with amplitude $10^{-5}$
 checks the full matrix action with maximum discrepancy
 $\PhaseSymbolError$ over the three grids.
 
-Full simulations start from outgoing populations built from
+The original fourteen simulations start from outgoing populations built from
 $p_j-\epsilon\cos[m\pi(y+1/2)/H]\,\partial_xp_j$, with physical
 $\epsilon=\pm0.01$, and $\pm0.02$ at H16. They use zero surface tension,
 zero body force and no hydraulic slip. A phase integral over one interface,
@@ -65,9 +65,15 @@ $H$ & $m$ & Predicted physical rate & Maximum relative difference \\\midrule
 \bottomrule\end{tabular}
 \end{center}
 Bounds round upward across both perturbation signs and tested amplitudes.
+The twelve subsequent wave runs add third modes and a separate width,
+with physical duration 1000 rather than 2000. The complete nine-group
+comparison follows; the maximum includes both perturbation signs and
+all tested amplitudes. Fit-window and cutoff eligibility checks are retained.
+\input{data/major-waves-table.tex}
+
 The spectral rate ratios support fourth-order shape relaxation in this
 test. An arbitrary-interface modified equation, universal coefficient
-or isotropy theorem is not inferred from five measured mode/grid combinations.
+or isotropy theorem is not inferred from these axial mode/grid/width combinations.
 The known leading conservative Allen--Cahn mapping and projection/isotropy
 distinction remain prior results \cite{subhedar2020}.
 

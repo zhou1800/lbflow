@@ -712,3 +712,24 @@ reference grids. It must solve the identical existing staggered operator
 and agree with the dense inverse on nonuniform manufactured/random forces
 over multiple spacings and slips. Preserve the dense default for historical
 reanalysis and record the selected solver in every new run receipt.
+
+For the bulk/wall distinction, partition the transverse mobility before
+examining outcomes. Use wall weight exp[-(y/2)^2]+exp[-((16-y)/2)^2]
+and complementary bulk weight. Apply `-a*h^2*L_y[weight*L_y(phi)]/24`.
+The two operators sum to the uniform intervention, conserve phase mass,
+preserve planar profiles and have nonpositive quadratic work. Compare
+wall-only and bulk-only controls at H32/H48 with slip1. The prescribed
+two-unit window is a localization diagnostic, not a measured contact-line
+length or an inference that all resistance is physically located there.
+
+Use held-out surface tensions .0025 and .01 at H16/H32 and the unchanged
+production kernel, with independent FV strengths 0 and 1. Add full-solver
+third transverse modes and a separately prescribed W09=6 wave control.
+Do not tune intervention coefficients or widths to those measurements.
+
+The C2 manufactured pure plateaus expose phase-tail overshoots of order
+8e-12 at the logarithmic reconstruction regularization scale. Retain their
+actual ranges and report them separately from the ordinary front comparisons;
+no boundedness theorem or claim that this is solely roundoff is permitted.
+The continuous-source mass budget and measured convergence orders are
+recomputed, rather than copied from the original summary.

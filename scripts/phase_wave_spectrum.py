@@ -52,11 +52,12 @@ def expansion_controls():
         scope='Exact matrix on well-separated periodic planar equilibria with diagnostic cutoff zero; mathematical expansion control, not a production LBM trajectory or a universal-interface validation.')
 
 
-def spectrum(height,mode=1,profile_steps=8000):
+def spectrum(height,mode=1,profile_steps=8000,width=WIDTH_REFERENCE):
     from stokes_phase_reference import projection_rest
     if height<16 or height%2 or not 1<=mode<height or profile_steps<1:
         raise ValueError('Use an even height >=16, a resolved transverse mode and positive profile duration')
-    dx=16/height;length=4*height;beta=match_beta(WIDTH_REFERENCE/dx)
+    if not np.isfinite(width) or width<=0:raise ValueError('Use a finite positive physical width')
+    dx=16/height;length=4*height;beta=match_beta(width/dx)
     ratio=coefficients()['bulk_segregation']/coefficients()['bulk_diffusion']
     profile=bulk_profile(length,beta/ratio,steps=profile_steps);wave=mode*np.pi/height
     stationary=float(abs(projection_rest(np.broadcast_to(profile,(4,length)),beta)-profile[None]).max())
@@ -80,9 +81,11 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--output',required=True)
     parser.add_argument('--heights',type=int,nargs='+',default=[16,32,48]);parser.add_argument('--modes',type=int,nargs='+',default=[1])
     parser.add_argument('--profile-steps',type=int,default=8000)
-    args=parser.parse_args();rows=[spectrum(h,m,args.profile_steps) for h in args.heights for m in args.modes]
+    parser.add_argument('--width',type=float,default=WIDTH_REFERENCE)
+    args=parser.parse_args();rows=[spectrum(h,m,args.profile_steps,args.width) for h in args.heights for m in args.modes]
     result=dict(measurements=rows,protocol='Analytic transverse Fourier symbol of the exact projection phase stencil at an independently relaxed planar profile. The unit normal is differentiated; the production color-gradient cutoff is retained; no relaxation rate is fitted.',
         scope='Zero-flow, zero-sigma, neutral reflected scalar operator. No moving-contact-line constitutive law or full hydrodynamic model implied.')
+    if args.width!=WIDTH_REFERENCE:result['physical_width']=args.width
     p=Path(args.output);p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps([{k:r[k] for k in ('height','mode','physical_relaxation_rate','translation_mode_overlap')} for r in rows],indent=2))
 

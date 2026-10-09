@@ -1,189 +1,251 @@
-\section{Discrete interface kinetics and capillary resistance}
+\section{From phase kinetics to numerical capillary resistance}
 \label{sec:phasekinetics}
-\subsection{Width and leading diffusion do not specify shape relaxation}
-The fixed-width resistance trend requires a kinetic control independent of
-the momentum balance. For the rest-state projection stencil, its leading
-bulk equation is the known conservative Allen--Cahn form
-\cite{subhedar2020,mirjalili2020}:
+\subsection{Exact finite-grid spectrum and conditional expansion}
+The leading bulk phase equation for the rest-state projection map is the
+established conservative Allen--Cahn form \cite{subhedar2020}:
 \begin{equation}\label{eq:leadingphase}
  \partial_t\varphi+\nabla\cdot(\varphi\bm u)
- =D\nabla\cdot[\nabla\varphi-2b\varphi(1-\varphi)\bm n],
- \qquad \bm n=\frac{\nabla\varphi}{|\nabla\varphi|}.
+ =D\nabla\cdot[\nabla\varphi-2b\varphi(1-\varphi)\bm n].
 \end{equation}
-Here $D=1/6$ and $b=\beta/h$ in the leading diffusive scaling;
-$h=16/H$ denotes the grid spacing in the H16 length units.
-The mapping is established, and does not supply a chemical-potential
-mobility or a calibrated contact-line law.
-
-For a smooth signed-distance field $d$, with $|\nabla d|=1$ in the
-interface neighborhood, set
-\begin{equation}\label{eq:distanceflux}
- \varphi=\frac{1+\tanh(bd)}{2},\qquad
- \nabla\varphi=2b\varphi(1-\varphi)\nabla d.
+Here $D=1/6$ in the common diffusive units, with $b=\beta/h$ in the formal
+smooth projection expansion. The independent logistic reference calibrates
+its own finite-grid $b$ from the same measured crossing width.
+For a smooth signed-distance field $d$,
+\begin{equation}
+ \varphi=\frac{1+\tanh(bd)}2,\qquad |\nabla d|=1,
 \end{equation}
-The leading nonadvective flux vanishes pointwise, including for curved
-signed-distance contours. This familiar profile-preservation property
-\cite{mirjalili2020,hao2024} does not say that every discrete representation
-has zero shape relaxation. In a linearization about a planar profile,
-the normal must vary with the phase perturbation. Freezing the normal
-would introduce an erroneous leading tangential-diffusion term.
+the nonadvective flux vanishes pointwise in the interface neighborhood.
+This known profile-preservation property \cite{mirjalili2020,hao2024}
+does not imply vanishing shape relaxation for a discretized map.
 
-We differentiate the complete zero-flow projection recurrence, including
-the unit-normal variation and production color-gradient cutoff, at its
-independently equilibrated planar profile. Let $T(q)$ be its transverse
-Fourier matrix and $\mu(q)$ its eigenvalue with greatest overlap with
-planar translation. The parameter-free prediction is
+We differentiate $P$ at its independently equilibrated planar bridge,
+including variation of $\bm n_h$ and the production color-gradient cutoff.
+Freezing the normal would spuriously retain leading tangential diffusion.
+For reflected transverse mode $q=m\pi/H$, let $T(q)$ denote the exact
+Fourier matrix and $\mu(q)$ the real eigenvalue with greatest overlap with
+planar translation. The predicted physical decay is
 \begin{equation}\label{eq:phaserate}
- \Gamma(q)=-\frac{\log\mu(q)}{h^2},\qquad
- q=\frac{m\pi}{H},\qquad k_{phys}=\frac{m\pi}{16}.
+ \Gamma(q)=-\log\mu(q)/h^2,\qquad k=m\pi/H_p.
 \end{equation}
-The matrix is given in the supplement. Its action agrees with the
-finite-difference derivative of the nonlinear scalar stencil within
-$\PhaseSymbolError$. No measured decay rate enters this calculation.
+No measured decay rate enters the matrix. Its analytic link summation,
+active-mask scope and independently differentiated action are supplied
+in the supplement.
 
-Fourteen complete LBM runs apply paired positive and negative transverse
-displacements of magnitude 0.01 to a neutral planar bridge; the coarse
-grid additionally uses magnitude 0.02. Both interfaces in each bridge
-share the same axial displacement. Both force and surface tension are
-zero. The first mode is measured at $H=16,32,48$ and a second-wavelength
-control at $H=16,32$. Late projected-amplitude decay rates agree with
-Eq.~\eqref{eq:phaserate} within \PhaseSpectrumPercent\%
-(Fig.~\ref{fig:phasespectrum}). First-mode rates are
-$6.0954\times10^{-5}$, $1.5552\times10^{-5}$ and
-$6.9031\times10^{-6}$ in physical time units.
-The second/first rate ratios are approximately 16.18 and 15.97.
-The nearly constant $\Gamma/(h^2 k_{phys}^4)$, approximately 0.041--0.042,
-is consistent with fourth-order numerical shape relaxation in this
-long-wavelength test. A formal isolated-interface expansion in the
-supplement gives $\Gamma=h^2k_{phys}^4/24+O(h^4)$ when tails and the
-cutoff do not intervene. This conditional limit is not a uniform
-arbitrary-interface coefficient. Exact finite-grid eigenvalues,
-rather than that expansion, predict the measured rates.
+The full solver is perturbed with paired amplitudes $\pm.01$ and, at H16,
+$\pm.02$ in physical length units. Both interfaces have the same displacement;
+surface tension and body force are zero. There are \MajorWaveCount\
+complete trajectories: modes 1 at H16/H32/H48, modes 2 and 3 at H16/H32,
+and mode 1 at separately prescribed $W_{0.9}=6$ on H16/H32.
+The maximum relative rate difference from Eq.~\eqref{eq:phaserate} is
+\MajorWavePercent\%, without refitting for mode or width.
+Moving the fit-window start from 50\% to 40\% or 60\% of available samples
+changes rates by at most $\MajorWindowDifference$ relatively.
+The reported windows and actual output times remain in the dataset.
 
 \begin{figure}[htbp]\centering
-\includegraphics[width=.98\linewidth]{phase-spectrum.pdf}
-\caption{Zero-flow interface kinetics at fixed measured physical width.
-(a) Complete-solver projected amplitudes (symbols) and discrete-spectrum
-predictions (lines), normalized at the start of the late window. The
-second mode is shown with open symbols. Only the displayed initial
-amplitude is anchored; the rate is not fitted to these trajectories.
-(b) Rates divided by physical wavenumber to the fourth power. The
-$h^2/24$ line is the formal isolated-interface trend, not an exact
-finite-grid coefficient.
-Both normal variation and the production tail cutoff are retained in
-the eigenvalue calculation.}
-\label{fig:phasespectrum}\end{figure}
+\includegraphics[width=.98\linewidth]{major-spectrum.pdf}
+\caption{Finite-grid phase kinetics. Left: exact rates divided by $k^4$
+for three modes and two widths; the $h^2/24$ line is a formal guide.
+Right: H16 full-solver late amplitudes (symbols) and exact spectral rates
+(lines), normalized at each displayed window start. Only amplitude is
+anchored; rates are predicted independently. All 26 signed/amplitude
+controls are retained in the data.}
+\label{fig:majorspectrum}\end{figure}
 
-\subsection{An explicit hydraulic control and independent Stokes reference}
-To distinguish hydrodynamic wall regularization from phase kinetics, we
-add an optional prescribed Navier slip length for neutral flat D2Q9 walls
-at equal $\tau=1$, projection recoloring and legacy MRT.
-Bounce-back/specular mixtures are established slip controls
-\cite{ahmed2009}; this option is not a new boundary concept.
-With lattice slip $\lambda_l=\lambda/h$, the specular fraction is
-$s=\lambda_l/(\lambda_l+1/2)$. Specular populations come from the forward
-tangential neighbor, and the existing relative-phase transfer receives
-factor $1-s$. This preserves the zero-flow neutral phase recurrence
-without double-counting its tangential transport. The default $\lambda=0$
-retains bitwise-identical fields and outgoing populations in three
-closed-kernel comparisons.
-
-Eighteen signed pure-channel controls over three heights and three slip
-lengths verify
-\begin{equation}\label{eq:slippure}
- u_j=\frac{F_l}{2\nu_l}
- [y_j(H-y_j)+\lambda_l H],\qquad y_j=j+\tfrac12.
+For an isolated smooth planar profile, projection weights, inactive tail
+cutoff and decaying perturbations, a formal expansion gives
+\begin{equation}\label{eq:fourthshape}
+ \eta_t=-K_{\mathrm{num}}\eta_{yyyy}+O(h^4),\qquad
+ K_{\mathrm{num}}=\frac{Dh^2}{4}=\frac{h^2}{24}.
 \end{equation}
-Neutral equilibrium, component conservation, rotation, two-rank exchange
-and outgoing restart are checked separately. Nonneutral, unequal-tau and
-pressure-reservoir uses of the slip option are rejected.
+The unit-normal correction is essential in this coefficient.
+The derivation and separate no-cutoff coefficient-refinement check are in
+the supplement. This is a conditional long-wave result for the tested
+$D=1/6$, not a universal coefficient for arbitrary interfaces or other
+mobility models. Exact finite-grid eigenvalues supply the wave predictions,
+including the finite-mode departures from the formal guide.
 
-An independent staggered finite-volume calculation solves constant-viscosity
-Stokes flow through a Fourier/biharmonic streamfunction and evolves
-Eq.~\eqref{eq:leadingphase} conservatively. It uses a logistic-distance
-reconstruction for the phase flux and capillary geometry. Signed-distance
-reconstruction is established \cite{hao2024}; our implementation is a
-separately verified numerical reference, not a replication of that
-paper's complete algorithm. The supplemental analytic and manufactured
-checks establish second-order hydraulic accuracy, cancellation of pure
-gradient forcing, planar phase equilibrium, prescribed scalar translation
-and zero-sigma hydraulic decoupling. The reference's pure-channel
-sampling offset $h^2/4$ is retained explicitly.
+Cutoff changes require a new stationary-profile check.
+At fixed original profiles, some $10^{-10}$ or $10^{-8}$ trial thresholds
+produce residuals of order $10^{-11}$--$10^{-10}$; their eigenvalues are
+not admitted as equilibrium rate predictions. Eligible H32 baseline and
+W=6 controls preserve the measured spectrum. This matrix sensitivity
+is not a full-solver test with altered production cutoffs or a theorem
+of cutoff independence.
 
-The common physical domain is height 16 and periodic length 64, with
-$W_{0.9}=4.765235$, $\nu=D=1/6$, $\sigma=0.005$, $F=10^{-7}$ and
-prescribed hydraulic slip $\lambda=1$. Two interfaces span the channel,
-and their circular phase centroid measures displacement. At the final
-sampled states of nominal physical duration 8000, LBM and independent-reference mean speeds differ by
-17.12\%, 15.18\% and \PhaseFineFVDifference\% over the three grids.
-This comparison is an unresolved discrepancy, not successful independent
-dynamic validation. Doubling the H16/H48 LBM durations changes late
-centroid speed by at most \PhaseDurationPercent\%.
-An H16 signed force-doubling pair remains linear within $3\times10^{-7}$
-in relative mean mobility. Reversing the force and halving the H32
-reference time step changes its speed magnitude by $\PhaseFVTimeSignError$
-relative to the positive-force full-step result. These controls exclude
-the tested time/rate effects as explanations of the much larger discrepancy.
-Swapping the H32 initial equilibria between the finite-volume and
-shared-phase algorithms changes their late mean speeds by less than
-$2\times10^{-6}$ relatively. The tested initialization difference does
-not explain the dynamic discrepancy either.
+\subsection{Selective fourth-order intervention}
+The original matched-width $\lambda=1$ dynamic comparison has
+$\overline u_{LB}/\overline u_{FV,0}-1$ equal to 17.12\%, 15.18\% and
+13.72\% at H16/H32/H48. A prior shared-projection-stencil ablation narrows
+the finest discrepancy to 0.290\%. Because it retains the complete
+discrete phase operator, that ablation alone neither identifies a
+particular term nor validates the leading continuum equation.
 
-A separate control increases the prescribed physical slip to $\lambda=4$
-without changing width, force or the numerical kernel. Six signed pure
-profiles verify Eq.~\eqref{eq:slippure} within $\PhaseLargerSlipPureError$
-relatively. The three dynamic mean-speed differences decrease to 5.40\%,
-3.95\% and \PhaseLargerSlipSpeedPercent\%. This is a sensitivity result,
-not independent validation. Define the equivalent hydraulic resistance
-$R=F/\overline u$ and its excess relative to each analytic discrete pure
-channel, $R_{ex}=R-R_0$. At H48, $R_{ex}/R_0$ is 0.12735 for LBM and
-0.16407 for FV: their normalized excesses still differ by
-\PhaseLargerSlipExcessPercent\%. Larger pure conductance partly dilutes the
-relative speed gap. The prescribed-slip table in the supplement retains
-both slip controls, so a smaller speed percentage cannot be mistaken for
-converged capillary resistance.
+We therefore add only
+\begin{equation}\label{eq:intervention}
+ \mathcal R_a(\varphi)=-aK_{\mathrm{num}}L_y^2\varphi,\qquad
+ a=0,\;0.5,\;1,
+\end{equation}
+to the independent FV right-hand side.
+$L_y$ is the cell-centered reflected Neumann Laplacian.
+The coefficient is fixed by Eq.~\eqref{eq:fourthshape}, without using a
+front velocity. The same planar profile, leading diffusion, measured width,
+Stokes solver, surface force and prescribed hydraulic slip are retained.
+The added term conserves phase mass and vanishes exactly on a planar bridge.
+Its cosine eigenrate is independently checked as
+\begin{equation}
+ \Gamma_{4,h}=aK_{\mathrm{num}}
+       [4h^{-2}\sin^2(m\pi/2H)]^2.
+\end{equation}
+This diagnostic is transverse and uses reflected fourth-order conditions;
+it is not an orientation-independent replacement for $P$ or a proposed
+physical phase law.
 
-\subsection{Separating momentum, force and phase operators}
-The actual production capillary force is reconstructed from two adjacent
-outgoing states, with color and density matched to their physical fields.
-After averaging cell forces onto staggered faces, the independent
-Stokes solve predicts the measured LBM mean speed within 0.493\%,
-0.134\% and \PhaseFineHydraulicDifference\%.
-Replacing this force by the independent capillary formula on the
-\emph{same} phase field also yields differences below 1\%.
-The flow and force discrepancies under these specific audits are much
-smaller than the complete dynamic-reference discrepancy.
+\input{data/major-intervention-table.tex}
 
-We then retain the exact zero-flow projection phase stencil while keeping
-the independent Stokes solver, conservative face advection and reference
-capillary force. This is an operator ablation: it shares phase kinetics
-with LBFlow and cannot serve as independent continuum validation.
-Its mean speeds differ from LBM by 1.166\%, 0.489\% and
-\PhaseFineHybridDifference\%; the phase-centroid differences are
-1.166\%, 0.489\% and 0.292\%.
-Halving the H32 ablation time step changes the mean speed by
-$\PhaseHybridTimeError$ relatively.
-Table~\ref{tab:kineticspeeds} and Fig.~\ref{fig:kineticresistance}
-retain all four comparisons.
-
-\input{data/phase-kinetics-table.tex}
-
-The combined spectrum prediction and operator ablation identify discrete
-phase kinetics as a material contributor to this numerical capillary
-response. Matching interface width, leading diffusion and a measured
-hydraulic slip condition does not match the complete interface dynamics.
-Neither the three-grid reference discrepancy nor the retained-stencil
-agreement proves a converged moving-contact-line law. The inference is
-bounded to neutral flat walls and low-speed equal-viscosity flow; it does
-not quantify nonneutral or curved-rock contact-line physics.
+The $a=1$ reference differs from LBM by \MajorCoarsePercent\%,
+\MajorMiddlePercent\% and \MajorFinePercent\%, using
+$\overline u_{FV,1}/\overline u_{LB}-1$.
+The separately prescribed $\lambda=4$ cases give 0.778\%, 0.308\%
+and 0.176\%. Half-strength H16/H32 results lie between the untreated
+and unit-strength responses (Fig.~\ref{fig:majorintervention}).
+The residuals remain numerical discrepancies; no contact-line validation
+or continuum extrapolation follows from their small values.
 
 \begin{figure}[htbp]\centering
-\includegraphics[width=.98\linewidth]{kinetic-resistance.pdf}
-\caption{Neutral periodic displacement with the same physical hydraulic
-slip and measured width. (a) Physical mean speeds from LBM, independent
-Stokes/FV and the shared-phase ablation. (b) Their explicitly defined
-relative discrepancies and the independent Stokes prediction from actual
-production force. Retaining phase kinetics narrows the dynamic discrepancy;
-that ablation shares the phase operator and is not an independent physical
-validation. No result in this plot is extrapolated to a rock contact-line law.}
-\label{fig:kineticresistance}\end{figure}
+\includegraphics[width=.98\linewidth]{major-intervention.pdf}
+\caption{Full nonlinear reference intervention at two prescribed hydraulic
+slips. LBM, FV and the held-normal-profile reduction use independently
+specified parameters. Crosses are reduced-model predictions, not speed fits.
+Half strength is additionally tested at slip 1 on H16/H32.
+The theoretical fourth-order term accounts for most of the dynamic gap;
+the agreement is a numerical mechanism test.}
+\label{fig:majorintervention}\end{figure}
+
+At H32, reversed force with half time step changes the corrected mean-speed
+magnitude by $7.48\times10^{-8}$ relatively; doubling the positive force
+changes corrected mean mobility by $2.33\times10^{-7}$.
+Relative mass changes are below $2\times10^{-13}$ for these FV controls.
+The original initialization cross-control, signed LBM and duration checks
+remain separate in the supplement.
+
+\subsection{Predictive low-force resistance reduction}
+To predict the intervention rather than only observe it, hold the
+independently calibrated normal profile $p(x)$ and write
+\begin{equation}
+ \delta\varphi(x,y)=-p'(x)\eta(y).
+\end{equation}
+The derivative has its appropriate sign at each interface.
+Project the phase rate onto the ascending-interface integral.
+The body-force Stokes response supplies $g_hF$; linearized capillary force
+and the same independent Stokes solver supply $\sigma C_h\eta$.
+Neither calculation uses an evolved front, an actual-force audit,
+a fitted slip nor a measured front velocity.
+
+The reduced displacement equation is
+\begin{equation}\label{eq:reducedphase}
+ \eta_t=g_hF+A_a\eta,\qquad
+ A_a=\sigma C_h-aK_{\mathrm{num}}L_y^2 .
+\end{equation}
+A uniformly translating shape satisfies
+\begin{equation}\label{eq:steadymobility}
+ A_a\eta+g_hF=U_\varphi\bm1,\qquad \bm1^T\eta=0.
+\end{equation}
+The second equation fixes the displacement gauge.
+Since rigid translation is a right null mode, a normalized left null vector
+$\ell_a$ gives
+\begin{equation}\label{eq:leftmobility}
+ \frac{U_\varphi}{F}
+ =\frac{\ell_a^Tg_h}{\ell_a^T\bm1},\qquad \ell_a^TA_a=0.
+\end{equation}
+$U_\varphi$ is the projected phase-displacement speed.
+The mean fluid speed is calculated separately from the capillary/body
+Stokes field induced by $\eta$; they are not assumed identical.
+
+The capillary matrix uses centered profile perturbations of size $10^{-4}$.
+Doubling that differentiation amplitude changes the H32 predictions by
+less than $9\times10^{-9}$ relatively. Its small rigid-mode differentiation
+residue, below $1.4\times10^{-11}$, is recorded before imposing the known
+translation identity. Left-null and bordered-system speeds agree within
+$3.1\times10^{-14}$ relatively in the retained matrix cases.
+The calculated operators have no positive eigenvalue above roundoff;
+no nonlinear stability theorem is inferred.
+
+For the 14 baseline nonlinear-reference comparisons at $\sigma=.005$,
+the reduced mean-speed error is at most \MajorReducedBaselinePercent\%.
+Across all 22 available slip/grid/strength/surface-tension comparisons it
+is at most \MajorReducedAllPercent\%.
+The held-profile approximation is explicitly checked, not assumed exact:
+its phase-volume shapes differ from the full FV reference by up to
+\MajorFVShapePercent\%.
+For LBM at $\sigma=.005$, the corresponding unit-strength predicted shapes
+differ by at most \MajorShapePercent\% over the six slip/grid cases.
+This observable is a row-wise phase-volume integral with its mean removed,
+not a fitted contour (Fig.~\ref{fig:majorlocalization}).
+
+The resistance mechanism is visible in Eq.~\eqref{eq:leftmobility}.
+At $a=0$, scaling $\sigma C_h$ changes the balancing deformation inversely
+with $\sigma$, while its left null vector and reduced mobility are unchanged.
+At $a>0$, the ratio $K_{\mathrm{num}}/\sigma$ changes $\ell_a$ and therefore
+mobility. Thus an interface-shape relaxation can create surface-tension
+sensitivity in the linear creeping-flow response without a change in
+hydraulic slip. Wall hydrodynamics mix transverse modes, and symmetric
+parabolic driving excites even modes. A single first-mode decay rate or
+an unbounded-interface estimate is insufficient to predict this resistance.
+
+\subsection{Surface-tension and wall/bulk controls}
+We test $\sigma=.0025$ and .01 at H16/H32, retaining the same production
+kernel, width, force and slip. Full LBM and FV strengths 0 and 1 are run
+independently; low-tension FV0 cases are extended to time 16000 because
+their initial duration left a resolvable late drift. The H32 low-tension
+LBM is continued from its exact outgoing donor to that same duration.
+Both earlier and later histories remain in the data.
+
+The LBM mean speed changes by about 9.11\% at H16 and 7.05\% at H32 over
+this fourfold surface-tension range. The untreated FV response changes
+only about 0.05\% and 0.094\%, respectively.
+The $a=1$ reference reproduces the direction and most of the magnitude,
+with LBM discrepancies 0.661--1.574\% at H16 and 0.298--0.673\% at H32.
+The reduced model predicts these reference responses without a new
+coefficient or mobility fit (Fig.~\ref{fig:majorsigma}).
+Its untreated surface-tension independence is a held-profile linear
+prediction; small profile/discretization effects in the full FV solution
+are retained rather than declared zero.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.98\linewidth]{major-sigma.pdf}
+\caption{Surface-tension controls at fixed physical width, force and slip.
+Crosses are independently constructed reduced predictions. The fourth-order
+term predicts the numerical surface-tension sensitivity; the untreated
+reduced mobility is independent of tension. Long low-tension controls use
+their actual extended output times; all earlier observations are retained.}
+\label{fig:majorsigma}\end{figure}
+
+To distinguish wall and bulk sensitivity, prescribe
+\begin{equation}
+ w_w(y)=e^{-(y/2)^2}+e^{-[(H_p-y)/2]^2},\qquad w_b=1-w_w,
+\end{equation}
+and replace $L_y^2$ by $L_y[wL_y]$.
+The two operators sum to the uniform intervention, conserve phase mass,
+annihilate the planar profile and have nonpositive quadratic work.
+The two-unit wall window is specified before comparing responses;
+it is not a measured contact-line length.
+
+At H48, wall-only, bulk-only and uniform mean speeds are
+$1.34333$, $1.20847$ and $1.34793$, respectively, multiplied by $10^{-5}$,
+compared with LBM $1.34423\times10^{-5}$ and untreated FV
+$1.18207\times10^{-5}$.
+H32 gives the same ordering (Fig.~\ref{fig:majorlocalization}).
+The principal sensitivity to this operator is therefore in the prescribed
+wall neighborhood. Responses are not additive even though the operators
+are, so a percentage decomposition of physical dissipation is not inferred.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.98\linewidth]{major-localization.pdf}
+\caption{Location and shape controls. Left: conservative wall/bulk/unit
+interventions normalized by the full LBM speed; the dotted line is LBM.
+Right: LBM row-wise phase-volume displacement and the unit-strength reduced
+prediction, with only the displacement gauge removed. The localization
+window is prescribed and the profile reduction is approximate. These
+comparisons do not measure molecular wall dissipation.}
+\label{fig:majorlocalization}\end{figure}

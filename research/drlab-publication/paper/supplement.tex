@@ -1,10 +1,15 @@
 \documentclass[11pt]{article}
 \usepackage[margin=25mm]{geometry}
 \usepackage{amsmath,amssymb,bm,booktabs,longtable,hyperref,graphicx}
+\graphicspath{{figures/}}
+\newcommand{\vct}[1]{\bm{#1}}
 \emergencystretch=3em
 \title{Supplement: operator derivation and reproducibility for LBFlow}
 \author{Yu Zhou\\Independent Researcher, Canada\\\texttt{[private contact omitted]}}
 \date{Research snapshot: 9 October 2026}
+\input{data/cpc-numbers.tex}
+\input{data/wall-flux-numbers.tex}
+\input{data/major-revision-numbers.tex}
 \input{data/core-reservoir-numbers.tex}
 \input{data/front-mobility-numbers.tex}
 \input{data/phase-kinetics-numbers.tex}
@@ -21,6 +26,12 @@ SRT and MRT, relaxation times 0.6--1.4 and two arithmetic/harmonic
 kinematic-viscosity choices are exercised. The physical force is force
 density. An acceleration would require multiplying by density, which is not
 the meaning of the constant \texttt{GV} value used here.
+
+\input{phase-kinetics-supplement.tex}
+\input{major-revision-supplement.tex}
+\input{supporting-implementation.tex}
+\input{supporting-transport.tex}
+\input{supporting-pore-flow.tex}
 
 \section{Equilibrium and source moments}
 For the actual lattice weights,
@@ -348,7 +359,7 @@ real line gives
 The leading moment corrections are
 $\delta J_0=\xi d\ln r$, $\delta J_1=O(\xi^2)$ and
 $\delta J_2=O(\xi^3)$. Expanding $-J_1^2/J_0$ gives the arithmetic
-coefficient in the main paper. Harmonic interpolation instead has
+coefficient in the supporting transport analysis. Harmonic interpolation instead has
 $1/\mu_H=c+d\tanh(s/\xi)$, for which the excess $J_0$ vanishes by symmetry
 and $J_2$ is unchanged. Using
 $\int_0^\infty s[1-\tanh(s/\xi)]ds=\pi^2\xi^2/24$ gives
@@ -568,7 +579,6 @@ alone do not establish a quantitative invasion/retraction interval.
 
 \input{core-reservoirs.tex}
 \input{front-mobility.tex}
-\input{phase-kinetics-supplement.tex}
 
 \section{Scientific limits and publication status}
 Only equal-density, low-speed flow in the documented parameter range is

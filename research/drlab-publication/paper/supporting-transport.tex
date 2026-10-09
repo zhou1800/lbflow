@@ -1,0 +1,606 @@
+\section{Physical origin of finite-interface transport bias}
+\subsection{Hydraulic response of a diffuse viscosity profile}
+Consider two equal-density fluids layered across a no-slip slit of width $H$,
+driven parallel to their interface by uniform force $F$. In steady low-speed
+flow, $d(\mu du/dy)/dy=-F$. Define the inverse-viscosity moments
+\begin{equation}
+ I_n=\int_0^H\frac{y^n}{\mu(y)}\,dy,\qquad n=0,1,2.
+\end{equation}
+Integrating the momentum balance and imposing $u(0)=u(H)=0$ gives
+\begin{equation}
+ \mu u'=F(I_1/I_0-y),\qquad
+ Q=\int_0^H u\,dy=F\left(I_2-\frac{I_1^2}{I_0}\right).
+ \label{eq:conductance}
+\end{equation}
+This elementary continuum relation evaluates the response of a specified
+constitutive profile without solving the lattice dynamics. A sharp step,
+the viscosity reconstructed from measured phase fractions, and a separately
+calibrated tanh profile therefore provide distinct references. At unit
+equal reference density, dynamic and kinematic viscosities coincide to
+leading order; small density departures remain recorded in the data.
+
+Let $s=y-H/2$, $\varphi=(1-\tanh(s/\xi))/2$, and
+$r=\mu_1/\mu_0$. For a well-separated interface, the integrated excess shear
+compliance relative to the sharp step is
+\begin{equation}
+ \mathcal C_A=\frac{\xi}{2}\left(\frac1{\mu_1}-\frac1{\mu_0}\right)\ln r,
+ \qquad \mathcal C_H=0.
+\end{equation}
+The subscripts denote arithmetic and harmonic interpolation. Harmonic
+interpolation cancels this zeroth-moment excess, but the stress varies across
+the interface in pressure-driven flow. Its first and second weighted moments
+still change the conductance. Writing $\gamma=(r-1)/(r+1)$, expansion of
+Eq.~\ref{eq:conductance} about the centered sharp interface gives
+\begin{align}
+ \frac{Q_A-Q_{sharp}}{Q_{sharp}}&=
+ -\frac{3\gamma^3\ln r}{4-3\gamma^2}\frac{\xi}{H}
+ +O((\xi/H)^2),\\
+ \frac{Q_H-Q_{sharp}}{Q_{sharp}}&=
+ \frac{2\pi^2\gamma^2}{4-3\gamma^2}\left(\frac{\xi}{H}\right)^2
+ +O((\xi/H)^4).
+ \label{eq:thininterface}
+\end{align}
+Exponential wall-tail corrections vanish in the separated-interface limit.
+The supplement derives these expressions. They describe the stated
+one-dimensional constitutive problem, not universal error laws for curved
+interfaces or heterogeneous rock. Harmonic interpolation's improved leading
+order therefore does not imply superior accuracy at every confinement.
+
+Three independent unforced planar calculations calibrate $W_{0.9}$ at
+$\beta=0.35,0.7,0.9$. The widths are 9.376, 4.765 and 3.929 nodes;
+$\xi=W_{0.9}/[2\operatorname{atanh}(0.9)]$ specifies a tanh approximation
+without fitting any velocity. Eighteen forced calculations combine these
+parameters with $H=16,32,64$, both closures and $(\tau_0,\tau_1)=(0.6,1.4)$.
+Force scales as $H^{-3}$ and surface tension as $H^{-1}$, with fixed
+relaxation times. Fixed $\beta$ makes the physical interface shrink during
+this diffusive-scale sequence, so it is not a fixed-interface spatial
+convergence test. All late relative velocity changes are below $10^{-11}$.
+
+At $H=16$, $\beta=0.35$, arithmetic interpolation decreases the sampled
+volume flux by 9.19\%, while harmonic interpolation increases it by 21.59\%.
+Independent planar-tanh predictions give $-9.08$\% and $+21.30$\%.
+The corresponding profile discrepancies against the \emph{sharp} solution
+are 17.02\% and 24.66\%, but discrepancies against the continuum solution
+using linear interpolation of the measured diffuse profile are 0.160\% and
+0.100\%. Shape-preserving cubic interpolation gives 0.121\% and 0.273\%.
+Most of the apparent failure is consequently the response of the chosen
+finite constitutive transition, rather than failure of the solver to recover
+its continuum momentum balance.
+
+Fig.~\ref{fig:transport} also shows the competing effect of sharpening an
+interface. At $H=16$, increasing $\beta$ from 0.35 to 0.9 reduces the
+arithmetic sharp-flux bias, but increases its measured-diffuse profile error
+from 0.160\% to 0.753\% with the specified linear reconstruction; the
+corresponding shape-preserving cubic values are 0.121\% and 0.443\%.
+At $H=64$, $\beta=0.9$, the harmonic discrepancy is 0.0117\% for linear
+interpolation and 0.0482\% for the cubic reference. Quadrature refinement
+changes a reference profile by at most $9.12\times10^{-8}$ relative to the
+measured velocity, whereas interpolation changes can be much larger.
+These small residuals include reference-reconstruction sensitivity and
+finite-density departures; they are not isolated lattice truncation errors.
+Interface confinement and lattice representation
+must therefore be assessed separately. The remaining error is not assigned
+exclusively to one discrete operator, and these flat interfaces do not test
+curved-interface spurious currents or capillary trapping.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\linewidth]{interfacial-transport.pdf}
+\caption{Controlled transport at viscosity ratio 9:1. Left: measured flux
+shifts against the midpoint-sampled sharp profile; lines show continuous
+tanh-profile predictions from the independent width calibration, with no
+flow-data fitting. Right: velocity-profile error against the continuum
+reference reconstructed from measured phase fractions. Bars span the
+linear/PCHIP reconstructions and quadrature refinement, not statistical
+confidence intervals. Diffuse constitutive bias and a reconstruction-dependent
+solver discrepancy are distinct observables.}
+\label{fig:transport}\end{figure}
+
+\subsection{Wall direction and capillary-stress magnitude}
+The capillary second moment is proportional to
+$|\vct g|(\vct n\vct n-I)$, so setting $\vct n$ alone does not set the stress
+magnitude. On a flat D2Q9 lower wall, a locally linear gradient has the
+clipped-stencil transformation
+\begin{equation}
+ \vct g_{clip}=\operatorname{diag}(5/6,1/2)\vct g,\qquad
+ \frac{|\vct g_{clip}|}{|\vct g|}
+ =\sqrt{\frac{25}{36}\sin^2\theta+\frac14\cos^2\theta}.
+ \label{eq:wallmagnitude}
+\end{equation}
+The recovered wall rotation preserves the magnitude of the gradient it
+receives. Even after an imposed direction correction, the local perturbation
+amplitude thus retains this linear-field attenuation: 0.764 at 60 or 120
+degrees and 0.833 at 90 degrees. Moment reconstruction removes that specific
+linear-stencil bias. It does not prove discrete mechanical equilibrium at a
+nonlinear contact line or prescribe an accurate curved-wall normal. The
+measured static-angle improvement and increased parasitic flow reported
+below are consistent with needing both checks; Eq.~\ref{eq:wallmagnitude}
+alone is not a quantitative prediction of the observed capillary pressure
+or spurious velocity.
+
+\section{Numerical controls for transport and capillarity}
+All runs use double precision, GCC 13.3, CMake 3.28.3 and Open MPI 4.1.6 on
+Linux. Dedicated workstation timings are described separately below.
+The tested physical range is low-speed flow at unit, equal reference density,
+$\tau_k\in\{0.6,0.8,1,1.4\}$ and prescribed $\sigma=0.005$ for droplet cases.
+The supplement supplies derivations, measurement protocols and run identities.
+
+\subsection{Force, viscosity and restart}
+In the original MRT operator, $S$ was fixed at the first-phase relaxation
+time. Pure second-phase pressure-channel fields were therefore identical
+when its relaxation time changed. The original velocity-shift force has
+momentum increment $s_j\tau F$: D3Q19 conserved rates make it vanish, while
+D2Q9's old conserved rates produce a relaxation-dependent force.
+The same fixed relaxation also changes capillary stress: at unchanged
+prescribed $\sigma=0.005$, swapping $(\tau_0,\tau_1)=(0.6,1.4)$ to
+$(1.4,0.6)$ gives inferred original surface tensions 0.00315 and 0.00764.
+Local relaxation restores the intended surface-tension scale.
+
+Sixteen uniform-force cases spanning both models, lattices, collision
+operators and two viscosities agree with $u(100)=10^{-4}$ within
+$3.2\times10^{-16}$. Twenty-four force-driven channel cases use halfway walls
+and compare with $u(y)=F_xy(H-y)/(2\mu)$. Force scales as $H^{-3}$ while
+relaxation time is fixed, preserving diffusive physical scaling. SRT errors
+fall by approximately four on each doubling from $H=8$ to 16 to 32.
+MRT errors are about $1.4\times10^{-8}$ or smaller, consistent with the
+remaining transient at the selected run duration (Fig.~\ref{fig:channel}).
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.94\linewidth]{channel-verification.pdf}
+\caption{Analytic halfway-wall channel verification. SRT refinement and MRT
+profiles are measured independently from globally reconstructed VTI output.}
+\label{fig:channel}\end{figure}
+
+Continuous and restarted uniform-force and three-dimensional droplet runs
+have bitwise-identical macroscopic fields in six comparisons, including
+one-to-two-rank restart. Invalid parameter cases exit with failure. Algebraic
+checks of the emitted production coefficients have maximum absolute error
+below $9\times10^{-16}$.
+
+For two equal-density layers at viscosity ratio 9:1, the arithmetic
+interpolation has 5.37\% relative profile error at $H=64$ against the
+sharp-interface solution. Its error against a continuum solution using the
+measured diffuse viscosity profile is 0.22\%. Harmonic interpolation reduces
+the sharp-interface discrepancy to 0.81\%, while the diffuse-reference error
+is 0.23\% (Fig.~\ref{fig:layered}). Thus the major change is a constitutive
+transition bias, not an improved collision formula.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.94\linewidth]{layered-flow.pdf}
+\caption{Layered Poiseuille flow: sharp-interface and measured diffuse-profile
+references diagnose viscosity-interpolation bias. The small residual also
+depends on reference reconstruction.}
+\label{fig:layered}\end{figure}
+
+\subsection{Interfaces and wetting}
+Planar interfaces conserve component mass and have spurious speed below
+$5\times10^{-16}$. The measured distance between $\chi=-0.9$ and $+0.9$ is
+4.765 nodes for D2Q9 and 5.289 for D3Q19 at $\beta=0.7$; D2Q9 widths at
+$\beta=0.35$ and 0.9 are 9.376 and 3.929 nodes respectively. Interface width
+is measured rather than equated to the input parameter.
+
+Pressure is averaged in bulk regions outside the diffuse interface, and
+radius is obtained by orthogonal fitting of subgrid contour intersections.
+At 12000 steps, D2Q9 Laplace errors for initial radii 12, 20 and 28 are
+1.50\%, 0.50\% and 0.23\%. The D3Q19 errors for radii 8, 12 and 16 are
+4.96\%, 1.92\% and 0.99\%; the largest case is continued to 8000 steps.
+The smallest spheres contain few interface widths and quantify finite-width
+bias, rather than establish a sharp-interface asymptotic regime
+(Fig.~\ref{fig:laplace}). Unequal-relaxation cases also retain the prescribed
+surface-tension scale; their detailed errors are tabulated in the supplement.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.94\linewidth]{laplace-verification.pdf}
+\caption{Laplace pressure compared with $\sigma/R$ and $2\sigma/R$.
+Insets quantify finite-interface error; late-time drift is checked separately.}
+\label{fig:laplace}\end{figure}
+
+Sessile-drop measurements use the physical halfway wall $y=0.5$ and measure
+the angle through phase 1. A principal orthogonal circle fit excludes points
+within $0.75W_{0.9}$ of the wall. Sensitivities to contour level and exclusion
+height, left--right asymmetry and late-time changes are retained.
+For initial radius 36 and $\beta=0.7$, the equilibrated 60-degree measurements
+are 64.52 degrees for the clipped stencil and 60.91 degrees for
+renormalization. The corresponding 120-degree measurements are 117.18 and
+120.92 degrees. Neutral-angle bias persists, and renormalization increases
+its spurious speed from approximately $2.8\times10^{-5}$ to $1.05\times10^{-4}$.
+This is a tradeoff rather than uniform superiority (Fig.~\ref{fig:wetting}).
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.94\linewidth]{wetting-sensitivity.pdf}
+\caption{Flat-wall contact-angle and spurious-velocity ablation. Error envelopes
+show deterministic measurement sensitivity rather than statistical confidence.
+Size and interface-width sequences use fixed lattice surface tension and are
+not labelled a matched-physics spatial convergence study.}
+\label{fig:wetting}\end{figure}
+
+\subsection{Direct closed-slit capillary response}
+Closed periodic slits contain a central phase-0 segment and two menisci, with
+halfway-wall spacing $H$, length $4H$ and no external force. Pressure is
+measured directly in separated bulk buffers, rather than inferred from
+velocity. The signed sharp reference is
+$p_0-p_1=2\sigma\cos\theta/H$, with the angle through phase 1.
+The H16 pilot tests 60, 90 and 120 degrees, three gradients and both capillary
+operators. The follow-up uses $H=16,32,48$ for legacy perturbation,
+linear-reconstructed perturbation and linear-reconstructed CSF.
+At fixed $\beta=0.7$ and $\tau_0=\tau_1=1$, $\sigma=0.005/s$ and the initial
+duration is $8000s^2$, where $s=H/16$. The three-width 60-degree controls
+are continued to twice that duration. This is a joint grid/sharp-interface sequence, not
+spatial convergence at fixed physical interface width.
+
+\input{data/capillary-numbers.tex}
+For the 60-degree controls, the legacy signed pressure discrepancy remains
+approximately $-6.3$ to $-7.5$\% over these three widths. Linear
+reconstruction reduces its discrepancy to \CapillaryRenPressureErrorFine\%
+at $H=48$; CSF gives \CapillaryCSFPressureErrorFine\%.
+CSF lowers the H48 nonneutral residual maximum speed by a factor
+\CapillaryNonneutralReductionFine\ relative to reconstructed perturbation,
+while the neutral-wall factor is \CapillaryNeutralReductionFine\
+(Fig.~\ref{fig:closedcapillary}). Lower velocity therefore does not imply
+lower pressure bias. The longest-hold checks change normalized pressure by
+less than \CapillaryHoldPressureChange\% of the sharp reference, with the
+late color RMS changes retained separately. The data do not establish a
+nonzero asymptotic legacy error from three widths or an entry threshold.
+The largest longer-hold color RMS change is $4.82\times10^{-9}$, and the
+maximum relative component/total mass drift across those earlier slit histories is
+$4.03\times10^{-12}$.
+Neutral residual $\mu U_{max}/\sigma$ remains near $3.0\times10^{-3}$ for
+linear-reconstructed perturbation and $3.3\times10^{-4}$ for CSF over the
+tested widths. Decreasing lattice velocity under diffusive scaling therefore
+does not demonstrate vanishing dimensionless parasitic flow. This is a
+specific limitation for low-rate capillary pore-flow studies, not a universal
+error floor for other geometries or wetting schemes.
+
+The negative controls are informative. Local tanh reconstruction increases
+the H16 neutral maximum speed from $9.05\times10^{-5}$ to
+$9.79\times10^{-5}$ relative to linear reconstruction with perturbation.
+Setting $\sigma=0$ leaves a wall-to-center color-profile difference of about
+0.0109 while fluid speed falls below $2\times10^{-16}$. Thus color-profile
+distortion occurs independently of capillary motion. The evidence motivates
+inspection of segregation and boundary reflection together; it does not
+prove that one discrete term exclusively causes the residual flow.
+Bulk CSF Laplace controls retain errors of 1.39\% and 0.303\% for D2Q9
+radii 12 and 24 after longer relaxation, and 4.26\% for D3Q19 radius 8.
+Those tests do not validate curved three-dimensional wetting.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.98\linewidth]{closed-capillary.pdf}
+\caption{Closed-slit pressure and residual velocity. Left: signed 60-degree
+pressure discrepancy after the longer holds; bars retain bulk-sampling and
+duration sensitivity. Right: $\mu U_{max}/\sigma$, with filled circles for
+60 degrees and open triangles for neutral wetting. Methods share the input
+surface tension and measured bulk width. The joint refinement sequence
+reduces pressure error for reconstruction, while CSF reduces residual flow.
+It does not remove the wall-color distortion.}
+\label{fig:closedcapillary}\end{figure}
+
+\subsection{Wall phase transport, equilibrium and physical location}
+A neutral zero-sigma control isolates the phase operator from capillary
+feedback. At rest, its axial scalar recurrence is
+\begin{equation}\label{eq:phaserecurrence}
+ \varphi'_j-\varphi_j=A\Delta_x\varphi_j+
+ \beta B(J_{j-1}-J_{j+1}),\qquad
+ J_j=n_j\varphi_j(1-\varphi_j).
+\end{equation}
+For cosine recoloring, $A=a+2b$ and $B=a+\sqrt2b$, whereas local
+wall bounce-back gives $A_w=a+b$ and $B_w=a+b/\sqrt2$;
+$a=1/9$ and $b=1/36$. The wall/bulk stationary ratios differ.
+A cosine-specific tangent multiplier
+$k=[(a+b)(a+\sqrt2b)/(a+2b)-b/\sqrt2]/a=0.9511844635$
+restores that ratio. It does not restore the entire transient operator.
+Published projection recoloring already has equal stationary ratios,
+so this multiplier is not needed for that model.
+Independent scalar recurrences, cutoff/rotation controls and the
+unfavorable nonneutral results are detailed in the supplement.
+
+\input{data/wall-numbers.tex}
+The cosine correction preserves generated neutral equilibria within
+\WallFixedColorBound\ in color and \WallFixedSpeedBound\ in velocity.
+From a step initialization, however, raw adjacent fields can retain
+period-two momentum (Fig.~\ref{fig:wallbalance}). A spatially alternating
+equilibrium momentum perturbation is preserved by collision and reverses
+under streaming, giving the established eigenvalue $-1$
+\cite{lallemand2000,guo2011}. Even-time reporting can conceal it.
+Adjacent-step stopping checks reject such false stationarity; no filtering
+or damping is applied to numerical fields. Exploratory nonneutral use
+of the cosine multiplier worsens the measured pressure bias.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.98\linewidth]{wall-balance.pdf}
+\caption{Neutral discrete fixed point and temporal controls. A cosine-specific
+wall correction removes static profile distortion but can retain raw
+alternating velocity. Adjacent-step averages diagnose this mode;
+they are not substituted into the solver. Complete histories and
+nonneutral negative controls are supplied in the supplement.}
+\label{fig:wallbalance}\end{figure}
+
+The full transient instead requires a conservative face transfer. For
+adjacent wall nodes $L,R$ and outgoing reflected diagonals $p,m$, define
+\begin{equation}\label{eq:wallphaseflux}
+ J_{LR}=f_{0p}(L)-f_{0m}(R)
+ -\frac{\varphi_L+\varphi_R}{2}[f_{Tp}(L)-f_{Tm}(R)].
+\end{equation}
+Opposite incoming face populations receive $\pm J_{LR}$; the second phase
+is complementary to its original total reflection. Each component is
+conserved globally, total-fluid reflection is unchanged and pure phases
+have zero transfer. At unit-density rest this reduces to the established
+forward specular scalar transport \cite{ginzburg2015}. It restores the
+complete neutral bulk recurrence, with six full-solver trajectories
+agreeing within \FluxTransientBound\ and unfiltered neutral velocity below
+\FluxNeutralSpeedBound. This condition controls numerical phase reflection,
+not a general contact-line constitutive relation.
+
+Physical wall location remains distinct. Rotating the normal at the first
+fluid center imposes the angle half a cell from the halfway wall. A circular
+sharp-interface estimate then replaces $H$ by $H-1$, giving pressure bias
+$1/(H-1)$; this is a testable geometric estimate rather than a fitted width.
+The halfway control extrapolates the inward normal to the physical wall.
+The published scalar ghost formula \cite{liu2015} instead sets
+$\chi_g=\chi_1-\cot\theta|1.5g_{t1}-0.5g_{t2}|$, followed by a full
+virtual-color stencil without a second center-angle rotation.
+This formula alone is not the complete published algorithm.
+
+Phase transfer with ordinary center rotation worsens pressure. With ghost
+color, the 60-degree errors after four initial durations become
+\FluxGhostPressureSixteen\%, \FluxGhostPressureThirtyTwo\% and
+\FluxGhostPressureFortyEight\% at H16/H32/H48 (Fig.~\ref{fig:wallflux}).
+Nonneutral currents, contour-fitting sensitivity and adjacent-step phase
+oscillations remain. The matched-core comparison below therefore retains
+signed pressure errors and raw velocities. Neutral transient consistency
+and static pressure improvement establish neither nonneutral dynamic
+accuracy nor curved digital-rock wetting.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.98\linewidth]{wall-flux.pdf}
+\caption{Wall transport and location are separate controls. (a) Independent
+phase-transient discrepancy. (b) Raw neutral velocity. (c) Signed nonneutral
+pressure discrepancy; the grey curve is the first-center geometric estimate.
+(d) Nonneutral residual capillary numbers. The full neutral transient is
+preserved without implying negligible nonneutral circulation.}
+\label{fig:wallflux}\end{figure}
+
+\subsection{Published core controls at matched phase transport}
+The ghost-color comparison initially retains the recovered recoloring and
+MRT definitions. To separate these from wall treatment, two independent
+controls reproduce the explicitly specified core operators of
+Liu et al. \cite{liu2015}. Projection recoloring uses
+\begin{equation}
+ R_i=\beta_p\rho\varphi(1-\varphi)w_i(\vct e_i\cdot\vct n),
+\end{equation}
+instead of dividing this projection by $|\vct e_i|$.
+The published D2Q9 raw-moment spectrum, in the existing row order, is
+$(1,1.63,1.14,1,1.92,1,1.92,1/\tau,1/\tau)$.
+The matching Guo source and physical half-force velocity preserve the
+momentum increment even when its relaxation rate is one.
+Only CSF is admitted with this spectrum: its energy rates do not justify
+reusing the legacy perturbation-tension mapping. The fluid-only
+normal derivative at walls remains an explicit LBFlow choice; these
+controls are not a full replication of an incompletely specified scheme.
+
+For an axial rest profile, projection segregation has $B_p=A=a+2b$,
+and local bounce-back has $B_{p,w}=A_w=a+b$. It already preserves the
+bulk stationary ratio without the cosine-derived multiplier.
+To compare transport independently of pressure, set
+\begin{equation}
+ \beta_p=\beta_c\frac{a+\sqrt{2}b}{a+2b}
+             =\CoreMatchedBeta\quad(\beta_c=0.7).
+\end{equation}
+This matches the complete axial bulk recurrence, not just a fitted width.
+Independent 128-cell planar profiles agree within
+$\CoreMatchedProfileError$; both have $W_{0.9}=4.765235$.
+Projection with the unadjusted $\beta_p=0.7$ instead has width 4.450814.
+The cosine weights $w_i/|\vct e_i|$ have a fourth-order isotropy defect
+$T_{xxxx}-3T_{xxyy}=0.0650874$, whereas standard projection weights
+give zero to roundoff. Equal axial recurrence therefore does not make
+the multidimensional discrete operators identical. The supplied oblique
+width diagnostic also retains its different sampling interval and
+interpolation bias; its full difference is not attributed to this tensor.
+
+With ghost color and phase transfer, the matched projection/legacy-MRT
+pressure discrepancies are $+0.517$, $-0.336$ and $-0.702$\% at
+$H=16,32,48$ after four initial durations. The published-MRT values are
+$+0.551$, $-0.341$ and $-0.716$\% (Fig.~\ref{fig:core}).
+The sign reversal and larger final discrepancy preclude using the close
+H16 result as uniform accuracy evidence. Raw nonneutral speeds decrease,
+but adjacent color still differs from its two-step state. At H16 the
+one-step change is approximately $6.66\times10^{-7}$, compared with
+$3.47\times10^{-12}$ over two steps. Projection and a different kinetic
+spectrum do not eliminate the conserved-momentum lattice mode.
+
+Its force coupling can be checked exactly. On an even periodic axis, or
+the reflecting wall-normal axis, let $P_t$ be the fluid-node mean of
+physical momentum times the alternating spatial sign, and $G_t$ the same
+projection of force density. Outgoing momentum is $P_t+G_t/2$; streaming
+or reflection changes its sign. Hence
+\begin{equation}\label{eq:parityforce}
+ P_{t+1}=-P_t+\frac{G_{t+1}-G_t}{2}.
+\end{equation}
+Physical fields, native outgoing populations and the actual force audit
+satisfy this relation within $5.1\times10^{-19}$ in the original held
+nonneutral control. Explicitly setting $\sigma=0$ makes circulation
+decay while alternating momentum remains; this diagnostic changes the
+physics and does not filter production velocities. Odd-periodic-domain
+and exact-translation controls are distinguished in the supplement.
+
+The MRT change also affects wall hydraulics. In a pure low-speed slit,
+define $\Lambda=(\tau-1/2)(1/s_q-1/2)$ and
+$C=4\Lambda/3-1/4$. The midpoint profile is
+\begin{equation}
+ u(y)=\frac{F}{2\nu}[y(H-y)+C],\qquad y=j+\tfrac12.
+\end{equation}
+Legacy rates give $\Lambda=3/16$ and $C=0$;
+the published $s_q=1.92$ gives $\Lambda=(\tau-1/2)/48$.
+Eighteen pure-channel controls match this independent reference within
+relative profile error $\CoreMaxHydraulicError$.
+The largest unshifted flux discrepancy is approximately $-2.30$\% at
+$H=8$, $\tau=0.6$. A lower static current cannot be interpreted as
+unchanged dynamic wall response. Bulk droplet controls at matched
+transport likewise retain their measured pressure and residual velocity.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.98\linewidth]{published-core.pdf}
+\caption{Independently matched core controls. (a) Axial planar profiles;
+matched projection overlaps cosine, while equal beta changes the width.
+(b) Signed 60-degree pressure discrepancies after longer holds.
+(c) Corresponding unfiltered residual capillary numbers.
+(d) Pure-channel flux offsets of the published MRT spectrum: symbols are
+measurements and lines are the independent midpoint prediction.}
+\label{fig:core}\end{figure}
+
+\subsection{Guarded pressure-driven fronts}
+A pressure boundary introduces component mass, so closed-mass conservation
+alone cannot validate it. The new experiment admits two opposed axial PB
+planes only with flat ghost-color walls and phase transfer. At every
+incoming/outgoing state, each prescribed phase must remain pure within
+$10^{-9}$ on its PB plane and two interior strips. The actual first-strip
+gradient must be below the existing $10^{-9}$ cutoff, keeping the
+uncorrected Zou--He reconstruction force-free. The solver fails when the
+interface reaches this collar. Phase-only wall transfers on faces touching
+PB nodes are disabled, including the wrap between opposite reservoirs.
+Velocity reservoirs, films and irregular walls are outside this extension.
+
+For interior VD/GV nodes, independently integrate every outgoing kinetic
+population entering from or leaving for PB. Solid links return by reflection
+and are excluded. The exact accounting is
+\begin{equation}
+ M_k(t)-M_k(t_0)=\sum_{n=t_0}^{t-1}
+   [\mathcal J_{k,\mathrm{PB}\to\mathrm{int}}(n)
+    -\mathcal J_{k,\mathrm{int}\to\mathrm{PB}}(n)]+\epsilon_k.
+\end{equation}
+The boundary-node sum of $\rho u$ is not substituted for these link fluxes.
+Restart establishes a new accounting baseline while retaining the same
+outgoing numerical state. Two-phase fields and populations are bitwise
+identical across the tested rank/restart changes. Across the pressure
+campaign, the largest budget residual relative to initial interior mass
+is $\CoreMaxPressureBudget$.
+
+Pure-channel pressure controls use both flow directions, both phases and
+both spectra, at $H=8,16,32$ and $\tau=1,1.55$. The independently measured
+central pressure gradient and specified midpoint offset reproduce the
+central profiles within $1.92\times10^{-5}$. The central gradient differs
+slightly from the nominal endpoint pressure divided by length, so measured
+pure-channel conductance is retained separately.
+
+A recorded crop of the held closed meniscus produces a single front in
+a $4H$ slit. Remote corridors explicitly combine donor phase populations
+into the prescribed pure phase, preserving each total population and its
+momentum. No damping or surface-tension fit is applied. Equal viscosities,
+60-degree walls and independently matched beta are used at H16/H32;
+$\sigma$ and duration scale as in the closed controls.
+The volume-equivalent front coordinate is
+$X_V=1/2+H^{-1}\sum_{\mathrm{int}}\varphi$; centerline and first-fluid-row
+crossings are retained as separate diagnostics.
+
+Reservoir differences $0.98,1,1.02$ times
+$p_Y=2\sigma\cos\theta/H$ give both motion directions. Increasing the
+duration fourfold to 32000/128000 steps changes the three-point linear
+zero-drift pressure ratio by at most $\CoreMaxDurationRatioChange$.
+Additional pressure pairs, prespecified at the separately measured closed
+pressure plus/minus $0.00025p_Y$, still give opposite drift signs at
+both durations. The linear zero-drift estimate differs from the closed
+pressure by at most \CoreMaxZeroClosedPercent\% of $p_Y$
+(Fig.~\ref{fig:fronts}; supplementary table). This is a finite-time flat-slit
+consistency check, not a geometric pore-throat trapping threshold.
+
+The measured slope of front speed against pressure remains approximately
+11.3--17.8\% lower than pure-channel conductance. A zero-sigma diagnostic at unchanged reservoir
+pressure recovers the pure-channel mean velocity within relative
+$6.1\times10^{-6}$ and front speed within $5.9\times10^{-5}$,
+supporting total-fluid decoupling rather than interpreting phase segregation
+alone as hydraulic resistance. Contact-line dissipation and its
+regularization are established physical issues \cite{huh1971,akai2018};
+these comparisons do not isolate a physical slip length, a constitutive
+contact-line law or a general numerical-error mechanism. Static pressure
+agreement alone is insufficient evidence for quantitative displacement
+rates in digital-rock pores.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.98\linewidth]{pressure-fronts.pdf}
+\caption{Pressure-driven single-front controls after four durations.
+(a,b) Both drift directions at H16/H32.
+(c) Estimated zero-drift pressure and independently measured closed pressure.
+(d) Front mobility relative to pure-channel conductance. Ghost color and
+phase transfer are shared; projection beta is independently matched.
+The narrower prespecified sign brackets and all raw mass budgets remain
+in the supplied data. No trapped pore or hysteresis loop is simulated.}
+\label{fig:fronts}\end{figure}
+
+\subsection{Fixed interface width and localized front resistance}
+The preceding fixed-beta sequence also sharpens the interface in physical
+units. To separate that change, projection recoloring and legacy MRT are
+retained at $\tau_0=\tau_1=1$, $\theta=60^\circ$ and
+$W_{0.9}/H=4.765235021846117/16$. Beta is selected from the independent
+descending axial zero-flux condition
+\begin{equation}
+ \varphi_{j+1}-\varphi_j=-\beta[
+ \varphi_j(1-\varphi_j)+\varphi_{j+1}(1-\varphi_{j+1})].
+\end{equation}
+Production planar controls verify the resulting widths at H16/H32/H48
+to relative $\FrontWidthRelativeError$. Beta is approximately
+$0.63165825,0.31145624,0.20699672$; no pressure or velocity enters that
+calibration. Diffusive units retain the leading axial scalar diffusion and
+fluid viscosity, both $1/6$, as well as the measured relative width.
+They do not independently fix an effective contact-line slip length.
+
+Closed donors supply pressure centers before any moving-front run.
+Offsets $\pm0.02p_Y$ are used on all three grids, with additional
+$\pm0.01p_Y,\pm0.04p_Y$ pairs and lengths $4H,8H$ at H16.
+Doubling the front duration changes the measured mobility by at most
+\FrontDurationMobilityPercent\%. With $M_V=d\dot X_V/d\Delta p$ and
+independently measured pure-channel mobility $G_0$, define
+\begin{equation}
+ R_e=M_V^{-1}-G_0^{-1}.
+ \label{eq:front-resistance}
+\end{equation}
+The H16 mobility deficit decreases from 11.26\% to 5.92\% when the
+channel doubles in length, while $R_e$ changes by only
+\FrontLengthResistancePercent\%. The response is almost independent of
+the fourfold pressure-halfwidth variation in this tested low-speed interval.
+Thus a length-independent interfacial contribution, added to the
+length-dependent hydraulic resistance, explains the measured length effect
+(Fig.~\ref{fig:front-resistance}). This does not separately locate all
+dissipation at the microscopic contact line.
+
+The low-speed reciprocal balance provides an independent force diagnostic.
+Let $\bm u_a,Q_a$ be the velocity and flux of a pure-channel auxiliary
+driven by $\Delta p_a$. In incompressible creeping flow with the same
+viscosity and stationary walls, the reciprocal work relation is
+$\Delta p_a Q=\Delta p Q_a+\int\bm F_c\cdot\bm u_a\,dV$.
+Its lattice quadrature defines
+\begin{equation}
+ p_F=-\frac{\sum_{\mathrm{fluid}}\bm F_c\cdot\bm u_a}{Q_a},
+ \qquad \overline U\simeq G_0(\Delta p-p_F).
+ \label{eq:force-work}
+\end{equation}
+The auxiliary is measured in separate positive/negative pure-channel runs;
+the production capillary force is audited from two adjacent checkpoints.
+Their reconstructed densities and color match physical output within
+$6.7\times10^{-16}$. Two-state averaging is applied only to diagnostics.
+The incremental resistance $\delta p_F/\delta\overline U$ agrees with
+$\delta\Delta p/\delta\overline U-G_0^{-1}$ within
+\FrontForceResistancePercent\%, with no force or slip parameter fitted.
+Absolute speed residuals up to $\FrontMaxForceResidual$ remain, and can be
+larger than the drift near rest. Equation~\eqref{eq:force-work} is consequently
+not asserted as an exact discrete identity or a zero-drift estimator.
+
+At fixed measured relative width the $4H$ mobility deficits are
+11.26\%, 18.57\% and \FrontFineDeficit\% on the three grids.
+Signed closed-pressure discrepancies are $+0.517$\%, $+1.389$\% and
+$+1.692$\%. The response has not converged on these resolutions.
+Force-work closure identifies how the numerical momentum balance produces
+the deficit; it does not verify its magnitude against independent physical
+contact-line data. The remaining discretization, diffuse regularization and
+wall coupling require a separate, matched moving-contact-line reference
+before quantitative rock displacement or pore-throat trapping is reported.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.98\linewidth]{front-resistance.pdf}
+\caption{Fixed-width and localized-resistance controls with unchanged
+projection/legacy MRT. (a) Independently calibrated planar profiles in common
+length units. (b) Grid-dependent mobility deficit at fixed measured $W_{0.9}/H$.
+(c) Nearly length-independent excess resistance across the tested pressure
+interval. The vertical scale resolves its small measured variation.
+(d) Resistance from independently weighted capillary force versus pressure
+and instantaneous mean flow, with the identity line for comparison.
+All results retain raw flow and exact component budgets.}
+\label{fig:front-resistance}\end{figure}
+

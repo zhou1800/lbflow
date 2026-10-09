@@ -28,8 +28,23 @@ def target(x,y,t,b=.62,height=16.,length=128.):
     offset=(x-length/2-eta+length/2)%length-length/2
     sign=-np.sign(offset);distance=length/4-abs(offset)
     phi=1/(1+np.exp(-2*b*distance));first=2*b*phi*(1-phi)
-    second=2*b*(1-2*phi)*first;norm=np.sqrt(1+etay*etay)
-    divergence=second*(norm*norm-norm)-sign*first*etayy*(1-1/norm**3)
+    second=2*b*(1-2*phi)*first
+    # C2 joins to exact pure plateaus remove the absolute-distance cusps.
+    # The joins affect only logistic tails below 5e-13, not the interface.
+    lo,hi=-27.,-23.;span=hi-lo;value=1/(1+np.exp(-2*b*hi))
+    slope=2*b*value*(1-value);curvature=2*b*(1-2*value)*slope
+    a3=10*value-4*span*slope+.5*span**2*curvature
+    a4=-15*value+7*span*slope-span**2*curvature
+    a5=6*value-3*span*slope+.5*span**2*curvature
+    tail=-abs(distance);r=np.maximum(0,np.minimum(1,(tail-lo)/span))
+    p=a3*r**3+a4*r**4+a5*r**5
+    p1=(3*a3*r*r+4*a4*r**3+5*a5*r**4)/span
+    p2=(6*a3*r+12*a4*r*r+20*a5*r**3)/span**2
+    active=tail<hi;upper=distance>0
+    phi=np.where(active,np.where(upper,1-p,p),phi)
+    first=np.where(active,p1,first);second=np.where(active,np.where(upper,-p2,p2),second)
+    norm=np.sqrt(1+etay*etay);product=2*b*phi*(1-phi)
+    divergence=second*norm**2-sign*first*etayy-2*b*(1-2*phi)*first*norm+sign*product*etayy/norm**3
     return dict(phi=phi,dx=sign*first,dy=-sign*first*etay,dt=-sign*first*etat,
         phase_divergence=divergence,capillary_x=etayy/norm**3*first,
         capillary_y=-etayy*etay/norm**3*first,interface_derivative=first)

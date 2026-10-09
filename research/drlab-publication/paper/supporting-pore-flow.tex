@@ -1,0 +1,136 @@
+\section{Supporting pore-flow, rock and older-kernel timing evidence}
+\subsection{Analytic pore flux and capillary entry}
+Two parallel, isolated slit pores have widths $H_0=8s$ and $H_1=16s$,
+with total specimen height $36s$, for $s=1,2,3$. Each pore contains a pure
+component; separate solid walls prevent a fluid-fluid interface. Periodic
+flow is driven by $F_x=10^{-6}s^{-3}$ with both permutations of
+$(\tau_0,\tau_1)=(0.6,1.4)$. The independently sampled Poiseuille reference is
+\begin{equation}
+ q_k=\frac{F_x}{\nu_k(36s)}\left(\frac{H_k^3}{12}+\frac{H_k}{24}\right).
+\end{equation}
+The second term accounts for midpoint sampling of the analytic velocity.
+Single-phase runs on the same geometry supply $K$ for normalization. Across
+both D2Q9 and extruded D3Q19, the maximum phase-flux discrepancy is
+$\BundleFluxError$ (Fig.~\ref{fig:pores}), consistent with the remaining
+transient at the selected duration and roundoff. This verifies phase attribution and
+viscosity normalization in a controlled pore system; it is not evidence for
+general relative-permeability curves in connected rock pores.
+
+Pressure boundaries then drive phase 0 into an initially phase-1-filled
+60-degree slit. Its sharp static reference is
+$p_c=2\sigma\cos\theta/H$. At pressure drops $0.5p_c$ and $1.5p_c$, the
+late interface respectively retreats and advances. Diffusive refinement uses
+$H=16s$, $\sigma=0.005/s$ and duration $8000s^2$, for $s=1,2,4$.
+Four D3Q19 square-tube controls at $H=16$ use the force-balance reference
+$p_c=4\sigma\cos\theta/H$. Both gradient variants give the expected late
+direction in these controls. In the square tube, however, inferring an
+entry pressure from a developed-flow hydraulic resistance gives deviations
+of approximately 17--25\% for the clipped stencil and 9--16\% for
+renormalization. Contact-line dissipation, voxel corners and diffuse wetting
+are not removed by this diagnostic. The result checks the direction of
+displacement and quantifies limitations; it does not calibrate a static
+capillary-pressure curve or a dynamic contact-angle law.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\linewidth]{pore-controls.pdf}
+\caption{Independent slit-bundle phase-flux checks and pressure-driven
+capillary-entry controls. Hydraulic pressure differences are diagnostic
+deviations from a sharp static reference, not a calibrated contact-line model.}
+\label{fig:pores}\end{figure}
+
+\subsection{Public Bentheimer specimen}
+The segmented 4.54~$\mu$m Bentheimer image of Shah, Crawshaw and Boek
+\cite{shah2014} supplies a public, CC BY 4.0 input. A centered
+$48^3$ crop starts at $(263,263,263)$ in the original $575^3$ array.
+Its porosity is $\RockPorosity$, and all pores belong to one connected
+component after periodic face connections. No pore removal, filtering or
+segmentation change is performed. Phase 0 initially occupies pores whose
+periodic distance to the grain-center mask is at least three original
+voxels; phase 1 occupies the remaining pore space. This deterministic
+morphological rule specifies an initial state and does not prescribe an
+experimental drainage history.
+
+Single-phase MRT flow at $\tau=1$ yields
+$K=\RockK\ \mathrm{m}^2$. Halving and doubling the force give a relative
+spread of $\RockForceSpread$. Independent LBPM v2026.04 calculations first
+pass three analytic slit controls, then use the same exact periodically
+padded mask, force, viscosity and averaging volume. Across five matched
+rock cases, the largest permeability difference is
+\RockReferenceDifference\ percent. Both solvers retain small finite-density
+convention differences; converted library permeability columns are not used.
+Pure-phase color-flow reductions agree with density-normalized SCSP velocity
+within $10^{-11}$ in the tested cases. These are numerical crosschecks on
+the specified periodically repeated specimen, not a comparison with
+laboratory sandstone permeability.
+
+Each original voxel is also divided into eight voxels, preserving the
+binary box geometry and initial phase volumes. Force, surface tension and
+duration are scaled diffusively. The resulting single-phase permeability
+decreases by \RefinedKChange\ percent. The independent refined LBPM reference
+reproduces this shift. This is a discretization sensitivity
+on a fixed segmented specimen; two resolutions do not establish an
+asymptotic convergence rate, and subdivision adds no imaging information.
+
+Closed two-phase runs at prescribed angles 60 and 120 degrees retain
+component masses to a maximum relative drift of $\RockMassDrift$.
+The zero-force control also evolves, so its motion cannot be attributed to
+the imposed body force. Physical interface relaxation and possible numerical
+currents have not been separated in this geometry. In the forced 60-degree case, the color
+field has RMS change \RockLateColor\ over the last 4000 steps of a
+16000-step run. The subdivided case is compared at the matched base time
+8000, not equated with the longer coarse endpoint. Planar controls at the
+two rock-study surface tensions measure a bulk interface width of 5.289
+lattice nodes, while the original crop's median periodic
+distance to grain centers is only two voxels. These lengths are not a
+calibrated throat-radius measurement, but they expose inadequate scale
+separation in many pores. Transient phase fluxes in Fig.~\ref{fig:rock} are
+therefore retained as measured observables and are not promoted to steady
+relative permeability or experimental wetting predictions.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\linewidth]{digital-rock.pdf}
+\caption{Actual phase fields and advective flux histories on the attributed
+Bentheimer crop. Grain voxels are masked. The zero-force control and
+late field changes distinguish evolving unforced motion from a steady
+transport measurement. The refined curve is scaled to the original
+diffusive units and is compared at matching times.}
+\label{fig:rock}\end{figure}
+
+Two additional full-field comparisons on this rock are bitwise identical:
+one versus two MPI ranks, and uninterrupted versus a one-to-two-rank restart.
+These extend the homogeneous/droplet replay checks to an irregular pore mask.
+
+\subsection{Workstation performance}
+This timing campaign uses the frozen perturbation executable recorded before
+the experimental capillary extension. It does not measure the new CSF branch
+or establish the runtime of the revised build. The complete executable hash
+remains in the timing data.
+A separate $96^3$ crop provides a fixed two-phase timing workload with
+\PerfFluidNodes\ fluid nodes. The actual D3Q19/MRT numerical path is timed
+for \PerfSteps\ updates at one, two, four and eight MPI ranks on an
+Intel Core Ultra 9 285K workstation. One full warm-up per rank count is
+discarded; three sequential measured repetitions interleave rank counts.
+Each local rank is pinned to one of the recorded logical CPUs. Frequency
+is governed by the operating system, not fixed by the experiment.
+All reconstructed fields agree bitwise across ranks and repetitions.
+
+The numerical timer includes streaming, MPI exchange, boundaries,
+macroscopic reconstruction, collision and finite-state checks. Initial
+collision is initialization, not an extra counted update. Separate timers
+cover field/diagnostic output and population checkpoints; construction and
+launcher overhead belong to the process duration. Each timer is a maximum
+across ranks, so category maxima need not sum to the maximum run wall time.
+Throughput counts fluid-node updates, although dense solid arrays also incur
+streaming and memory costs. Fig.~\ref{fig:performance} reports median and
+observed range, with exact counts and per-rank memory in the supplement.
+These are local CPU/MPI measurements; they establish neither cluster
+scaling nor GPU performance, and no runtime comparison with LBPM is inferred.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.95\linewidth]{workstation-performance.pdf}
+\caption{Repeated, fixed-affinity workstation timing. Error bars show the
+observed minimum and maximum of three runs. Numerical work and I/O are
+reported separately; the speedup denominator is the same measured workload
+at one rank.}
+\label{fig:performance}\end{figure}
+

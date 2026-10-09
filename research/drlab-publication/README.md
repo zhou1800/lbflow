@@ -14,10 +14,25 @@ review, public repository access and an immutable release citation remain.
 
 The study addresses predictive discrete interface kinetics and capillary resistance,
 supported by continuum/discrete derivations and operator-controlled
-experiments. See [the latest research status](notes/phase-kinetics-status.zh.txt) and
-[the physical research direction](notes/physics-direction.md) for literature
-overlap, completed evidence and the remaining capillary-trapping experiments.
-Neither a new bulk model nor a measured trapping threshold is claimed.
+experiments. Neither a new bulk model nor a measured trapping threshold is claimed.
+
+The major revision adds 17 full LBM executions, 30 independent FV trajectories
+and seven continuous-source coupled manufactured cases. Its 30 reduced-matrix
+predictions do not read evolved fronts to construct their operators; 22 have
+full nonlinear-reference comparisons. Twenty-six complete phase waves span
+three modes and two widths. The largest reduced mean-speed error is approximately 0.0563%;
+the full-FV volume-shape error reaches 4.244%, a separate approximation limit.
+The theoretical selective intervention reduces the original slip1 gaps to
+1.023%, 0.452% and 0.275%, without fitting its coefficient.
+See `paper/data/major-revision.json`, `major-revision-validation.json` and
+[the reproduction instructions](notes/major-revision-reproduction.md).
+
+The complete pre-revision archive is preserved in the new reproduction
+package. The five new figures supplement the 17 earlier figure assets;
+five appear in the revised main article and 15 in the supplement.
+The primary Stokes reference keeps its dense default; `--fast-stokes`
+solves the identical spatial matrix. The fourth-order and wall/bulk options
+are numerical diagnostics at the tested D=1/6, not a new physical phase law.
 
 ```sh
 python3 scripts/interfacial_transport.py --solver build/bin/LBFlow --root results/interfacial-transport --jobs 2

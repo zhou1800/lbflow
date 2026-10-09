@@ -1,0 +1,152 @@
+\section{Coupled reference verification and major-revision protocol}
+The rollback source is revision\\
+\texttt{1ed179a9092819dff8a3b17e934dbdac7e99fe91}.\\
+The preserved tag is \nolinkurl{cpc-pre-major-revision-20261009}.
+The original datasets and executable identities remain unchanged.
+The major revision adds \MajorNewNativeCount\ full LBM executions,
+\MajorReferenceCount\ FV trajectories, seven canonical coupled manufactured
+runs and 30 reduced-matrix predictions. Fourteen earlier and twelve new
+wave trajectories form the 26-wave comparison.
+Reduced predictions, reused hydraulic audit fields and repeated
+postprocessing are not counted as new simulation trajectories.
+
+\subsection{Continuous manufactured sources}
+Use physical height $H_p=16$, periodic length $L=128$ and
+\begin{equation}
+ \eta(y,t)=.25\cos(\pi y/H_p)\cos(.05t)+.0002t,\qquad
+ d=L/4-|\operatorname{wrap}(x-L/2-\eta;L)|.
+\end{equation}
+Near the interface $\varphi_*=[1+\tanh(.62d)]/2$.
+For $|d|>23$, a quintic polynomial joins this logistic tail to an exact pure
+plateau at $|d|=27$. Value and its first two derivatives match at 23 and
+vanish at 27; the upper tail is complementary. This $C^2$ construction
+removes the absolute-distance cusp in the pure bulk and changes only
+logistic tails below $5\times10^{-13}$.
+It is an analytic target, not numerical clipping.
+
+For each prescribed hydraulic slip $\lambda$ let
+\begin{align}
+ \psi_*&=4\times10^{-8} A(y)\sin(2\pi x/L),\\
+ A(y)&=y^2(H_p-y)^2+c_\lambda y(H_p-y),\qquad
+ c_\lambda=\frac{2\lambda H_p^2}{H_p+2\lambda},\\
+ \bm u_*&=(\partial_y\psi_*,-\partial_x\psi_*),\\
+ p_*&=10^{-5}\cos(2\pi x/L)\cos(\pi y/H_p).
+\end{align}
+$A=0$ at the walls and its derivatives satisfy Navier slip.
+The analytically differentiated sources are
+\begin{align}
+ \bm F_{\mathrm{ext},*}
+ &=-\nu\Delta\bm u_*+\nabla p_*-\sigma\kappa_*\nabla\varphi_*,\\
+ S_*&=\partial_t\varphi_*+\bm u_*\cdot\nabla\varphi_*
+ -D\nabla\cdot[\nabla\varphi_*-2b\varphi_*(1-\varphi_*)\bm n_*].
+\end{align}
+The actual numerical capillary force is still evaluated from the evolving
+field, so its errors are not canceled by discretely manufactured forcing.
+Continuous scalar derivatives likewise do not call the face-flux routine.
+
+At $t=16$, phase error is normalized by $\|\varphi_*\|_2$; velocity error
+uses both staggered components with denominator $\|\bm u_*\|_2$.
+The additional phase-displacement error divides
+$\|\varphi-\varphi_*\|_2$ by the norm of the analytic normal-profile
+derivative. At slip 1 these displacement errors are
+$3.22527\times10^{-5}$, $7.76476\times10^{-6}$ and
+$1.92697\times10^{-6}$ in length units.
+At slip 4 they are $4.12151\times10^{-5}$,
+$1.00931\times10^{-5}$ and $2.51358\times10^{-6}$.
+Time stepping uses $\Delta t=.125h^2$, with a separate
+$\Delta t=.0625h^2$ H32/slip1 calculation.
+The mass check integrates the actual continuous source samples with the
+same temporal quadrature and reports its budget residual.
+Analytic derivative checks are independently retained.
+
+Reconstruction clips only arguments of logarithms at $10^{-12}$;
+the evolving $\varphi$ is not clipped.
+That regularization is active in the exact pure manufactured plateaus,
+unlike the ordinary primary front comparisons.
+The tiny retained pure-tail overshoots do not establish a monotonicity or
+boundedness property. The earlier non-$C^2$ pilot is retained separately,
+outside the seven canonical tests.
+
+\subsection{Intervention and reference refinement}
+The selective reflected Laplacian has zero face flux at both walls.
+Its squared form has the continuum conditions
+$\varphi_y=\varphi_{yyy}=0$ in the corresponding smooth reflection limit.
+These are numerical regularization choices; they do not supply a microscopic
+moving-contact-line boundary law. In a weighted split the exterior Laplacian
+retains zero net flux. Nonnegative wall and bulk mobilities give
+$\langle\varphi,-K L_y[wL_y\varphi]\rangle
+=-K\langle L_y\varphi,wL_y\varphi\rangle\le0$.
+The independent cosine, partition, mass and quadratic-work controls are
+stored as matrix/operator calculations, not full shape trajectories.
+
+The reference adds H64/H96 at fixed sampled crossing width and a separate
+H48/H64/H96 sequence at fixed continuum
+$b=2\operatorname{atanh}(.9)/W_{0.9}$.
+The latter uses the corresponding sampled width at each spacing rather
+than changing $b$ to match an interpolated crossing.
+No contact-line asymptotic order is assigned to either sequence.
+The optional DST-I/rank-two inversion agrees with the original dense
+Stokes matrix; dense remains the default for earlier reanalysis.
+
+The low-tension H16/H32 untreated FV runs and H32 unit-strength FV run
+cover physical time 16000. The original shorter runs are kept.
+The H32 production continuation imports and hashes its exact outgoing
+native donor. The chosen longest-duration means are explicitly recorded
+in each reduced-reference comparison.
+Mean, centroid and output-interval changes remain separate in the data.
+
+\subsection{Reduced model construction and shape observable}
+At each grid, take the analytic logistic bridge independently matched to
+$W_{0.9}=4.765235$. Its signed derivative $p'$ is positive at the ascending
+interface and negative at the descending one.
+Centered perturbations $\pm\epsilon[-p'\eta]$ construct each column of the
+capillary/Stokes response. The conservative ascending-half phase-rate
+projection is $-h\sum_x\dot\varphi/(h\sum_xp')$.
+The same projection of the body-force response constructs the drive.
+No full-front measurement is read by
+\texttt{phase\_mechanism\_controls.py}.
+
+The bordered linear system fixes $\sum_y\eta=0$ and gives both translation
+speed and deformation. A separately calculated left null vector verifies
+that speed; velocity and shape comparison data do not alter the matrix.
+The full mean fluid velocity is computed from the resulting Stokes field,
+rather than substituted for the projected phase speed.
+A small matrix-row correction enforces the analytic rigid-translation
+identity only after checking its finite-difference residue.
+The receipt retains the residue, linear-system error, null-vector error,
+matrix spectrum and differentiation-amplitude repeat.
+
+The measured row displacement is
+$z(y)=-h\sum_{x\in\mathrm{ascending\ half}}\varphi(x,y)$ with its row mean
+subtracted. Its reduced prediction is $(h\sum_xp')\eta(y)$.
+No contour position, shape amplitude or speed is fitted.
+The largest full-FV volume-shape reduction error is
+\MajorFVShapePercent\%, despite the much smaller mean-speed errors.
+This is an explicit limitation of the retained-normal-profile approximation.
+
+\subsection{Reanalysis and exclusions}
+\texttt{data/major-revision.json} is regenerated from frozen snapshots,
+receipts and source identities. The collector verifies native inputs,
+geometry, executables, seed profiles and outgoing donors; it recomputes
+centroids, wave fits, manufactured errors and full hydraulic fields.
+The predictive model is recalculated in a separate process from its frozen
+source, with no front data input. Old receipts are relocated in memory;
+their original bytes are preserved.
+The raw manifest and relocated reanalysis checks identify the exact evidence
+inventory and canonical measurement digest.
+
+Three reference CLI pilots failed before calculation because a width option
+was unavailable in their frozen version. Their logs are preserved.
+A reduced-model run calculated its summary but failed during final console
+printing; it is retained outside the canonical prediction set and rerun
+with the same numerical formulas. The pre-$C^2$ manufacture and preliminary
+analysis products are similarly excluded from publication counts.
+Failures are not silently converted into successful controls.
+Older primitive FV, same-node slip and superseded-kernel failures remain
+in the preserved pre-revision archive.
+
+\section{Earlier shared-phase comparison}
+The prior full-projection phase ablation retains all of its original
+measurements and limitations. It is a separate shared-kinetics experiment,
+not a distinct independent continuum validation.
+\input{data/phase-kinetics-table.tex}

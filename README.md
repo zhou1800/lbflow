@@ -57,6 +57,13 @@ resistance to independently weighted capillary force. That response still
 varies with grid resolution and is not a validated physical contact-line law.
 See the [numerical change log](research/drlab-publication/notes/numerical-changes.md).
 
+The [numerical mechanism study](research/drlab-publication/notes/major-revision-theory.md)
+adds an exact 26-wave phase-spectrum comparison, a theoretical fourth-order
+reference intervention and a predictive low-force capillary-resistance model.
+Coupled continuous-source verification, full force/velocity fields and
+wall/bulk/surface-tension controls bound this numerical mechanism. The
+production C++ kernel is unchanged; no physical contact-line law is claimed.
+
 CTest exercises coefficients from the actual C++ implementation, 16 analytic
 force cases, analytic phase fluxes in isolated pores, capillary-entry direction,
 single/two-rank and restarted field agreement, and invalid parameter/checkpoint
@@ -79,7 +86,9 @@ checksum-pinned crops of a DOI-cited public sandstone image, with its separate
 CC BY 4.0 data license and full preparation manifest. Workflows measure
 single-phase permeability, phase-fraction-weighted advective Darcy flux,
 component mass, late field changes and MPI/restart agreement. The manuscript
-is being prepared for Computer Physics Communications around this application.
+is being prepared for Computer Physics Communications around numerical
+interface kinetics and capillary resistance, with the rock flow retained
+as a supporting demonstration.
 
 ```sh
 python3 scripts/porous_media.py bundle --solver build/bin/LBFlow --root results/pore-bundles

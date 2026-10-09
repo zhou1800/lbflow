@@ -1,0 +1,345 @@
+{
+  "status": "Completed local major revision, scientific and reproduction checks; author review/public immutable program archive pending.",
+  "baseline_commit": "1ed179a9092819dff8a3b17e934dbdac7e99fe91",
+  "backup": {
+    "commit": "1ed179a9092819dff8a3b17e934dbdac7e99fe91",
+    "tag": "cpc-pre-major-revision-20261009",
+    "remote_tag_object": "aa3967ce854ba47a9b013f5c9f43121c918e749b",
+    "local_copy": "/tmp/lbflow-major-revision-20261009/baseline",
+    "previous_reproducibility_sha256": "33f2b23888193c31bfacebcc4b965d14018fe4c0a380214a324aa213b52260c8",
+    "previous_reproducibility_bytes": 508965804
+  },
+  "production_cpp_changed": false,
+  "native_executable_sha256": [
+    "9d9b5196a034e90e8cc02199840cd4b040084213022f850fff89f6f1a21165c5"
+  ],
+  "original_archive_files_unchanged": 82,
+  "historical_c_files_unchanged": 66,
+  "default_compatibility": {
+    "checks": [
+      {
+        "height": 16,
+        "default_histories_bitwise": true
+      },
+      {
+        "height": 32,
+        "default_histories_bitwise": true
+      },
+      {
+        "height": 16,
+        "amplitude": 0.0,
+        "mode": 1,
+        "default_seed_fields_populations_and_metadata_bitwise": true
+      },
+      {
+        "height": 16,
+        "amplitude": 0.01,
+        "mode": 3,
+        "default_seed_fields_populations_and_metadata_bitwise": true
+      },
+      {
+        "height": 32,
+        "amplitude": -0.01,
+        "mode": 1,
+        "default_seed_fields_populations_and_metadata_bitwise": true
+      }
+    ],
+    "short_two_snapshot_reference": {
+      "mean_speed": 1.7699999999999973e-05,
+      "centroid_speed": 1.7673464093093116e-05
+    },
+    "overlapping_wall_windows_rejected": true,
+    "original_archive_files_unchanged": 82,
+    "scope": "Default reference and generated seeds compared to frozen sources; original archive hash verification. Production C++ is unchanged."
+  },
+  "new_executions": {
+    "full_lbm": 17,
+    "independent_fv": 30,
+    "canonical_coupled_manufactured": 7
+  },
+  "prior_phase_stage": {
+    "full_lbm": 67,
+    "independent_fv": 10,
+    "shared_phase_ablation": 5
+  },
+  "dataset_sha256": "12a7d88fe789203bd48f67964fa0a8ebd1dab66496c9dc6c920474333aba46ce",
+  "previous_dataset_sha256": "4b7c202dd2ddda085a2101e1af5beac8dabf40613d2d1a66df4300b622974396",
+  "raw_manifest_sha256": "147f61b44cc3e33be53bb051d86ebdeb11482f1691c8323726e61fa5be481f31",
+  "raw_files": 3199,
+  "raw_bytes": 323723366,
+  "environment": {
+    "python": "3.12.3",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "matplotlib": "3.11.2",
+    "platform": "Linux x86-64",
+    "openblas_num_threads": 1,
+    "pythondontwritebytecode": 1
+  },
+  "manuscripts": {
+    "main.pdf": {
+      "pages": 15,
+      "bytes": 232860,
+      "sha256": "5af4e886397faef8680f90df9092063b4b283b8f03714cd8e10673db1f53d070",
+      "undefined_references": 0
+    },
+    "supplement.pdf": {
+      "pages": 45,
+      "bytes": 609325,
+      "sha256": "bb1d64491369f37d69135073aa7d61bcc16fd5144510f25d7832030f8e4880b4",
+      "undefined_references": 0
+    }
+  },
+  "figures": {
+    "main": 5,
+    "supplement": 15,
+    "available_pairs": 22,
+    "new_pngs_bitwise_regenerated": {
+      "major-sigma.png": "1aff6543bd5fbf88b148ecc935ae22668544b04cf53d3624beb49687eb94a126",
+      "major-intervention.png": "6f5daf430f64c402d59d839dfe40fc67d494dc1578e5a14272f0be42511f7cca",
+      "major-manufactured.png": "96f71229881ad64cc2b15da8c8bec33ab6a68e16c11adb76ae81889adb360fe1",
+      "major-localization.png": "5505e5a7b24d9b742d40d8733dad94cab6b315db582d2bdf5ddc4054f0fbbfef",
+      "major-spectrum.png": "4a5e0742815f38621c0c00ee4ec51e12a9f45d6875d2d21b8fb3b4070067455f"
+    }
+  },
+  "rendered_abstract_words": 214,
+  "highlights_characters": [
+    75,
+    80,
+    78,
+    79,
+    68
+  ],
+  "scientific_scope": "Neutral equal-viscosity/equal-reference-density D2Q9 low-force numerical resistance mechanism. Fourth-order term is a transverse diagnostic; held-profile reduction has a separately reported shape error.",
+  "remaining_limits": [
+    "Unforced physical moving-contact-line accuracy and complete moving wall-phase equivalence remain unproved.",
+    "No quantitative nonneutral curved-rock wetting, resolved trapping threshold or steady two-phase rock relative permeability.",
+    "No universal coefficient/cutoff/isotropy theorem or current-CSF/cluster/GPU performance claim."
+  ],
+  "author": {
+    "name": "Yu Zhou",
+    "affiliation": "Independent Researcher, Canada",
+    "email": "[private contact omitted]",
+    "specific_funding": false,
+    "competing_interests": false
+  },
+  "review": "Internal independent reviewer stance; no external peer-review decision claimed.",
+  "matrix_calculations": {
+    "reduced_predictions": 30,
+    "nonlinear_reference_comparisons": 22,
+    "operator_checks": 12,
+    "scope": "Not additional full solver trajectories."
+  },
+  "waves": {
+    "full_solver_trajectories": 26,
+    "groups": 9,
+    "maximum_relative_rate_error": 8.36140570137367e-06,
+    "maximum_relative_window_effect": 5.139709929879999e-07
+  },
+  "reduced_model": {
+    "maximum_relative_mean_error": 0.0005632282421661472,
+    "maximum_relative_volume_shape_error": 0.042436434422912846,
+    "no_front_data_used_in_operator_construction": true
+  },
+  "manufactured": {
+    "spatial_orders": [
+      {
+        "slip": 1.0,
+        "observable": "relative_phase_error",
+        "errors": [
+          2.625043300801636e-06,
+          6.320197558960327e-07,
+          1.5684719799447772e-07
+        ],
+        "orders": [
+          2.0542996601319197,
+          2.01060989907105
+        ]
+      },
+      {
+        "slip": 1.0,
+        "observable": "interface_displacement_error",
+        "errors": [
+          3.225270832919665e-05,
+          7.764756242661363e-06,
+          1.9269654918159555e-06
+        ],
+        "orders": [
+          2.054407771606093,
+          2.010609899087593
+        ]
+      },
+      {
+        "slip": 1.0,
+        "observable": "relative_velocity_error",
+        "errors": [
+          0.0266593998839562,
+          0.006636515868725333,
+          0.0016564259810960262
+        ],
+        "orders": [
+          2.006146365891327,
+          2.0023522973050456
+        ]
+      },
+      {
+        "slip": 4.0,
+        "observable": "relative_phase_error",
+        "errors": [
+          3.3544884612674623e-06,
+          8.215364192483011e-07,
+          2.0459556150897213e-07
+        ],
+        "orders": [
+          2.0296963438089564,
+          2.005549684578045
+        ]
+      },
+      {
+        "slip": 4.0,
+        "observable": "interface_displacement_error",
+        "errors": [
+          4.1215067919784655e-05,
+          1.0093086458805665e-05,
+          2.513583869189546e-06
+        ],
+        "orders": [
+          2.0298044552831285,
+          2.005549684594588
+        ]
+      },
+      {
+        "slip": 4.0,
+        "observable": "relative_velocity_error",
+        "errors": [
+          0.01973268665457853,
+          0.004926460591985887,
+          0.001231002381370657
+        ],
+        "orders": [
+          2.001963974121007,
+          2.000717964019981
+        ]
+      }
+    ],
+    "maximum_recomputed_source_mass_budget_residual": 9.408347395562866e-13,
+    "maximum_divergence": 2.710505431213761e-20,
+    "maximum_retained_pure_tail_overshoot": 7.683409464220858e-12,
+    "scope": "Continuous-source consistency, not unforced physical moving-contact-line validation."
+  },
+  "full_field_audits": {
+    "reused_states": 6,
+    "scope": "Same recorded phases; not six new full LBM runs.",
+    "measurements": [
+      {
+        "height": 16,
+        "step": 8002,
+        "max_state_error": 4.440892098500626e-16,
+        "relative_actual_force_cell_velocity_error": 0.005520775246027714,
+        "relative_reference_force_cell_velocity_error": 0.00972427057500457,
+        "relative_capillary_face_force_difference": 0.11858374360453212,
+        "relative_force_driven_mac_velocity_difference": 0.004974934164474705,
+        "max_actual_cell_velocity_difference": 2.1930723422206106e-07,
+        "max_reference_cell_velocity_difference": 4.3310873300038747e-07,
+        "lbm_mean_speed": 1.5106667402228081e-05,
+        "actual_force_stokes_mean": 1.5181187676760455e-05,
+        "reference_force_stokes_mean": 1.5242625612575434e-05,
+        "audit_log_sha256": "c991b9c433f7fe46947058dcf5ff4b8bf44fcbeceb7262bcee3234a9b4fad1ca",
+        "receipt_sha256": "7dcd5842bb4d09d7b8611130416c9d5fcd8ab239ce819ccbc542a5b93670948f",
+        "solver_sha256": "9d9b5196a034e90e8cc02199840cd4b040084213022f850fff89f6f1a21165c5"
+      },
+      {
+        "height": 16,
+        "step": 8003,
+        "max_state_error": 4.440892098500626e-16,
+        "relative_actual_force_cell_velocity_error": 0.005520775246057623,
+        "relative_reference_force_cell_velocity_error": 0.00972427057534612,
+        "relative_capillary_face_force_difference": 0.11858374348106644,
+        "relative_force_driven_mac_velocity_difference": 0.0049749341643045755,
+        "max_actual_cell_velocity_difference": 2.1930725391890423e-07,
+        "max_reference_cell_velocity_difference": 4.33109109855112e-07,
+        "lbm_mean_speed": 1.5106667401943754e-05,
+        "actual_force_stokes_mean": 1.5181187676470013e-05,
+        "reference_force_stokes_mean": 1.5242625612311248e-05,
+        "audit_log_sha256": "07f87b6b0fb5246b29db94a19d6a5a141d7af6233d7f53c194b0d9a761ce46db",
+        "receipt_sha256": "7dcd5842bb4d09d7b8611130416c9d5fcd8ab239ce819ccbc542a5b93670948f",
+        "solver_sha256": "9d9b5196a034e90e8cc02199840cd4b040084213022f850fff89f6f1a21165c5"
+      },
+      {
+        "height": 32,
+        "step": 32002,
+        "max_state_error": 4.440892098500626e-16,
+        "relative_actual_force_cell_velocity_error": 0.0017961524126788788,
+        "relative_reference_force_cell_velocity_error": 0.0033031383613301214,
+        "relative_capillary_face_force_difference": 0.04050984551429386,
+        "relative_force_driven_mac_velocity_difference": 0.001820119016571226,
+        "max_actual_cell_velocity_difference": 1.0771869767075883e-07,
+        "max_reference_cell_velocity_difference": 2.1299606138919758e-07,
+        "lbm_mean_speed": 1.3942673595770636e-05,
+        "actual_force_stokes_mean": 1.3961372062122506e-05,
+        "reference_force_stokes_mean": 1.3979285137543596e-05,
+        "audit_log_sha256": "4acb940c7a874a68645955c145e939625dd980d2f196e1a2d2887924dd1cdd68",
+        "receipt_sha256": "dedae213d80b00a2113d68a5256537209ed70d31f046d95c14132e0938d5f8f8",
+        "solver_sha256": "9d9b5196a034e90e8cc02199840cd4b040084213022f850fff89f6f1a21165c5"
+      },
+      {
+        "height": 32,
+        "step": 32003,
+        "max_state_error": 4.440892098500626e-16,
+        "relative_actual_force_cell_velocity_error": 0.0017961524126580278,
+        "relative_reference_force_cell_velocity_error": 0.0033031383613425017,
+        "relative_capillary_face_force_difference": 0.04050984551428977,
+        "relative_force_driven_mac_velocity_difference": 0.0018201190166058417,
+        "max_actual_cell_velocity_difference": 1.077187007524612e-07,
+        "max_reference_cell_velocity_difference": 2.1299608677942522e-07,
+        "lbm_mean_speed": 1.3942673595771004e-05,
+        "actual_force_stokes_mean": 1.3961372062122279e-05,
+        "reference_force_stokes_mean": 1.3979285137544069e-05,
+        "audit_log_sha256": "06059bb23782ee08e2d53aee2bf92aee7a16c6f9a06b27ea5121d62b5af3c4a3",
+        "receipt_sha256": "dedae213d80b00a2113d68a5256537209ed70d31f046d95c14132e0938d5f8f8",
+        "solver_sha256": "9d9b5196a034e90e8cc02199840cd4b040084213022f850fff89f6f1a21165c5"
+      },
+      {
+        "height": 48,
+        "step": 72002,
+        "max_state_error": 4.440892098500626e-16,
+        "relative_actual_force_cell_velocity_error": 0.0009281212499928773,
+        "relative_reference_force_cell_velocity_error": 0.0017660944757417983,
+        "relative_capillary_face_force_difference": 0.02083467571197971,
+        "relative_force_driven_mac_velocity_difference": 0.0010035212750218044,
+        "max_actual_cell_velocity_difference": 6.8648656516253e-08,
+        "max_reference_cell_velocity_difference": 1.323555285664476e-07,
+        "lbm_mean_speed": 1.3442303955605956e-05,
+        "actual_force_stokes_mean": 1.3450623555465954e-05,
+        "reference_force_stokes_mean": 1.3460178896462222e-05,
+        "audit_log_sha256": "0945761e68cf181f43448a771bfc9b5471a552833bfef9293514df046f73fd2c",
+        "receipt_sha256": "69c8917bb96431054f4c538115e154c49aa713b98b31b55c74651f4ee95b234f",
+        "solver_sha256": "9d9b5196a034e90e8cc02199840cd4b040084213022f850fff89f6f1a21165c5"
+      },
+      {
+        "height": 48,
+        "step": 72003,
+        "max_state_error": 6.661338147750939e-16,
+        "relative_actual_force_cell_velocity_error": 0.0009281212499873443,
+        "relative_reference_force_cell_velocity_error": 0.0017660944757551334,
+        "relative_capillary_face_force_difference": 0.0208346757122233,
+        "relative_force_driven_mac_velocity_difference": 0.001003521275041338,
+        "max_actual_cell_velocity_difference": 6.864865697711854e-08,
+        "max_reference_cell_velocity_difference": 1.3235553196635484e-07,
+        "lbm_mean_speed": 1.344230395560567e-05,
+        "actual_force_stokes_mean": 1.3450623555465603e-05,
+        "reference_force_stokes_mean": 1.3460178896462148e-05,
+        "audit_log_sha256": "d54fc717f8bd1b7981005cc980246a6580de4f70291e6cfb29c3c4e73e8a8516",
+        "receipt_sha256": "69c8917bb96431054f4c538115e154c49aa713b98b31b55c74651f4ee95b234f",
+        "solver_sha256": "9d9b5196a034e90e8cc02199840cd4b040084213022f850fff89f6f1a21165c5"
+      }
+    ]
+  },
+  "relocated_reanalysis": {
+    "root": "/tmp/lbflow-major-relocated-20261009",
+    "archive_crc_and_all_digests_verified": true,
+    "canonical_summary_byte_identical": true,
+    "input_tree_unchanged": true,
+    "canonical_sha256": "12a7d88fe789203bd48f67964fa0a8ebd1dab66496c9dc6c920474333aba46ce"
+  }
+}

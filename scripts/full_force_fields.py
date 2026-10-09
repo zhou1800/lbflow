@@ -24,8 +24,9 @@ def norm_difference(left,right):
     return float(np.sqrt(error/denominator)) if denominator else None
 
 
-def collect(phase_root,output):
-    output.mkdir(parents=True,exist_ok=False);rows=[]
+def collect(phase_root,output=None):
+    if output is not None:output.mkdir(parents=True,exist_ok=False)
+    rows=[]
     campaign=phase_root/'hydraulic-audit-canonical'
     for path in sorted((campaign/'results').glob('*.json')):
         receipt=receipt_at_root(json.loads(path.read_text()),phase_root);verify(receipt)
@@ -56,13 +57,16 @@ def collect(phase_root,output):
                 lbm_mean_speed=float(raw[0].mean()),actual_force_stokes_mean=float(u.mean()),reference_force_stokes_mean=float(ur.mean()),
                 audit_log_sha256=sha(log),receipt_sha256=sha(path),solver_sha256=receipt['solver_sha256'])
             rows.append(row)
-            np.savez_compressed(output/f'H{height}-step{step}.npz',lbm_velocity=raw,actual_force_velocity=actual,
-                reference_force_velocity=reference,actual_fx=fx,actual_fy=fy,reference_fx=rx,reference_fy=ry,h=h)
+            if output is not None:
+                np.savez_compressed(output/f'H{height}-step{step}.npz',lbm_velocity=raw,actual_force_velocity=actual,
+                    reference_force_velocity=reference,actual_fx=fx,actual_fy=fy,reference_fx=rx,reference_fy=ry,h=h)
     if len(rows)!=6:raise AssertionError('Expected two audited states at each of three grids')
     result=dict(measurements=rows,comparison='Cell LBM versus specified two-face MAC averages; forces compared on MAC faces. Gradient-force gauges are retained.',
         scope='Hydraulic fields on supplied recorded phases; not independent validation of their evolution.')
-    (output/'summary.json').write_text(json.dumps(result,indent=2)+'\n')
-    print(json.dumps(rows),flush=True)
+    if output is not None:
+        (output/'summary.json').write_text(json.dumps(result,indent=2)+'\n')
+        print(json.dumps(rows),flush=True)
+    return result
 
 
 def main():

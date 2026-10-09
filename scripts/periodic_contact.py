@@ -21,8 +21,9 @@ def gradient(phi):
     return np.divide(g,norm[None],out=np.zeros_like(g),where=norm[None]>1e-9)
 
 
-def seed(path,h,length=4,amplitude=0.,mode=1):
-    nx=length*h;beta=match_beta(WIDTH_REFERENCE*h/16)
+def seed(path,h,length=4,amplitude=0.,mode=1,width=WIDTH_REFERENCE):
+    if not np.isfinite(width) or width<=0:raise ValueError('Use a finite positive physical width')
+    nx=length*h;beta=match_beta(width*h/16)
     ratio=coefficients()['bulk_segregation']/coefficients()['bulk_diffusion']
     profile=bulk_profile(nx,beta/ratio);dx=16/h
     derivative=(np.roll(profile,-1)-np.roll(profile,1))/(2*dx)
@@ -86,7 +87,11 @@ def main():
     parser.add_argument('--slip',type=float,default=0.,help='Prescribed slip in H16 physical length units; default zero.')
     parser.add_argument('--modes',type=int,nargs='+',default=[1])
     parser.add_argument('--seeds',nargs='+')
-    args=parser.parse_args();study=Study(args.solver,args.root);items=[]
+    parser.add_argument('--width',type=float,default=WIDTH_REFERENCE,help='Independently prescribed physical W09.')
+    args=parser.parse_args()
+    if args.width!=WIDTH_REFERENCE and args.stage not in ('fronts','waves'):
+        parser.error('--width applies to newly seeded fronts/waves; holds inherit their recorded donor width')
+    study=Study(args.solver,args.root);items=[]
     if args.stage=='hold':
         if not args.seeds:parser.error('Holds require recorded periodic-front receipts')
         def resume(filename):
@@ -104,6 +109,8 @@ def main():
         else:choices=[(f,args.sigma,0.,1) for f in args.forces]
         for force,sigma,amplitude,mode in choices:
             cfg=config(h,force,sigma,args.length,args.end,amplitude,mode)
+            if args.width!=WIDTH_REFERENCE:
+                cfg['physical_width']=args.width;cfg['name']+=f'-W{args.width:g}'
             cfg['physical_slip']=args.slip
             if args.slip:
                 cfg['name']+=f'-slip{args.slip:g}'
@@ -111,7 +118,7 @@ def main():
             if args.stage=='pure':
                 cfg.update(name=cfg['name']+'-pure',label=lambda x,y,z,hh=h:255 if y in (0,hh+1) else 100)
                 items.append((cfg,None));continue
-            path=study.root/(cfg['name']+'-seed');beta,phi=seed(path,h,args.length,amplitude,mode)
+            path=study.root/(cfg['name']+'-seed');beta,phi=seed(path,h,args.length,amplitude,mode,width=args.width)
             cfg.update(beta=beta,seed_phase_file=str(path)+'.phase.npz',seed_phase_sha256=sha(str(path)+'.phase.npz'))
             items.append((cfg,path))
     with ThreadPoolExecutor(max_workers=args.jobs) as pool:
