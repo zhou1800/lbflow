@@ -198,6 +198,7 @@ public:
     void ValidateSimulation() const;
     string getWallGradient() const;
     string getViscosityInterpolation() const;
+    string getCapillaryModel() const;
 
     /// \name Get functions for #grid mesh
     ///@{

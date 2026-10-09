@@ -15,7 +15,7 @@ Reference source revision: `1bef9bbe7047ca74280f5870f4787be4df12fe20`. All chang
 | Optional wall moment reconstruction | Recover locally linear gradients from the actual available stencil | Algebraic linear-field check; 30 wall configurations sharing one bulk kernel |
 
 The uniform-viscosity MRT fast path caches its collision and force matrices. Unequal viscosities use local moment-space rates.
-Perturbation and recoloring remain the recovered color-gradient mechanism; the capillary perturbation is not multiplied by the external Guo source prefactor.
+Perturbation and recoloring remain the default recovered mechanism; the capillary perturbation is not multiplied by the external Guo source prefactor.
 The wall projection and wall normal remain common in the gradient ablation. Angle improvement is assessed alongside spurious velocity and fitting sensitivity.
 
 The original native-double population layout is retained with explicit outgoing-state metadata. Restart histories reset conservatively; identical automatic stopping time across a restart is not claimed.
@@ -23,6 +23,38 @@ The sidecar does not identify every physical parameter. Run receipts contain the
 The executable workflow uses one configuration per MPI process lifetime; reuse of its historical function-static caches across multiple simulator objects is unverified.
 
 Completed quantitative coverage is equal density, standard pressure weights, low speed and relaxation times 0.6--1.4. Wider density ratios, arbitrary EOS, curved/3D wetting, hysteresis, film boundaries and dynamic contact lines require additional work before new claims.
+
+## Optional Capillary Research Operators
+
+`wallGradient "tanh"` fits locally affine `atanh(chi)` on the available fluid
+stencil, continues it over a virtual full stencil, and applies the common
+geometric rotation. Color is clipped to `[-1+1e-8,1-1e-8]` for this transform.
+This local reconstruction is inspired by equilibrium-profile continuation;
+it is not an exact implementation of Bhattacharya et al.'s global ghost-node
+scheme. Its H16 pilot reduces some nonneutral residual velocities but
+increases the neutral-wall velocity. It is experimental, not a new default.
+
+`capillaryModel "csf"` implements the established curvature surface force
+`sigma*kappa*grad(chi)/2` through the existing Guo SRT/MRT operators, with
+`kappa=-(I-n*n):grad(n)`. It exchanges a normalized-interface field and
+reconstructs its derivatives from fluid neighbors at walls. The same total
+force enters physical half-force velocity and collision. Fresh incoming
+populations subtract the initial capillary half-force; checkpoints retain
+their outgoing stage. This follows Lishchuk/Guo as used by Sedahmed and Coelho
+(2024); our retained wall/color operators differ from their complete scheme.
+
+The option rejects unequal reference densities, nonstandard pressure weights,
+open reservoirs and selective films. Direct slit and bulk-drop measurements
+use equal viscosity, tau=1. CTest additionally verifies SRT/MRT, D2Q9/D3Q19,
+normal MPI exchange, initial bulk-plane equilibrium, uniform acceleration and
+bitwise restart. These contracts do not transfer high-density-ratio or curved
+3D wetting validation to this option. The old wall modes/default perturbation
+retain bitwise-identical fields in four comparisons to the frozen baseline.
+
+The new measurements show lower residual velocities with CSF and continuing
+finite-width pressure bias. Zero-sigma controls retain a wall-color profile
+distortion while their velocity is at roundoff. Neither a changed gradient
+nor a force substitution proves consistent wall segregation or a new model.
 
 ## CPC Application And Pressure Reporting
 

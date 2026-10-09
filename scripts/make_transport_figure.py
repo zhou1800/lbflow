@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
 
 from interfacial_transport import diffuse_reference, sharp_reference, viscosity
+from benchmarks import sha
 
 
 def main():
@@ -18,8 +19,14 @@ def main():
     parser.add_argument('--data', default=str(Path(__file__).resolve().parents[1]/
                         'research/drlab-publication/paper/data/interfacial-transport.json'))
     parser.add_argument('--paper', required=True)
+    parser.add_argument('--sensitivity', default=str(Path(__file__).resolve().parents[1]/
+                        'research/drlab-publication/paper/data/reference-sensitivity.json'))
     args = parser.parse_args()
     data = json.loads(Path(args.data).read_text())
+    sensitivity = json.loads(Path(args.sensitivity).read_text())
+    if sensitivity['input_sha256'] != sha(args.data):
+        raise ValueError('Sensitivity data belong to a different measurement summary')
+    envelopes = {r['name']: r['profile_error_envelope'] for r in sensitivity['records']}
     folder = Path(args.paper)/'figures'
     folder.mkdir(parents=True, exist_ok=True)
     plt.rcParams.update({'font.size': 10, 'pdf.fonttype': 42, 'savefig.dpi': 200})
@@ -37,6 +44,10 @@ def main():
                             marker=marker, s=35, label=f'{closure}, beta={beta:g}')
             axes[1].loglog(x, [100*m['measured_diffuse_profile_relative_error'] for m in selected],
                           marker+'-', color=color, ms=5, label=f'{closure}, beta={beta:g}')
+            values=np.array([100*m['measured_diffuse_profile_relative_error'] for m in selected])
+            bounds=np.array([envelopes[m['name']] for m in selected])*100
+            axes[1].errorbar(x,values,yerr=[values-bounds[:,0],bounds[:,1]-values],
+                             fmt='none',color=color,capsize=3,alpha=.6)
         widths = np.linspace(.04, .62, 150)
         grid = np.linspace(0, 1, 32769)
         _, sharp_flux = sharp_reference(np.array([.5]), 1., (1/30, .3), 1.)
@@ -53,7 +64,7 @@ def main():
                 ylabel='Flux shift from sharp interface (%)')
     axes[0].legend(fontsize=7.3, loc='upper left')
     axes[1].set(xlabel='Measured interface width / slit width, W/H',
-                ylabel='Profile error against diffuse continuum (%)')
+                ylabel='Discrepancy against reconstructed continuum (%)')
     axes[1].set_xticks([.06, .1, .2, .4, .6])
     axes[1].set_xticklabels(['0.06', '0.1', '0.2', '0.4', '0.6'])
     axes[1].xaxis.set_minor_formatter(NullFormatter())

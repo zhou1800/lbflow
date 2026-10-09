@@ -19,6 +19,11 @@ using namespace std;
 
 ColorFluid::ColorFluid(const FilePrm &prm)
     : Simulator(prm)
+    , renormalizedWall(p.getWallGradient()=="renormalized")
+    , tanhWall(p.getWallGradient()=="tanh")
+    , capillaryForce(p.getCapillaryModel()=="csf" ? g.S.D : 0)
+    , capillaryGradient(capillaryForce.size())
+    , interfaceNormal(capillaryForce.size())
     , SOLID_DENS_N(86)
     , f{vava_val_t(g.S.Q), vava_val_t(g.S.Q)}
     , fOld{vava_val_t(g.S.Q), vava_val_t(g.S.Q)}
@@ -43,6 +48,10 @@ ColorFluid::ColorFluid(const FilePrm &prm)
     for (size_t d = 0; d < g.S.D; ++d)
         v[d]  = va_val_t(0.0, g.LG.N);
 
+    for (size_t d=0; d<capillaryForce.size(); ++d) {
+        capillaryForce[d] = capillaryGradient[d] = va_val_t(0.0,g.LG.N);
+        interfaceNormal[d] = va_val_t(0.0,g.LG.FG.N);
+    }
     initPhi();
     calcTibNorm();
     calcWallGradientInverse();
@@ -74,7 +83,8 @@ void ColorFluid::Run(std::ostream &logProc)
         // Construct the t=0 incoming state, then use the normal collision
         // kernel to obtain outgoing populations whose next action is stream.
         calcMacroVar(0);
-        bodyForce();
+        if (capillaryForce.size()) initializeCapillaryForce();
+        bodyForce(0);
         seconds[INIT_TIME] += MPI_Wtime() - begin;
         begin = MPI_Wtime();
         output.Save(p.getTStart());
@@ -106,7 +116,7 @@ void ColorFluid::Run(std::ostream &logProc)
 
         // 3. Calculate macroscopic variables.
         calcMacroVar(t);
-        bodyForce();
+        bodyForce(t);
         seconds[NUMERICAL_TIME] += MPI_Wtime() - begin;
         begin = MPI_Wtime();
 
@@ -240,7 +250,7 @@ void ColorFluid::collision()
     //static const double cAngle = cos(p.getCAngle() / 180.0 * pi) ;
     //static const double sAngle = sin(p.getCAngle() / 180.0 * pi) ;
     static const double beta = p.getIThickness();
-    static const bool renormalizedWall = p.getWallGradient() == "renormalized";
+    const bool csf = capillaryForce.size() != 0;
 
     // MRT
     static const EQUILFN equilfn = p.getEquilModel() == "SRT" ? SRT : MRT;
@@ -253,9 +263,16 @@ void ColorFluid::collision()
     static const va_val_t uniformForce = MatMulMat(
         MatMulDiag(MInv, 1.0 - 0.5 * uniformRates, Q), M, Q, Q, Q);
     for (size_t idx : p.getIdx({IT::VD, IT::GV, IT::VB, IT::PB, IT::HF})) {
-        const va_val_t force = forceForIndex(idx);
-        const bool forced = inner_product(begin(force), end(force), begin(force), 0.0) != 0.0;
+        const va_val_t external = forceForIndex(idx);
+        const bool externallyForced = inner_product(begin(external),end(external),begin(external),0.0) != 0.0;
+        va_val_t localForce(0.0,csf ? g.S.D : 0);
         for (size_t i : gIdx[idx]) {     // array index
+            if (csf) {
+                localForce = external;
+                for (size_t d=0; d<g.S.D; ++d) localForce[d] += capillaryForce[d][i];
+            }
+            const va_val_t& force = csf ? localForce : external;
+            const bool forced = csf ? inner_product(begin(force),end(force),begin(force),0.0) != 0.0 : externallyForced;
             // 2. B-G-K collision.
             double usq = 0;
             for (size_t d = 0; d < g.S.D; ++d)
@@ -311,68 +328,14 @@ void ColorFluid::collision()
                     fT[q] += correction[q];
             }
 
-            // 3. perturbation.
-            va_val_t gDens(0.0, g.S.D);
-            double norm = 0;
-            if (!ibI[i]){
-                for (size_t d = 0; d < g.S.D; ++ d){
-                    for (size_t q : g.S.QrelD[d]){
-                        if (g.S.Qi[q][d] == 1)
-                            gDens[d] += wi[q] * densN[adjI[i2f[i]][q]];
-                        else// if (g.S.Qi[q][d] == -1)
-                            gDens[d] -= wi[q] * densN[adjI[i2f[i]][q]];
-                    }
-                }
-                gDens *= 3.0;       // 3.0 / (c * t)
-                norm = sqrt(inner_product(
-                            begin(gDens), end(gDens), begin(gDens),
-                                       static_cast<double>(0.0)));
-            }
-            else{    // solid - liquid boundary.
-                for (size_t d = 0; d < g.S.D; ++ d){
-                    for (size_t q : g.S.QrelD[d]){
-                        double densN0 = densN[i2f[i]];
-                        double densNQ = densN[adjI[i2f[i]][q]];
-                        if (densNQ == SOLID_DENS_N)
-                            continue;   // skip solid boundary.
-                        if (g.S.Qi[q][d] == 1)
-                            gDens[d] += wi[q] * (densNQ - densN0);
-                        else// if (g.S.Qi[q][d] == -1)
-                            gDens[d] -= wi[q] * (densNQ - densN0);
-                    }
-                }
-                gDens *= 3.0;       // 3.0 / (c * t)
-                norm = sqrt(inner_product(
-                            begin(gDens), end(gDens), begin(gDens),
-                                       static_cast<double>(0.0)));
-
-                double cAngle = ibCosCA[ibI[i]];
-                double sAngle = ibSinCA[ibI[i]];
-                if (renormalizedWall) {
-                    // gDens currently contains 3*b from the clipped stencil.
-                    gDens = MatMulVec(wallGradientInv[ibI[i]], gDens,
-                                      g.S.D, g.S.D) / 3.0;
-                    norm = sqrt(inner_product(begin(gDens), end(gDens),
-                                               begin(gDens), 0.0));
-                }
-                if (g.S.D == 3) {
-                    va_val_t gDensNorm = MatMulMat(TibNorm[ibI[i]], gDens,
-                                                    3, 3, 1);
-                    va_val_t txInv = RotateTx3D(-gDensNorm[0], gDensNorm[1]);
-                    va_val_t tInv = MatMulMat(TibNormInv[ibI[i]], txInv,
-                            3, 3, 3);
-                    gDens = {0, norm * sAngle, norm * cAngle};
-                    gDens = MatMulMat(tInv, gDens, 3, 3, 1);
-                }
-                else if (g.S.D == 2) {
-                    va_val_t gDensNorm = MatMulMat(TibNorm[ibI[i]], gDens,
-                                                    2, 2, 1);
-                    if (gDensNorm[0] >= 0)
-                        gDens = {norm * sAngle, norm * cAngle};
-                    else
-                        gDens = {-norm * sAngle, norm * cAngle};
-                    gDens = MatMulMat(TibNormInv[ibI[i]], gDens, 2, 2, 1);
-                }
+            double norm = 0.0;
+            va_val_t gDens;
+            if (csf) {
+                gDens = va_val_t(0.0,g.S.D);
+                for (size_t d=0; d<g.S.D; ++d) gDens[d] = capillaryGradient[d][i];
+                norm = sqrt(inner_product(begin(gDens),end(gDens),begin(gDens),0.0));
+            } else {
+                gDens = colorGradient(i,norm);
             }
 
             double dens0T = dens[0][i] / densT[i];
@@ -387,7 +350,7 @@ void ColorFluid::collision()
                     }
                     angle /= norm;
 
-                    fT[q] += AkNorm * (wi[q]*angle*angle - bi[q]);
+                    if (!csf) fT[q] += AkNorm * (wi[q]*angle*angle - bi[q]);
 
             // 4. recolor.
                     if (q != 0) angle /= g.S.Qnorm[q];
@@ -406,6 +369,166 @@ void ColorFluid::collision()
     }
     validatePopulations(f[0]);
     validatePopulations(f[1]);
+}
+
+va_val_t ColorFluid::colorGradient(size_t i, double& norm) const
+{
+    const size_t Q = g.S.Q;
+    const auto& i2f = g.LG.getI2fMap();
+    const auto& adjI = g.LG.FG.getAdjI();
+    // Common color gradient and geometric wall projection.
+    va_val_t gDens(0.0, g.S.D);
+    norm = 0;
+    if (!ibI[i]){
+        for (size_t d = 0; d < g.S.D; ++ d){
+            for (size_t q : g.S.QrelD[d]){
+                if (g.S.Qi[q][d] == 1)
+                    gDens[d] += wi[q] * densN[adjI[i2f[i]][q]];
+                else// if (g.S.Qi[q][d] == -1)
+                    gDens[d] -= wi[q] * densN[adjI[i2f[i]][q]];
+            }
+        }
+        gDens *= 3.0;       // 3.0 / (c * t)
+        norm = sqrt(inner_product(
+                    begin(gDens), end(gDens), begin(gDens),
+                               static_cast<double>(0.0)));
+    }
+    else{    // solid - liquid boundary.
+        for (size_t d = 0; d < g.S.D; ++ d){
+            for (size_t q : g.S.QrelD[d]){
+                double densN0 = densN[i2f[i]];
+                double densNQ = densN[adjI[i2f[i]][q]];
+                if (densNQ == SOLID_DENS_N)
+                    continue;   // skip solid boundary.
+                if (g.S.Qi[q][d] == 1)
+                    gDens[d] += wi[q] * (densNQ - densN0);
+                else// if (g.S.Qi[q][d] == -1)
+                    gDens[d] -= wi[q] * (densNQ - densN0);
+            }
+        }
+        gDens *= 3.0;       // 3.0 / (c * t)
+        norm = sqrt(inner_product(
+                    begin(gDens), end(gDens), begin(gDens),
+                               static_cast<double>(0.0)));
+
+        double cAngle = ibCosCA[ibI[i]];
+        double sAngle = ibSinCA[ibI[i]];
+        if (renormalizedWall) {
+            // gDens currently contains 3*b from the clipped stencil.
+            gDens = MatMulVec(wallGradientInv[ibI[i]], gDens,
+                              g.S.D, g.S.D) / 3.0;
+            norm = sqrt(inner_product(begin(gDens), end(gDens),
+                                       begin(gDens), 0.0));
+        }
+        if (tanhWall) {
+            // An equilibrium tanh profile has locally affine atanh(chi).
+            // Continue that fitted profile over a virtual full stencil.
+            const auto transform = [](double color) {
+                return atanh(max(-1.0 + 1e-8, min(1.0 - 1e-8, color)));
+            };
+            const double center = transform(densN[i2f[i]]);
+            va_val_t moment(0.0, g.S.D);
+            for (size_t q = 1; q < Q; ++q) {
+                const double neighbor = densN[adjI[i2f[i]][q]];
+                if (neighbor == SOLID_DENS_N) continue;
+                const double difference = transform(neighbor) - center;
+                for (size_t d = 0; d < g.S.D; ++d)
+                    moment[d] += wi[q] * g.S.Qi[q][d] * difference;
+            }
+            const va_val_t slope = MatMulVec(wallGradientInv[ibI[i]], moment,
+                                            g.S.D, g.S.D);
+            gDens = va_val_t(0.0, g.S.D);
+            for (size_t q = 1; q < Q; ++q) {
+                double position = center;
+                for (size_t d = 0; d < g.S.D; ++d)
+                    position += g.S.Qi[q][d] * slope[d];
+                const double color = tanh(position);
+                for (size_t d = 0; d < g.S.D; ++d)
+                    gDens[d] += 3.0 * wi[q] * g.S.Qi[q][d] * color;
+            }
+            norm = sqrt(inner_product(begin(gDens), end(gDens),
+                                       begin(gDens), 0.0));
+        }
+        if (g.S.D == 3) {
+            va_val_t gDensNorm = MatMulMat(TibNorm[ibI[i]], gDens,
+                                            3, 3, 1);
+            va_val_t txInv = RotateTx3D(-gDensNorm[0], gDensNorm[1]);
+            va_val_t tInv = MatMulMat(TibNormInv[ibI[i]], txInv,
+                    3, 3, 3);
+            gDens = {0, norm * sAngle, norm * cAngle};
+            gDens = MatMulMat(tInv, gDens, 3, 3, 1);
+        }
+        else if (g.S.D == 2) {
+            va_val_t gDensNorm = MatMulMat(TibNorm[ibI[i]], gDens,
+                                            2, 2, 1);
+            if (gDensNorm[0] >= 0)
+                gDens = {norm * sAngle, norm * cAngle};
+            else
+                gDens = {-norm * sAngle, norm * cAngle};
+            gDens = MatMulMat(TibNormInv[ibI[i]], gDens, 2, 2, 1);
+        }
+    }
+    return gDens;
+}
+
+void ColorFluid::calcCapillaryForce(size_t t)
+{
+    const auto& i2f = g.LG.getI2fMap();
+    const auto& adj = g.LG.FG.getAdjI();
+    const size_t D = g.S.D;
+    for (size_t idx : p.getIdx({IT::VD,IT::GV})) {
+        for (size_t i : gIdx[idx]) {
+            double norm;
+            const va_val_t gradient = colorGradient(i,norm);
+            for (size_t d=0; d<D; ++d) {
+                capillaryGradient[d][i] = gradient[d];
+                interfaceNormal[d][i2f[i]] = norm > 1e-9 ? gradient[d]/norm : 0.0;
+            }
+        }
+    }
+    for (size_t d=0; d<D; ++d) syncBorder(&interfaceNormal[d],t);
+    for (size_t idx : p.getIdx({IT::VD,IT::GV})) {
+        for (size_t i : gIdx[idx]) {
+            double curvature = 0.0, norm2 = 0.0;
+            for (size_t d=0; d<D; ++d) norm2 += capillaryGradient[d][i]*capillaryGradient[d][i];
+            if (norm2 > 1e-18) {
+                for (size_t a=0; a<D; ++a) {
+                    va_val_t moment(0.0,D);
+                    const double center = interfaceNormal[a][i2f[i]];
+                    for (size_t q=1; q<g.S.Q; ++q) {
+                        if (densN[adj[i2f[i]][q]]==SOLID_DENS_N) continue;
+                        const double difference = interfaceNormal[a][adj[i2f[i]][q]]-center;
+                        for (size_t b=0; b<D; ++b)
+                            moment[b] += wi[q]*g.S.Qi[q][b]*difference;
+                    }
+                    const va_val_t derivative = ibI[i] ?
+                        MatMulVec(wallGradientInv[ibI[i]],moment,D,D) : moment*3.0;
+                    for (size_t b=0; b<D; ++b)
+                        curvature += (center*interfaceNormal[b][i2f[i]]-(a==b ? 1.0 : 0.0))*derivative[b];
+                }
+            }
+            for (size_t d=0; d<D; ++d) {
+                capillaryForce[d][i] = .5*p.getSTension()*curvature*capillaryGradient[d][i];
+                if (!isfinite(capillaryForce[d][i])) throw runtime_error("Non-finite capillary force.");
+            }
+        }
+    }
+}
+
+void ColorFluid::initializeCapillaryForce()
+{
+    calcCapillaryForce(0);
+    for (size_t idx : p.getIdx({IT::VD,IT::GV})) {
+        for (size_t i : gIdx[idx]) {
+            for (size_t q=0; q<g.S.Q; ++q) {
+                double ef = 0.0;
+                for (size_t d=0; d<g.S.D; ++d) ef += g.S.Qi[q][d]*capillaryForce[d][i];
+                for (size_t ph=0; ph<NP; ++ph)
+                    f[ph][q][i] -= 1.5*wi[q]*ef*dens[ph][i]/densT[i];
+            }
+        }
+    }
+    calcMacroVar(0);
 }
 
 void ColorFluid::zouHeBoundary()
@@ -506,8 +629,14 @@ void ColorFluid::zouHeBoundary()
     }
 }
 
-void ColorFluid::bodyForce()
+void ColorFluid::bodyForce(size_t t)
 {
+    if (capillaryForce.size()) {
+        calcCapillaryForce(t);
+        for (size_t idx : p.getIdx({IT::VD,IT::GV}))
+            for (size_t i : gIdx[idx])
+                for (size_t d=0; d<g.S.D; ++d) v[d][i] += .5*capillaryForce[d][i]/densT[i];
+    }
     for (size_t idx : p.getIdx({IT::GV}))
         for (size_t i : gIdx[idx]) {
             const va_val_t fi = forceForIndex(idx) * 0.5;
@@ -682,7 +811,8 @@ bool ColorFluid::report(ostream &os, const va_val_t &r0, const va_val_t &r1,
 
 void ColorFluid::calcWallGradientInverse()
 {
-    if (p.getWallGradient() != "renormalized") return;
+    if (p.getWallGradient() != "renormalized" && p.getWallGradient() != "tanh" &&
+        !capillaryForce.size()) return;
     const auto& i2f = g.LG.getI2fMap();
     const auto& adj = g.LG.FG.getAdjI();
     va_u8_t extended(g.LG.FG.N);
@@ -705,7 +835,7 @@ void ColorFluid::calcWallGradientInverse()
             for (size_t row = col+1; row < D; ++row)
                 if (abs(augmented[row][col]) > abs(augmented[pivot][col])) pivot = row;
             if (abs(augmented[pivot][col]) < 1e-12)
-                throw runtime_error("Rank-deficient fluid wall stencil; renormalized gradient is unsupported here.");
+                throw runtime_error("Rank-deficient fluid wall stencil; reconstructed derivatives are unsupported here.");
             for (size_t k = 0; k < 2*D; ++k) swap(augmented[col][k],augmented[pivot][k]);
             const double diagonal = augmented[col][col];
             for (size_t k = 0; k < 2*D; ++k) augmented[col][k] /= diagonal;

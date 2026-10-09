@@ -84,6 +84,8 @@ class Study:
                       surfaceTension=s['sigma'], interfaceThickness=s['beta'],
                       wallGradient=f'"{s.get("wall_gradient","legacy")}"')
         params['viscosityInterpolation']=f'"{s.get("viscosity_interpolation","arithmetic")}"'
+        if 'capillary_model' in s:
+            params['capillaryModel']=f'"{s["capillary_model"]}"'
         params.update(s.get('overrides',{}))
         text = '\n'.join(f'{key} {val};' for key,val in params.items())
         text += '\n'+'\n'.join(s['indices'])+'\n'

@@ -47,6 +47,9 @@ physical velocity reporting, checkpoint time/stage semantics, field-based
 convergence and numerical failure exits. The color-gradient
 perturbation and recoloring remain the bulk mechanism. Optional harmonic
 viscosity and wall-gradient reconstruction have separate measured tradeoffs.
+An experimental curvature surface force is available for closed equal-density
+color flow. It reduces residual velocities in the recorded slit controls,
+with remaining pressure and wall-profile errors documented explicitly.
 See the [numerical change log](research/drlab-publication/notes/numerical-changes.md).
 
 CTest exercises coefficients from the actual C++ implementation, 16 analytic
@@ -54,6 +57,9 @@ force cases, analytic phase fluxes in isolated pores, capillary-entry direction,
 single/two-rank and restarted field agreement, and invalid parameter/checkpoint
 failures. A GitHub Actions workflow is provided for GCC and Clang; its execution
 depends on the repository's Actions settings.
+The fourth CTest group checks CSF equilibrium/forcing in both lattices and
+collision operators, normal-field MPI exchange, restart and unsupported-input
+failures.
 
 The extended study has 24 analytic channel cases, 12 layered-flow cases and 30
 wall-drop configurations. Its completed quantitative scope is equal reference
@@ -114,6 +120,14 @@ draft and has not been submitted or accepted.
 - `wallGradient "legacy"` is the default; `"renormalized"` enables weighted
   moment reconstruction. `viscosityInterpolation "arithmetic"` is the default;
   `"harmonic"` selects harmonic kinematic viscosity.
+- `wallGradient "tanh"` enables experimental local profile continuation;
+  it does not uniformly improve the measured controls. `capillaryModel "csf"`
+  selects the experimental curvature/Guo force instead of the default
+  `"perturbation"`. CSF accepts only equal reference densities, standard
+  pressure weights and closed VD/GV flow with SD/BB walls. Pressure/velocity
+  reservoirs and selective films are rejected. New quantitative capillary
+  measurements use equal viscosity, tau=1; moving/curved 3D contact-line
+  accuracy remains unverified.
 - `reportDir 0` requests a prescribed run duration. Automatic convergence
   requires three stable velocity/color reports and applicable scalar diagnostics.
   Legacy K is a reference-viscosity mobility diagnostic, not verified phase

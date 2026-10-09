@@ -32,6 +32,11 @@ class ColorFluid : public Simulator
 {
     friend class NumericalAudit; // Inspect actual lattice operators in the verification executable.
 private:
+    const bool renormalizedWall, tanhWall;
+    vava_val_t capillaryForce, capillaryGradient, interfaceNormal;
+    va_val_t colorGradient(size_t i, double& norm) const;
+    void calcCapillaryForce(size_t t);
+    void initializeCapillaryForce();
     /// \name Constants
     ///@{
     static constexpr size_t NP = 2;  //!< \brief Number of phase = 2.
@@ -382,7 +387,7 @@ private:
      *
      * \see collision()
      */
-    void bodyForce();
+    void bodyForce(size_t t=0);
 
     /*!
      * \brief Apply half permeable film.

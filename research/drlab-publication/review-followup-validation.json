@@ -1,0 +1,287 @@
+{
+  "status": "Completed bounded physical/model continuation; not submission ready",
+  "recorded_date": "2026-10-08",
+  "source_parent_commit": "422b277fe982855e9accfef16adb7ddff72b71c6",
+  "experimental_kernel_changed": true,
+  "default_fields_preserved_bitwise": true,
+  "solver_sha256": "125c7ff2c3222448db9c9219ac837ccd34a3e1787c8a6c7d4a8c44ae6757e33c",
+  "physical_executions": 47,
+  "initial_slit_executions": 30,
+  "slit_continuations": 9,
+  "verification": "All 47 physical executions have successful receipts and verified input, geometry and frozen executable hashes; final measurements reanalyzed from fields.",
+  "maximum_slit_relative_mass_drift": 4.025224598080966e-12,
+  "maximum_held_color_rms_change": 4.818037765690068e-09,
+  "local_ctest_groups_passed": [
+    "numerical_moments",
+    "simulator_contracts",
+    "pore_flow",
+    "capillary_contracts"
+  ],
+  "ctest_log_sha256": "bbedbaeadf56be4ded3f7c673f469a2155a97a1ed1e79b6cb2f3518092532b58",
+  "csf_contracts": {
+    "controls": [
+      {
+        "name": "csf-plane-d2-SRT-1rank",
+        "max_speed": 3.5736987762985454e-16,
+        "initial_speed": 0.0,
+        "mass": {
+          "total_mass": 5.107025913275719e-15,
+          "phase_masses": 6.883382752675969e-15
+        }
+      },
+      {
+        "name": "csf-force-d2-SRT-1rank",
+        "velocity_error": 2.8059152223924855e-16,
+        "transverse_speed": 1.283695372222832e-16
+      },
+      {
+        "name": "csf-plane-d2-MRT-1rank",
+        "max_speed": 9.794661063803535e-17,
+        "initial_speed": 0.0,
+        "mass": {
+          "total_mass": 8.88178419700125e-16,
+          "phase_masses": 3.7747582837255314e-15
+        }
+      },
+      {
+        "name": "csf-force-d2-MRT-1rank",
+        "velocity_error": 1.0148132334464322e-16,
+        "transverse_speed": 2.0469737016526314e-16
+      },
+      {
+        "name": "csf-plane-d3-SRT-1rank",
+        "max_speed": 5.828670879282051e-16,
+        "initial_speed": 0.0,
+        "mass": {
+          "total_mass": 3.330669073875469e-15,
+          "phase_masses": 1.3766765505351938e-14
+        }
+      },
+      {
+        "name": "csf-force-d3-SRT-1rank",
+        "velocity_error": 1.6371452804531117e-17,
+        "transverse_speed": 8.673617379884132e-17
+      },
+      {
+        "name": "csf-plane-d3-MRT-1rank",
+        "max_speed": 8.369928418277285e-17,
+        "initial_speed": 0.0,
+        "mass": {
+          "total_mass": 2.2204460492503126e-16,
+          "phase_masses": 4.218847493575594e-15
+        }
+      },
+      {
+        "name": "csf-force-d3-MRT-1rank",
+        "velocity_error": 1.1535911115245767e-16,
+        "transverse_speed": 2.0816681711721676e-17
+      }
+    ],
+    "comparisons": [
+      {
+        "left": "csf-drop-continuous-1rank",
+        "right": "csf-drop-parallel-2rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "csf-drop-continuous-1rank",
+        "right": "csf-drop-resumed-1-1rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "csf-drop-continuous-1rank",
+        "right": "csf-drop-resumed-2-2rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "csf-wall-continuous-1rank",
+        "right": "csf-wall-parallel-2rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      }
+    ],
+    "failures": [
+      {
+        "name": "invalid-capillary",
+        "exit": 1
+      },
+      {
+        "name": "invalid-wall",
+        "exit": 1
+      },
+      {
+        "name": "unsupported-density",
+        "exit": 1
+      },
+      {
+        "name": "unsupported-pressure-weights",
+        "exit": 1
+      },
+      {
+        "name": "pressure-boundary",
+        "exit": 1
+      },
+      {
+        "name": "velocity-boundary",
+        "exit": 1
+      },
+      {
+        "name": "selective-film",
+        "exit": 1
+      }
+    ],
+    "solver_sha256": "125c7ff2c3222448db9c9219ac837ccd34a3e1787c8a6c7d4a8c44ae6757e33c",
+    "scope": "Bulk plane/forcing and short-time replay tests; these do not validate curved 3D wetting, contact-line accuracy or high density ratios."
+  },
+  "default_compatibility": {
+    "solver_sha256": "125c7ff2c3222448db9c9219ac837ccd34a3e1787c8a6c7d4a8c44ae6757e33c",
+    "comparisons": [
+      {
+        "left": "menisci-H16-theta60-legacy-beta0.7-1rank",
+        "right": "menisci-H16-theta60-legacy-beta0.7-1rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "menisci-H16-theta60-renormalized-beta0.7-1rank",
+        "right": "menisci-H16-theta60-renormalized-beta0.7-1rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "menisci-H16-theta90-legacy-beta0.7-1rank",
+        "right": "menisci-H16-theta90-legacy-beta0.7-1rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "menisci-H16-theta90-renormalized-beta0.7-1rank",
+        "right": "menisci-H16-theta90-renormalized-beta0.7-1rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      }
+    ]
+  },
+  "original_archive_files_unchanged": 82,
+  "legacy_prototype_changes": 0,
+  "main_pdf_pages": 21,
+  "supplement_pdf_pages": 9,
+  "figure_count": 9,
+  "evidence_sha256": {
+    "capillary-response.json": "d6cbf1314a89da77c0bb0d95f917669145c4cab23aee2107e629019b167e075d",
+    "reference-sensitivity.json": "549b403cd0979d02e1da29a64d47a6a7f94d34e9716790e8d9e1bd8a0d875350"
+  },
+  "kernel_source_sha256": {
+    "solver/src/lbm/colorfluid.cpp": "fe5022ba266391487a315af865094af6a6b2c00bdd97ae14963310c794d49656",
+    "solver/src/file/fileprm.cpp": "de93133b8c133b2b496c9619b8b2d1582e706861a4ade59c8dd501567a8c2a1f",
+    "solver/inc/lbm/colorfluid.h": "5864d63f27a70c407e8cf15f77a4922dd4ec7a7ba3a1f1956afe3aef4c553b98",
+    "solver/inc/file/fileprm.h": "72176587b29fa73c8fba242cc9c6c66e3a20cccde3a73d7de34f0b1c90500f92"
+  },
+  "main_pdf_compiled": true,
+  "supplement_pdf_compiled": true,
+  "remaining": "Reference sensitivity and omitted prior work repaired. Model improvements reduce residual flow in bounded controls, but dimensionless neutral currents and wall-color distortion persist. No trapping, new-theory or publication-readiness claim.",
+  "default_and_csf_storage_compatibility": {
+    "solver_sha256": "125c7ff2c3222448db9c9219ac837ccd34a3e1787c8a6c7d4a8c44ae6757e33c",
+    "comparisons": [
+      {
+        "left": "menisci-H16-theta60-legacy-beta0.7-1rank",
+        "right": "menisci-H16-theta60-legacy-beta0.7-1rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "menisci-H16-theta60-renormalized-beta0.7-1rank",
+        "right": "menisci-H16-theta60-renormalized-beta0.7-1rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "menisci-H16-theta90-legacy-beta0.7-1rank",
+        "right": "menisci-H16-theta90-legacy-beta0.7-1rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "menisci-H16-theta90-renormalized-beta0.7-1rank",
+        "right": "menisci-H16-theta90-renormalized-beta0.7-1rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      },
+      {
+        "left": "menisci-H16-theta60-renormalized-beta0.7-csf-1rank",
+        "right": "menisci-H16-theta60-renormalized-beta0.7-csf-1rank",
+        "max_absolute_differences": {
+          "r0": 0.0,
+          "r1": 0.0,
+          "v": 0.0
+        },
+        "bitwise_fields": true
+      }
+    ]
+  },
+  "measurement_executable_scope": "Physical measurements retain their actual frozen executable identities. A final force-storage refactor retains bitwise fields in four default and one CSF comparisons; the current verification executable has its separate identity.",
+  "png_and_generated_text_rebuild_byte_identical": true,
+  "run_kernel_reconstruction": {
+    "purpose": "Reconstruct the pre-storage-refactor numerical kernel used by the refined/continued slit and bulk campaigns. Apply the patch in a separate copy of this source revision.",
+    "restored_frozen_executable_sha256": "6694a743a12b8054c0cb98b4b47465f4f276262673aa9b7db44e8077eada9eac",
+    "rebuild_in_original_environment_byte_identical": true,
+    "final_verification_executable_sha256": "125c7ff2c3222448db9c9219ac837ccd34a3e1787c8a6c7d4a8c44ae6757e33c",
+    "colorfluid_source_sha256_before_patch": "fe5022ba266391487a315af865094af6a6b2c00bdd97ae14963310c794d49656",
+    "colorfluid_source_sha256_after_patch": "828c222beb6a476a78fe055fbc1ac1ebb9c5446001f06f886572387b33292ea2",
+    "patch_sha256": "91cfeb2b1eefc5386b07214184ab0a711ec933477a9951d30d3c7958cc10ff52",
+    "scope": "Only force-vector storage differs; equations, stencil, cutoff, forcing and boundary operators are unchanged. Historical pilot/baseline executable hashes are retained separately; binary hashes depend on compiler/build environment.",
+    "apply_command": "git apply --unidiff-zero research/drlab-publication/run-kernels/6694a743-force-storage.patch",
+    "patch_context": "Zero context preserves the historical mixed CRLF/LF source bytes without storing carriage-return context as trailing whitespace."
+  }
+}

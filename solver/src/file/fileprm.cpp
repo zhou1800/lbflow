@@ -63,6 +63,16 @@ string FilePrm::getViscosityInterpolation() const
     return result;
 }
 
+string FilePrm::getCapillaryModel() const
+{
+    const auto value = iPrm.find("capillaryModel");
+    if (value == iPrm.end()) return "perturbation";
+    string result;
+    if (!parse(value->second, &result))
+        throw invalid_argument("capillaryModel must be a quoted string.");
+    return result;
+}
+
 void FilePrm::ValidateSimulation() const
 {
     const size_t ndim = dimension.size();
@@ -98,10 +108,24 @@ void FilePrm::ValidateSimulation() const
             !isfinite(density[k]) || density[k] <= 0.0)
             throw invalid_argument("Densities must be positive; relaxation times must exceed 0.5.");
     if (model == "color") {
+        const string capillary = getCapillaryModel();
+        if (capillary != "perturbation" && capillary != "csf")
+            throw invalid_argument("capillaryModel must be perturbation or csf.");
+        if (capillary == "csf") {
+            const double standardAlpha = ndim == 2 ? 4.0/9.0 : 1.0/3.0;
+            if (density[0] != density[1] || abs(getAlpha0()-standardAlpha) > 1e-14)
+                throw invalid_argument("Experimental CSF requires equal reference densities and standard pressure weights.");
+            for (const auto& item : idx) {
+                const IT type = item.second->Type;
+                if (type != IT::VD && type != IT::GV && type != IT::SD && type != IT::BB)
+                    throw invalid_argument("Experimental CSF supports only closed VD/GV flow with SD/BB walls.");
+            }
+        }
         if (getViscosityInterpolation() != "arithmetic" && getViscosityInterpolation() != "harmonic")
             throw invalid_argument("viscosityInterpolation must be arithmetic or harmonic.");
-        if (getWallGradient() != "legacy" && getWallGradient() != "renormalized")
-            throw invalid_argument("wallGradient must be legacy or renormalized.");
+        if (getWallGradient() != "legacy" && getWallGradient() != "renormalized" &&
+            getWallGradient() != "tanh")
+            throw invalid_argument("wallGradient must be legacy, renormalized or tanh.");
         const double a0 = getAlpha0();
         const double a1 = 1.0 - density[0] / density[1] * (1.0 - a0);
         if (!isfinite(a0) || a0 < 0.0 || a0 >= 1.0 ||
@@ -275,6 +299,9 @@ void FilePrm::parseAll()
         }
         else if (a.first == "viscosityInterpolation") {
             // Optional interpolation selector is read directly from iPrm.
+        }
+        else if (a.first == "capillaryModel") {
+            // Optional experimental capillary force selector.
         }
         else if (a.first == "interfaceThickness")
             parse(a.second, &iThickness);

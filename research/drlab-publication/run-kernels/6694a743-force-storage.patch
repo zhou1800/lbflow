@@ -1,0 +1,16 @@
+--- a/solver/src/lbm/colorfluid.cpp
++++ b/solver/src/lbm/colorfluid.cpp
+@@ -267,2 +266,0 @@
+-        const bool externallyForced = inner_product(begin(external),end(external),begin(external),0.0) != 0.0;
+-        va_val_t localForce(0.0,csf ? g.S.D : 0);
+@@ -270,6 +268,4 @@
+-            if (csf) {
+-                localForce = external;
+-                for (size_t d=0; d<g.S.D; ++d) localForce[d] += capillaryForce[d][i];
+-            }
+-            const va_val_t& force = csf ? localForce : external;
+-            const bool forced = csf ? inner_product(begin(force),end(force),begin(force),0.0) != 0.0 : externallyForced;
++            va_val_t force = external;
++            if (csf)
++                for (size_t d=0; d<g.S.D; ++d) force[d] += capillaryForce[d][i];
++            const bool forced = inner_product(begin(force),end(force),begin(force),0.0) != 0.0;

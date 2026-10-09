@@ -92,3 +92,78 @@ claim requires a mechanism, a controlled test and a comparison with recent work.
 5. Put implementation history and parallel checks in support of the physical
    evidence. Update the paper only with completed derivations and measured
    results. Keep a bounded next-stage plan for unmeasured pore-throat physics.
+
+## Review-Driven Continuation
+
+The author authorizes further physical research and model improvements when
+needed. Scientific peer review uses domain evidence, not software-document
+templates. The review of source `422b277` identifies missing directly relevant
+diffuse-interface analyses, reference-reconstruction uncertainty, and an
+unclosed connection to quantitative two-phase pore physics.
+
+1. Compare with Lai et al. (2025), Fuster and Mimoh (2024), and Reder et al.
+   (2024). Retain the continuum analysis as an explanatory reference and
+   establish additional significance through measured physical outcomes.
+2. Record linear and shape-preserving reconstruction sensitivity for the
+   eighteen existing layered cases. Their residual is a discrepancy against
+   a specified continuum reconstruction; do not call it isolated lattice
+   error without an independent uncertainty bound.
+3. Measure closed slit menisci with direct bulk pressure differences, signed
+   Young-Laplace references, phase mass and late geometry changes. Include
+   neutral wetting as a planar mechanical-equilibrium control. Resolve
+   static pressure before inferring an open-boundary entry threshold.
+4. Diagnose the wall representation before introducing an optional correction.
+   A correction must preserve the established defaults, bulk force/capillary
+   operators, source provenance and replay contracts. Compare pressure,
+   geometry and parasitic flow, including negative results. Published tanh
+   profile continuation is a baseline idea, not evidence of novelty.
+5. Use a common calibrated surface tension, interface width and wall location.
+   Establish finite-time and resolution sensitivity before new physical
+   predictions or journal submission. No new theory, universal correction or
+   submission-readiness claim follows merely from adding a model option.
+
+### Experimental Nonlinear Wall Reconstruction
+
+The static neutral-wall control shows persistent flow with both existing
+wall gradients. An optional `wallGradient "tanh"` examines one specific
+mechanism: linear reconstruction of a nonlinear equilibrium color profile.
+It reconstructs the locally affine `atanh(chi)` field using the available
+fluid-stencil moment tensor, continues the inferred profile over a virtual
+full stencil, and applies the common geometrical angle projection. The
+transform clips color to `[-1+1e-8,1-1e-8]`; this regularization is explicit.
+Rank-deficient stencils remain unsupported. The legacy default and existing
+renormalized operator retain their arithmetic and bulk implementation.
+
+This is an experimental local reconstruction, not an implementation claim
+for a published global ghost-node algorithm, a new bulk theory or a guarantee
+of wall mechanical equilibrium. Test direct capillary pressure, neutral-wall
+flow, mass, gradient-profile consistency and replay. Promote it only to the
+scope supported by those comparisons; record any failure to improve flow.
+
+### Experimental Curvature Surface Force
+
+The nonlinear wall pilot does not remove the neutral-plane parasitic flow.
+An optional `capillaryModel "csf"` replaces the perturbation increment with
+the established continuum surface force `F_s = sigma*kappa*grad(chi)/2`,
+where `kappa = -(I-n*n):grad(n)` and `n = grad(chi)/|grad(chi)|`.
+This follows the Lishchuk/Guo force approach used in Sedahmed and Coelho
+(2024), DOI 10.1063/5.0228835; it is not a new physical theory or an exact
+replication of their complete wetting model. Normal derivatives use the
+weighted fluid stencil, reconstructed at walls, with an additional MPI
+normal-field exchange. Gradients below the existing recoloring cutoff have
+zero normal and force. The geometric projection and chosen gradient remain
+common to both capillary options.
+
+The same combined external and capillary force enters Guo collision and
+the physical half-force velocity. Fresh incoming populations include the
+initial capillary half-force subtraction. Saved states remain outgoing.
+The default `perturbation` arithmetic and archived source are preserved.
+Initially admit only closed equal-density, standard-pressure-weight color
+flow with VD/GV labels; pressure/velocity reservoirs and selective films are
+unsupported for this experimental option and must be rejected explicitly.
+
+Verify zero-force plane equilibrium, signed slit pressure, Laplace pressure
+of bulk drops, mass, both collision operators and lattices, MPI exchange,
+restart continuity and unchanged default fields. Report pressure/speed and
+late-time sensitivity together; lower spurious velocity alone does not
+establish an accurate or universally superior wetting model.

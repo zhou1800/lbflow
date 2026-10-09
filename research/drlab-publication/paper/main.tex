@@ -22,8 +22,9 @@
 \begin{abstract}
 Finite numerical interfaces can alter pore-scale transport even when a
 two-phase calculation conserves mass and remains stable. We use the C++/MPI
-program LBFlow to distinguish diffuse constitutive bias, residual lattice
-error and wall-wetting effects in equal-density color-gradient simulations.
+program LBFlow to distinguish diffuse constitutive bias, discrepancies
+against reconstructed continuum references and wall-wetting effects in
+equal-density color-gradient simulations.
 A continuum momentum balance expresses slit conductance through three
 moments of inverse viscosity. For a centered tanh interface, arithmetic and
 harmonic interpolation produce leading flux shifts linear and quadratic
@@ -99,6 +100,18 @@ diffuse constitutive profile from the error in solving it, then tests the
 result over controlled interface and pore-width sequences. Neither this
 elementary continuum relation nor the existing interpolation schemes are
 claimed as new fundamental laws.
+
+Directly relevant diffuse-interface analyses already address this separation.
+Lai et al. derive layered Poiseuille solutions for several viscosity rules
+and warn against interpreting diffuse-model error as numerical error
+\cite{lai2025}. Our conductance identity is a compact consequence of the
+same momentum problem; this separation is not a new concept.
+Fuster and Mimoh analyze one-fluid regularization errors \cite{fuster2024},
+while Reder et al. derive viscous-stress approximations from mechanical jump
+conditions \cite{reder2024}. Their work also cautions against extending a
+scalar viscosity comparison to arbitrary multidimensional stress fields.
+The present scope is a reproducible diagnosis of these effects in the
+recovered implementation and a bounded capillary-operator comparison.
 
 The source baseline is the reference solver, historical revision
 \texttt{1bef9bbe7047}. The full source identity is recorded in the supplement. The original archive is
@@ -223,6 +236,34 @@ translating phase field. Periodic acceleration benchmarks disable steady
 stopping; undefined pressure-based permeability is identified separately
 from invalid numerical state.
 
+\subsection{Experimental capillary operators}
+Two optional controls examine limitations exposed by the static tests.
+The first fits $\psi=\operatorname{atanh}(\chi)$ on available fluid neighbors
+with the same moment tensor $A$, continues $\tanh(\psi+\vct e_i\cdot\nabla\psi)$
+over a virtual full stencil, then applies the common angle rotation.
+Color is clipped to $\pm(1-10^{-8})$ for this transform. Equilibrium-profile
+continuation has prior work \cite{bhattacharya2026}; this local fit is not
+an exact implementation of that paper's global ghost-node scheme.
+
+The second replaces perturbation with established continuum surface forcing
+\cite{lishchuk2003,sedahmed2024}:
+\begin{equation}
+ \vct F_s=\frac{\sigma}{2}\kappa\vct g,\qquad
+ \kappa=-(I-\vct n\vct n):\nabla\vct n,\quad
+ \vct n=\vct g/|\vct g|.
+\end{equation}
+Normal derivatives use the weighted fluid stencil and $A^{-1}$ at walls.
+An additional MPI exchange supplies neighboring normals. Below
+$|\vct g|=10^{-9}$, normal and capillary force are zero. The combined external
+and capillary force enters both Guo collision and physical half-force
+velocity; incoming initialization subtracts its capillary half-force before
+the initial collision. Recoloring and the selected wall projection remain
+common. This is a separate force-operator comparison, not a wall-only
+ablation or replication of a published complete model.
+The experimental force currently accepts closed VD/GV flow at equal reference
+density and standard pressure weights. Open pressure/velocity reservoirs and
+selective films are rejected. Neither option changes the legacy defaults.
+
 \subsection{Pore-scale observables}
 For $N$ total voxels, $N_f$ pore voxels, and $\varphi_0=\rho_0/\rho$,
 $\varphi_1=1-\varphi_0$ in the fluid, the analysis defines
@@ -308,7 +349,8 @@ volume flux by 9.19\%, while harmonic interpolation increases it by 21.59\%.
 Independent planar-tanh predictions give $-9.08$\% and $+21.30$\%.
 The corresponding profile discrepancies against the \emph{sharp} solution
 are 17.02\% and 24.66\%, but discrepancies against the continuum solution
-using the measured diffuse profile are only 0.160\% and 0.100\%.
+using linear interpolation of the measured diffuse profile are 0.160\% and
+0.100\%. Shape-preserving cubic interpolation gives 0.121\% and 0.273\%.
 Most of the apparent failure is consequently the response of the chosen
 finite constitutive transition, rather than failure of the solver to recover
 its continuum momentum balance.
@@ -316,7 +358,15 @@ its continuum momentum balance.
 Fig.~\ref{fig:transport} also shows the competing effect of sharpening an
 interface. At $H=16$, increasing $\beta$ from 0.35 to 0.9 reduces the
 arithmetic sharp-flux bias, but increases its measured-diffuse profile error
-from 0.160\% to 0.753\%. Interface confinement and lattice representation
+from 0.160\% to 0.753\% with the specified linear reconstruction; the
+corresponding shape-preserving cubic values are 0.121\% and 0.443\%.
+At $H=64$, $\beta=0.9$, the harmonic discrepancy is 0.0117\% for linear
+interpolation and 0.0482\% for the cubic reference. Quadrature refinement
+changes a reference profile by at most $9.12\times10^{-8}$ relative to the
+measured velocity, whereas interpolation changes can be much larger.
+These small residuals include reference-reconstruction sensitivity and
+finite-density departures; they are not isolated lattice truncation errors.
+Interface confinement and lattice representation
 must therefore be assessed separately. The remaining error is not assigned
 exclusively to one discrete operator, and these flat interfaces do not test
 curved-interface spurious currents or capillary trapping.
@@ -327,8 +377,10 @@ curved-interface spurious currents or capillary trapping.
 shifts against the midpoint-sampled sharp profile; lines show continuous
 tanh-profile predictions from the independent width calibration, with no
 flow-data fitting. Right: velocity-profile error against the continuum
-reference reconstructed from measured phase fractions. Residual lattice
-error and diffuse constitutive bias are distinct observables.}
+reference reconstructed from measured phase fractions. Bars span the
+linear/PCHIP reconstructions and quadrature refinement, not statistical
+confidence intervals. Diffuse constitutive bias and a reconstruction-dependent
+solver discrepancy are distinct observables.}
 \label{fig:transport}\end{figure}
 
 \subsection{Wall direction and capillary-stress magnitude}
@@ -403,7 +455,8 @@ transition bias, not an improved collision formula.
 \begin{figure}[htbp]\centering
 \includegraphics[width=.94\linewidth]{layered-flow.pdf}
 \caption{Layered Poiseuille flow: sharp-interface and measured diffuse-profile
-references separate viscosity-interpolation bias from discretization error.}
+references diagnose viscosity-interpolation bias. The small residual also
+depends on reference reconstruction.}
 \label{fig:layered}\end{figure}
 
 \subsection{Interfaces and wetting}
@@ -447,6 +500,66 @@ show deterministic measurement sensitivity rather than statistical confidence.
 Size and interface-width sequences use fixed lattice surface tension and are
 not labelled a matched-physics spatial convergence study.}
 \label{fig:wetting}\end{figure}
+
+\subsection{Direct closed-slit capillary response}
+Closed periodic slits contain a central phase-0 segment and two menisci, with
+halfway-wall spacing $H$, length $4H$ and no external force. Pressure is
+measured directly in separated bulk buffers, rather than inferred from
+velocity. The signed sharp reference is
+$p_0-p_1=2\sigma\cos\theta/H$, with the angle through phase 1.
+The H16 pilot tests 60, 90 and 120 degrees, three gradients and both capillary
+operators. The follow-up uses $H=16,32,48$ for legacy perturbation,
+linear-reconstructed perturbation and linear-reconstructed CSF.
+At fixed $\beta=0.7$ and $\tau_0=\tau_1=1$, $\sigma=0.005/s$ and the initial
+duration is $8000s^2$, where $s=H/16$. The three-width 60-degree controls
+are continued to twice that duration. This is a joint grid/sharp-interface sequence, not
+spatial convergence at fixed physical interface width.
+
+\input{data/capillary-numbers.tex}
+For the 60-degree controls, the legacy signed pressure discrepancy remains
+approximately $-6.3$ to $-7.5$\% over these three widths. Linear
+reconstruction reduces its discrepancy to \CapillaryRenPressureErrorFine\%
+at $H=48$; CSF gives \CapillaryCSFPressureErrorFine\%.
+CSF lowers the H48 nonneutral residual maximum speed by a factor
+\CapillaryNonneutralReductionFine\ relative to reconstructed perturbation,
+while the neutral-wall factor is \CapillaryNeutralReductionFine\
+(Fig.~\ref{fig:closedcapillary}). Lower velocity therefore does not imply
+lower pressure bias. The longest-hold checks change normalized pressure by
+less than \CapillaryHoldPressureChange\% of the sharp reference, with the
+late color RMS changes retained separately. The data do not establish a
+nonzero asymptotic legacy error from three widths or an entry threshold.
+The largest longer-hold color RMS change is $4.82\times10^{-9}$, and the
+maximum relative component/total mass drift across the slit histories is
+$4.03\times10^{-12}$.
+Neutral residual $\mu U_{max}/\sigma$ remains near $3.0\times10^{-3}$ for
+linear-reconstructed perturbation and $3.3\times10^{-4}$ for CSF over the
+tested widths. Decreasing lattice velocity under diffusive scaling therefore
+does not demonstrate vanishing dimensionless parasitic flow. This is a
+specific limitation for low-rate capillary pore-flow studies, not a universal
+error floor for other geometries or wetting schemes.
+
+The negative controls are informative. Local tanh reconstruction increases
+the H16 neutral maximum speed from $9.05\times10^{-5}$ to
+$9.79\times10^{-5}$ relative to linear reconstruction with perturbation.
+Setting $\sigma=0$ leaves a wall-to-center color-profile difference of about
+0.0109 while fluid speed falls below $2\times10^{-16}$. Thus color-profile
+distortion occurs independently of capillary motion. The evidence motivates
+inspection of segregation and boundary reflection together; it does not
+prove that one discrete term exclusively causes the residual flow.
+Bulk CSF Laplace controls retain errors of 1.39\% and 0.303\% for D2Q9
+radii 12 and 24 after longer relaxation, and 4.26\% for D3Q19 radius 8.
+Those tests do not validate curved three-dimensional wetting.
+
+\begin{figure}[htbp]\centering
+\includegraphics[width=.98\linewidth]{closed-capillary.pdf}
+\caption{Closed-slit pressure and residual velocity. Left: signed 60-degree
+pressure discrepancy after the longer holds; bars retain bulk-sampling and
+duration sensitivity. Right: $\mu U_{max}/\sigma$, with filled circles for
+60 degrees and open triangles for neutral wetting. Methods share the input
+surface tension and measured bulk width. The joint refinement sequence
+reduces pressure error for reconstruction, while CSF reduces residual flow.
+It does not remove the wall-color distortion.}
+\label{fig:closedcapillary}\end{figure}
 
 \section{Pore-scale application and computational evidence}
 \subsection{Analytic pore flux and capillary entry}
@@ -551,6 +664,10 @@ one versus two MPI ranks, and uninterrupted versus a one-to-two-rank restart.
 These extend the homogeneous/droplet replay checks to an irregular pore mask.
 
 \subsection{Workstation performance}
+This timing campaign uses the frozen perturbation executable recorded before
+the experimental capillary extension. It does not measure the new CSF branch
+or establish the runtime of the revised build. The complete executable hash
+remains in the timing data.
 A separate $96^3$ crop provides a fixed two-phase timing workload with
 \PerfFluidNodes\ fluid nodes. The actual D3Q19/MRT numerical path is timed
 for \PerfSteps\ updates at one, two, four and eight MPI ranks on an
@@ -589,6 +706,11 @@ reference accounts for most of the transport discrepancy. Neither good
 conservation nor selection of a familiar viscosity closure removes it.
 The local wall analysis makes the analogous distinction between an imposed
 interface direction and capillary-stress magnitude.
+Direct closed-slit pressure and zero-sigma controls further show why
+surface-force, wetting and phase-boundary consistency must be considered
+together. The experimental CSF branch improves residual flow in its measured
+scope but retains pressure bias and wall-color distortion. This established
+force formulation is not evidence for a new bulk theory.
 
 Extending these findings to capillary trapping requires a different test.
 Quasistatic invasion and retraction in a specified pore throat must resolve

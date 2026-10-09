@@ -20,16 +20,55 @@ Neither a new bulk model nor a measured trapping threshold is claimed.
 
 ```sh
 python3 scripts/interfacial_transport.py --solver build/bin/LBFlow --root results/interfacial-transport --jobs 2
-python3 scripts/make_transport_figure.py --data results/interfacial-transport/interfacial-transport.json --paper results/regenerated-transport
+python3 scripts/reference_sensitivity.py --data results/interfacial-transport/interfacial-transport.json --output results/interfacial-transport/reference-sensitivity.json
+python3 scripts/make_transport_figure.py --data results/interfacial-transport/interfacial-transport.json --sensitivity results/interfacial-transport/reference-sensitivity.json --paper results/regenerated-transport
 ```
 
 The campaign contains three independent planar calibrations and eighteen
-layered-flow calculations. No kernel change or new dependency is required.
+layered-flow calculations. Those measurements retain the unchanged default
+operators. The sensitivity postprocessing uses SciPy from the existing
+analysis requirements and compares specified reference reconstructions;
+it does not isolate lattice truncation error.
 Rebuild its figure from the included data with:
 
 ```sh
 python3 scripts/make_transport_figure.py --paper results/regenerated-transport
 ```
+
+## Closed Capillary And Model Controls
+
+The continued study compares direct bulk pressure, residual velocity and
+late geometry, including an optional local tanh reconstruction and an
+established curvature/Guo surface force. The options remain experimental.
+They do not establish a new multiphase theory, an exact implementation of a
+published complete wetting scheme, or a pore-throat trapping threshold.
+
+```sh
+python3 scripts/capillary_response.py --solver build/bin/LBFlow --root results/menisci-base --heights 16
+python3 scripts/capillary_response.py --solver build/bin/LBFlow --root results/menisci-tanh --heights 16 --walls tanh
+python3 scripts/capillary_response.py --solver build/bin/LBFlow --root results/menisci-csf --heights 16 --walls legacy renormalized tanh --capillary-models csf
+python3 scripts/capillary_response.py --solver build/bin/LBFlow --root results/menisci-refined-linear --heights 32 48 --angles 60 90 --walls renormalized --capillary-models perturbation csf
+python3 scripts/capillary_response.py --solver build/bin/LBFlow --root results/menisci-refined-legacy --heights 32 48 --angles 60 90 --walls legacy
+python3 scripts/continue_menisci.py --solver build/bin/LBFlow --initial-roots results/menisci-base results/menisci-refined-legacy --root results/menisci-legacy-hold --walls legacy
+python3 scripts/continue_menisci.py --solver build/bin/LBFlow --initial-roots results/menisci-base results/menisci-csf results/menisci-refined-linear --root results/menisci-linear-hold
+python3 scripts/bulk_capillary_controls.py --solver build/bin/LBFlow --root results/bulk-controls
+```
+
+Heights 16/32/48 use diffusive surface-tension and duration scaling with
+fixed beta. This is a joint grid/sharp-interface sequence, not fixed-interface
+grid convergence. Continuations keep complete mass/field histories.
+The wall-profile control sets sigma to zero to distinguish color segregation
+from capillary flow. The supplied measurements retain unfavorable results
+and early drop measurements, including the reason for longer relaxation.
+Use `make_capillary_figure.py --paper results/regenerated-capillary` to rebuild
+the figure, numerical macros and table from the distributed summary.
+`collect_capillary_controls.py` reanalyzes and checksums the separate run roots.
+The [run-kernel patch](run-kernels/manifest.json) reconstructs the frozen
+pre-storage-refactor source used for the refined/continued controls. Its
+binary was rebuilt byte-identically in the original environment, then the
+current source/binary was restored. Apply that patch only in a separate copy
+with `git apply --unidiff-zero` when reproducing that historical executable; binary hashes are not portable
+between toolchains.
 
 ## CPC Digital-Rock Extension
 

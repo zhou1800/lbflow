@@ -1,5 +1,5 @@
 Finite-interface viscosity can alter transport despite stable conserved flow.
-Continuum momentum balance separates constitutive bias from lattice error.
+Continuum-reference sensitivity is measured alongside transport bias.
 Harmonic viscosity can overestimate flux when the interface is confined.
-Wall-gradient direction and capillary-stress magnitude need separate checks.
+Curvature-force controls reduce residual flow but retain capillary bias.
 Public digital-rock tests retain measured resolution and transient limits.

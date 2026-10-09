@@ -312,6 +312,9 @@ ranges are observed variability, not confidence intervals.
 \input{data/performance-table.tex}
 
 The included \texttt{data/porous-media.json} contains all these measured
+timings for the frozen pre-extension perturbation executable; no timing or
+memory result is transferred to the experimental CSF option.
+It also retains the
 histories, matching-field results, hardware/frequency/load records, input
 geometry identities and program hashes. \texttt{permeability-comparison.json}
 retains the independent comparisons. The new figures and generated text
@@ -364,8 +367,17 @@ profiles are sampled at the same halfway-wall cell centers as the measured
 velocity; continuous volume flux is retained separately.
 The tanh prediction uses only independent planar width calibration.
 The measured-diffuse reference interpolates the observed phase fractions,
-with 256 quadrature intervals per lattice cell. It is an explanatory
-reference, not an independent prediction of the phase profile.
+linearly with constant continuation from the first/last fluid node to the
+wall, using 256 quadrature intervals per lattice cell. It is an explanatory
+reference, not an independent prediction of the phase profile. A separate
+postprocessing calculation holds the observed samples fixed and compares
+linear interpolation at 1024 intervals per cell with shape-preserving PCHIP
+interpolation at the same quadrature density. The resulting discrepancy
+envelopes in \texttt{data/reference-sensitivity.json} describe the specified
+reconstructions; they do not bound every admissible phase profile or isolate
+lattice error. The largest linear quadrature refinement change is
+$9.12\times10^{-8}$ relative to the measured velocity. The largest
+linear-to-PCHIP reference change is 0.527\%.
 
 All late relative velocity changes are below $9.65\times10^{-12}$ and the
 maximum relative component/total mass drift is $9.11\times10^{-12}$.
@@ -377,6 +389,43 @@ reference errors, inputs and executable hashes are in
 from its raw fields, and input, geometry and frozen-executable hashes were
 verified. The calculation uses the existing operators; no numerical kernel
 was changed for this campaign.
+
+\section{Closed capillary controls and optional operators}
+The distributed \texttt{data/capillary-response.json} retains all pilot,
+resolution and longer-hold measurements, as well as initial and relaxed
+bulk-drop controls. The initial campaign contains 18 H16 configurations
+(three angles, three gradients, two force operators) and twelve H32/H48
+configurations. Nine 60-degree cases continue to twice their initial
+duration. Pressure uses $\rho/3$ averaged where $|\chi|>0.99$, with phase-0
+buffer $1.5H\le x<2.5H$ and phase-1 buffers $x<0.5H$ or $x\ge3.5H$.
+The principal sample excludes $H/4$ rows at each wall. The retained sensitivity
+uses cutoffs 0.98/0.99/0.999 and both zero and $H/4$ wall margins.
+Pressure is measured at multiple snapshots; it is not inferred from an
+assumed developed-flow resistance. Circle extrapolations are retained only
+where enough interface points are available.
+
+\input{data/capillary-table.tex}
+
+The experimental CSF normal derivatives are
+$\partial_b n_a=3\sum_i w_i e_{ib}(n_{a,i}-n_a)$ in the bulk, and use
+$A^{-1}$ applied to the corresponding moment vector at walls.
+The projected curvature is $\sum_{ab}(n_an_b-\delta_{ab})\partial_b n_a$.
+For a smooth unit normal this agrees with $-\nabla\cdot\bm n$; discrete
+projection is specified rather than silently equated to a different
+curvature stencil. The cutoff is the existing recoloring cutoff, not a
+pressure-error fitting parameter. No extra surface-tension multiplier is
+fitted. An equilibrium-profile fit is likewise an optional local control;
+its transform clipping and remaining negative results are explicit.
+
+Fresh capillary incoming populations subtract
+$\tfrac32 w_i(\bm e_i\cdot\bm F_s)\rho_k/\rho$, preserving initial
+component masses and the physical half-force convention. Saved states
+remain outgoing. Short-time tests verify both lattices and collision
+operators, bulk-plane equilibrium, uniform external acceleration,
+bitwise MPI/restart and unsupported-input exits. Four unchanged-default
+meniscus comparisons are bitwise identical to the frozen pre-change solver.
+Neither these replay tests nor the bulk-drop pressure checks establish
+dynamic or curved three-dimensional wall accuracy.
 
 \section{Scientific limits and publication status}
 Only equal-density, low-speed flow in the documented parameter range is
