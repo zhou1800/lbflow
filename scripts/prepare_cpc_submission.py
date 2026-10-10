@@ -119,7 +119,10 @@ contains country-only affiliation; personal correspondence details are used
 only in the separate private manuscript package and submission form.
 Historical archives preserve original bytes and may contain former contact
 metadata. This submission package is private and is not a public release.
-No account credentials are included. Code is MIT-licensed; attributed
+The account credentials file is not packaged. Preserved historical archives
+include old runner registration literals accepted by the author as obsolete
+configuration on 10 October 2026; their validity has not been tested.
+Code is MIT-licensed; attributed
 Bentheimer derivatives retain CC BY 4.0 and third-party notices are preserved.
 '''
     with zipfile.ZipFile(previous) as old, zipfile.ZipFile(
@@ -169,7 +172,10 @@ Bentheimer derivatives retain CC BY 4.0 and third-party notices are preserved.
                   manuscripts={p.name:dict(bytes=p.stat().st_size, sha256=digest(p))
                                for p in (output/'manuscript.pdf', output/'supplement.pdf')},
                   raw_files=len(manifest['files']), original_archives_preserved=True,
-                  private_address_inserted=True, credentials_in_archives=False,
+                  private_address_inserted=True, credentials_in_archives=True,
+                  credentials_scope='Legacy runner literals in preserved historical archives; account credentials file not packaged.',
+                  account_credentials_file_packaged=False,
+                  historical_runner_literals_author_accepted='2026-10-10',
                   author_originality_confirmed=True, author_exclusive_submission_confirmed=True,
                   checks='Both ZIP CRCs, all committed source bytes, all frozen raw digests, historical archive identity and sample input/output hashes verified.',
                   journal_submission_made=False, external_actions='Local preparation only')
