@@ -6,10 +6,11 @@
 \makeatletter
 \def\ps@pprintTitle{%
   \let\@oddhead\@empty\let\@evenhead\@empty
-  \def\@oddfoot{\footnotesize\itshape Research draft\hfill\today}%
+  \def\@oddfoot{\footnotesize\itshape Computer Physics Communications\hfill\today}%
   \let\@evenfoot\@oddfoot}
 \makeatother
 \emergencystretch=3em
+\newcommand{\AIPlotDisclosure}{\space Plotting scripts were developed with disclosed AI assistance.}
 \newcommand{\vct}[1]{\bm{#1}}
 \input{data/cpc-numbers.tex}
 \input{data/phase-kinetics-numbers.tex}
@@ -54,10 +55,6 @@ color-gradient model \sep pore-scale flow \sep numerical verification
 \end{keyword}
 \end{frontmatter}
 
-\noindent\textbf{Research status.}
-This manuscript is an author-review draft. Numerical statements refer to
-recorded runs or stated mathematical approximations. Public repository access
-and an immutable program-archive citation remain to be verified before submission.
 \input{program-summary.tex}
 
 \section{Physical question and relation to prior work}
@@ -127,9 +124,10 @@ $\tau_0=\tau_1=1$, legacy MRT, projection recoloring and curvature surface
 forcing. These explicit choices exclude the historical cosine normalization
 and unequal-density extensions from the main kinetic result.
 
-With $\varphi=\rho_0/\rho$ and $\rho=\rho_0+\rho_1$, the physical velocity is
+With $\varphi=\rho_0/\rho$ and $\rho=\rho_0+\rho_1$, the force-corrected
+velocity and pressure in lattice units are
 \begin{equation}
- \rho\bm u=\sum_i\bm e_i(f_i^0+f_i^1)+\bm F/2,\qquad p=\rho/3.
+ \rho\bm u_l=\sum_i\bm e_i(f_i^0+f_i^1)+\bm F_l/2,\qquad p_l=\rho/3.
 \end{equation}
 The combined body and surface force uses the established Guo source
 \cite{guo2002}. The curvature force is
@@ -156,12 +154,24 @@ $P(\varphi)$. The component corrections have opposite momentum and preserve
 the total population. The full map, rather than only its leading equation,
 is the object of the spectral calculation.
 
+\paragraph{Research tools.}
+OpenAI Codex and ChatGPT assisted source inspection, numerical
+extensions, analysis code, formal derivations, literature triage and manuscript
+preparation. The reported simulations execute numerical source code on
+recorded inputs; they are not AI-generated measurements.
+AI-assisted derivations are treated as stated approximations and checked
+against the separate numerical controls described below.
+Figures are generated from archived data by reproducible plotting scripts
+developed with AI assistance; no generative image synthesis is used.
+
 \subsection{Geometry, scaling and independently specified slip}
 The physical slit has height $H_p=16$ and periodic length $4H_p=64$ in common
 base units. We write $H$ for its wall-normal lattice-node count; the main
 grids have $H=16,32,48$ and $h=H_p/H$. Diffusive scaling sets the physical
 time step to $h^2$, with $\nu=D=1/6$, $\sigma_l=\sigma h$,
 $F_l=Fh^3$ and $\lambda_l=\lambda/h$.
+The corresponding velocity and pressure conversions are $\bm u=\bm u_l/h$
+and $p=p_l/h^2$; pressure differences remove the arbitrary reference level.
 The independently calibrated crossing width is
 $W_{0.9}=4.765235$, so $W_{0.9}/H_p=0.297827$.
 The LBM $\beta$ and reference logistic coefficient are determined from that
@@ -207,7 +217,7 @@ from a small speed discrepancy.
 
 \section{Accuracy and limits of the independent reference}
 \subsection{Coupled continuous-source verification}
-The independent calculation solves constant-viscosity Stokes flow by a
+The independent calculation solves constant-viscosity Stokes flow using
 Fourier modes and a streamfunction biharmonic inversion on a staggered mesh. Conservative
 face advection and second-order Runge--Kutta advance the phase equation.
 A logistic-distance face flux preserves its independently calibrated planar
@@ -243,7 +253,7 @@ surface tension and two Navier slips. Errors are measured against the
 analytic phase and staggered velocity at physical time 16. The half-step
 control is separate from spatial refinement. Sources prescribe the
 interface motion; this establishes numerical consistency, not unforced
-physical contact-line accuracy.}
+physical contact-line accuracy.\AIPlotDisclosure}
 \label{fig:majormanufactured}\end{figure}
 
 The dynamic untreated reference is additionally refined to H64 and H96.
@@ -284,10 +294,11 @@ evolving phase dynamics.
 \section{Implications for pore-scale simulation and supported scope}
 The controlled mechanism shows how a higher-order interface term can alter
 a low-rate capillary response while preserving measured width, leading
-diffusion and pure-channel slip. Its dimensionless strength, using capillary
-time $\mu H_p/\sigma$, is
+diffusion and pure-channel slip. With dynamic viscosity
+$\mu_v=\rho_{ref}\nu=1/6$ in the present unit-reference-density setting,
+its dimensionless strength, using capillary time $\mu_v H_p/\sigma$, is
 \begin{equation}
- \Xi=\frac{\mu K_{\mathrm{num}}}{\sigma H_p^3}.
+ \Xi=\frac{\mu_v K_{\mathrm{num}}}{\sigma H_p^3}.
 \end{equation}
 The model also depends on $W_{0.9}/H_p$, $\lambda/H_p$ and $h/H_p$;
 $\Xi$ alone is not an error criterion or a universal collapse.
@@ -352,17 +363,22 @@ subsequent digital-rock physical validation must still resolve.
 
 \section*{Declarations}
 \textbf{Software and data availability:} the MIT-licensed implementation,
-reproduction scripts and measurement summaries are prepared in
-\url{https://github.com/zhou1800/lbflow}. Public access and an immutable release
-identifier will be verified before submission.
+reproduction scripts, frozen numerical fields and checksum manifests are
+provided in the accompanying program archive for review and deposition in
+the CPC Program Library. Its library link is to be added by the Technical Editor.
+The developer's repository is \url{https://github.com/zhou1800/lbflow};
+access to the accompanying archive does not depend on repository visibility.
 The Bentheimer image derivatives retain CC BY 4.0; data courtesy of
 Qatar Carbonates and Carbon Storage Research Centre, Imperial College London.\\
 \textbf{Funding:} this research received no specific funding.\\
 \textbf{Competing interests:} the author declares no competing interests.\\
-\textbf{AI assistance:} OpenAI Codex and ChatGPT assisted source inspection,
-implementation, literature triage and drafting. Numerical claims are tied to
-recorded executions or explicit derivations. All final content requires
-author review before submission.
+\section*{Declaration of generative AI and AI-assisted technologies}
+During this work, OpenAI Codex and ChatGPT assisted the research and
+manuscript preparation as detailed in the methods. Their use includes
+implementation, analysis, literature triage, drafting and reproducible
+data visualization. Numerical statements are supported by recorded executions
+or explicitly scoped derivations. The author retains responsibility for
+the accuracy, integrity and interpretation of the work.
 \bibliographystyle{elsarticle-num}
 \bibliography{references}
 \end{document}

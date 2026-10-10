@@ -1,20 +1,18 @@
-Draft cover letter for author review; public program archive and final submission attestations remain pending.
-
 Dear Editor,
 
 Please consider "Predicting numerical capillary resistance from discrete interface kinetics in LBFlow" for the Computer Programs in Physics category of Computer Physics Communications.
 
 The manuscript investigates how a numerical interface changes low-rate capillary transport even after width, leading diffusion and hydraulic slip are matched. The contribution is a quantitative numerical mechanism, with a reproducible C++/MPI program and independent analysis tools, rather than a claim of a new bulk multiphase model.
 
-An exact projection-phase spectrum, including unit-normal variation, predicts decay in 26 full-solver trajectories within 0.00084%, spanning three transverse modes and two widths. A conditional isolated-interface expansion supplies the transverse fourth-order coefficient used in a selective intervention. Adding this term alone to an independent Stokes/finite-volume reference reduces the three-grid neutral-slit speed gaps from 17.12%, 15.18% and 13.72% to 1.023%, 0.452% and 0.275%, with a separately prescribed larger slip checked.
+An exact projection-phase spectrum, including unit-normal variation, predicts decay in 26 full-solver trajectories within 0.00084%, spanning three transverse modes and two widths. A conditional isolated-interface expansion supplies the transverse fourth-order coefficient used in a selective intervention. With LBM as the common denominator, adding this term alone to an independent Stokes/finite-volume reference reduces the three-grid neutral-slit speed differences from 12.06-14.62% to 0.275-1.023%, with a separately prescribed larger slip checked. An additional complete transverse-mode matrix check supports the intervention beyond the three full-solver wave modes.
 
 The new low-force capillary/Stokes response reduction uses no evolving front data to construct its operators. It predicts the full reference mean speeds within 0.0564% across the available slip/grid/strength/surface-tension comparisons. Its left-null-vector relation explains how numerical shape relaxation can introduce surface-tension sensitivity into steady mobility. Conservative wall/bulk interventions test where that response is sensitive, without inferring a molecular wall length.
 
 Continuous-source coupled manufactured tests verify near-second-order phase and velocity convergence. Full recorded force/velocity fields distinguish hydraulic error from phase evolution. The primary scope is neutral equal-viscosity D2Q9 flow; physical moving-contact-line validation, curved-rock wetting and steady rock relative permeability are not claimed. An attributed digital-rock demonstration and the older recovery/performance evidence are retained in the supplement.
 
-The MIT-licensed software, frozen source identities, raw-evidence manifest, relocated reanalysis, operator derivations and MPI/restart controls accompany the study. Prior conservative Allen-Cahn, phase-field/profile-preservation, wetting and slip developments are acknowledged, including the closely related 2024 color-gradient-based phase-field formulation. AI-assisted work is disclosed.
+The MIT-licensed software, frozen source identities, raw-evidence manifest, relocated reanalysis, operator derivations, comprehensive sample inputs/outputs and MPI/restart controls accompany the study as program files for review and CPC Program Library deposition. Prior conservative Allen-Cahn, phase-field/profile-preservation, wetting and slip developments are acknowledged, including the closely related 2024 color-gradient-based phase-field formulation. AI-assisted research, drafting and reproducible plotting are disclosed.
 
-Public software access, an immutable program-archive citation, author review and final submission attestations must be finalized before submission. This draft does not attest exclusive submission or publication rights on behalf of the author.
+The work has not been formally published and is not under consideration by another journal. Yu Zhou is the sole author. No specific funding was received and there are no competing interests. The requested publication route is traditional subscription publication.
 
 Sincerely,
 Yu Zhou

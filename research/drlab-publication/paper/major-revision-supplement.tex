@@ -125,6 +125,27 @@ The largest full-FV volume-shape reduction error is
 This is an explicit limitation of the retained-normal-profile approximation.
 
 \subsection{Reanalysis and exclusions}
+\paragraph{Additional mode-range sensitivity.}
+The resistance response involves modes above the three full-solver wave
+controls. In a separate held-profile matrix diagnostic, retaining the
+fourth-order intervention only for $m\leq3$ changes the H48/slip1 mean speed
+by $-10.4587$\% relative to the all-mode intervention.
+We therefore compare all reflected modes $m=1,\ldots,H-1$ with the exact
+rest-map translation eigenvalues. The corresponding semidiscrete rates
+$(1-\mu_m)/h^2$ are distinct from the discrete-time log rates used for the
+full wave trajectories. Replacing the fourth-order diagonal rates by these
+exact semidiscrete rates, while retaining the same capillary/Stokes response,
+changes the predicted mean speed by 0.11663\%, 0.03988\% and 0.01663\%
+at H16/H32/H48 and slip1, and by 0.00545\% at H48/slip4.
+The selected translation overlaps exceed 0.9979 in all these modes.
+Over the even modes excited by the drive, the formal reflected fourth-order
+rates differ from the exact semidiscrete eigenrates by at most 2.020\%,
+0.877\% and 0.435\%, respectively.
+The archived \texttt{modal\_response\_check.py} records complete spectra,
+mode truncations and an instantaneous-projection alternative.
+These are additional reduced-matrix checks, not new full LBM/FV trajectories
+or a uniform modified equation for moving interfaces.
+
 \texttt{data/major-revision.json} is regenerated from frozen snapshots,
 receipts and source identities. The collector verifies native inputs,
 geometry, executables, seed profiles and outgoing donors; it recomputes

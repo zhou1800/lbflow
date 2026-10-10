@@ -1,7 +1,6 @@
 \section*{Program summary}
 \noindent\textbf{Program title:} LBFlow.\\
-\textbf{CPC Library link to program files:} to be assigned on actual program
-archive deposition; no archive DOI is claimed in this research draft.\\
+\textbf{CPC Library link to program files:} to be added by the Technical Editor.\\
 \textbf{Developer's repository link:} \url{https://github.com/zhou1800/lbflow}.\\
 \textbf{Licensing provisions:} MIT for code; CC BY 4.0 for the attributed
 Bentheimer image derivatives. The preserved cJSON source retains its notices.\\
@@ -10,8 +9,13 @@ Bentheimer image derivatives. The preserved cJSON source retains its notices.\\
 NumPy for verification, SciPy for image/reference analysis, Matplotlib for figures.\\
 \textbf{Tested operating system:} Linux, x86-64, double precision.\\
 \textbf{Nature of problem:} Pore-scale single-phase and immiscible two-phase
-flow on segmented voxel images, with independently checked force, viscosity,
-capillary and phase-flux conventions.\\
+flow on segmented voxel images. A numerical diffuse interface can change
+capillary transport even when measured width, leading phase diffusion and
+hydraulic slip are matched. In microscopic pores, resolving and diagnosing
+that contribution is necessary for interpreting computed resistance.
+The program supplies controlled tests of force, viscosity, phase transport
+and interface kinetics, with a quantitative neutral-slit resistance study
+and separately scoped digital-rock demonstrations.\\
 \textbf{Solution method:} D2Q9/D3Q19 lattice Boltzmann streaming, SRT or
 raw-moment MRT, Guo forcing, color-gradient perturbation and recoloring,
 geometrical wetting, halfway solid-link bounce-back and MPI domain exchange.\\

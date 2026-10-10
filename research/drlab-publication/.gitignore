@@ -11,3 +11,4 @@ paper/*.out
 paper/bibliography-metadata.json
 __pycache__/
 *.pyc
+submission/
