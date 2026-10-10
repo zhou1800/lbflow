@@ -373,8 +373,10 @@ python3 scripts/make_wall_figure.py --data research/drlab-publication/paper/data
 `scripts/replay_recorded_case.py` relocates an archived `input.prm`, raw
 geometry and outgoing seed into a fresh directory, with optional bitwise
 field comparison. Select the corresponding source kernel using the manifests
-and zero-context patches under `run-kernels/`; historical results do not
-silently acquire the current executable's hash. Numerical audit output
+and zero-context patches under `run-kernels/`. The
+[source checkout table](run-kernels/source-checkouts.json) locates the recorded
+operators. Source and executable checksums identify the frozen archived bytes;
+rebuilt executables require their own verification. Numerical audit output
 identifies root-local dimensions and origin when inspecting a parallel state.
 
 The four original figures can be regenerated directly from the included measurements,

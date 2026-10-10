@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "scope": "Numerical kernel checkouts. Original source and executable digests identify frozen archived bytes; checkout revisions locate the corresponding operators.",
+  "revisions": [
+    {
+      "recorded_revision": "0a9a7022fdfda1d8c6cdb54115206257384dcd59",
+      "checkout_revision": "5ee714d981f9a8bebe6e4700d2453ef3a6bdbedb"
+    },
+    {
+      "recorded_revision": "394b26d93ac9a147ba2e202e685f2c98c6c26df3",
+      "checkout_revision": "ffac6b6d29651d5247fe8edc651d6338bb47dfee"
+    },
+    {
+      "recorded_revision": "a383c8e439c55621b3b248885b56611d48292447",
+      "checkout_revision": "0e966bfb34b2d383fe6003c68c675dbe0f340d0a"
+    },
+    {
+      "recorded_revision": "dc1c52306006d9dc40683bd136e9b909e9910f8e",
+      "checkout_revision": "e778ca89698191b04c37a31103402f8c31954be2"
+    }
+  ]
+}
