@@ -16,7 +16,32 @@ import zipfile
 from package_publication import digest, stream_digest
 
 
+def insert_private_contact(paper, contact):
+    """Add contact to private copies, leaving public templates intact."""
+    main = paper / 'main.tex'
+    public_address = r'\address{Independent Researcher, Canada}'
+    full_address = ', '.join([contact['affiliation'], contact['street'], contact['city'],
+                              contact['state'], contact['postal_code'], contact['country']])
+    email = contact['email']
+    text = main.read_text()
+    if (text.count(public_address) != 1 or '@' not in email or
+            any(c in full_address + email for c in '\\{}%$&#_\r\n')):
+        raise ValueError('Unexpected contact template or unescaped TeX contact')
+    main.write_text(text.replace(public_address, r'\address{' + full_address + '}\n' +
+                                r'\ead{' + email + '}'))
+    supplement = paper / 'supplement.tex'
+    author = r'\author{Yu Zhou\\Independent Researcher, Canada}'
+    text = supplement.read_text()
+    if text.count(author) != 1:
+        raise ValueError('Unexpected supplement author template')
+    supplement.write_text(text.replace(author, author[:-1] +
+                                      r'\\\texttt{' + email + '}}'))
+
+
 def prepare(repo, previous, contact_path, samples, output, engine):
+    repo, contact_path, output = repo.resolve(), contact_path.resolve(), output.resolve()
+    if output.is_relative_to(repo) or contact_path.is_relative_to(repo):
+        raise ValueError('Private contact and submission output must be outside the checkout')
     if subprocess.check_output(['git', 'status', '--porcelain'], cwd=repo, text=True).strip():
         raise RuntimeError('Commit candidate source before preparing submission files')
     commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=repo, text=True).strip()
@@ -42,7 +67,7 @@ def prepare(repo, previous, contact_path, samples, output, engine):
                 raise AssertionError('Sample input changed: ' + name)
         if case['exit'] != 0 or not all(x['finite'] for x in case['history']):
             raise AssertionError('Incomplete sample verification')
-    output.mkdir(parents=True, exist_ok=False)
+    output.mkdir(parents=True, exist_ok=False, mode=0o700)
     paper = output / 'manuscript-source'
     paper.mkdir()
     original = root / 'paper'
@@ -53,21 +78,15 @@ def prepare(repo, previous, contact_path, samples, output, engine):
             target = paper / rel
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, target)
-    # The home address never modifies committed source or enters the program ZIP.
-    main = paper / 'main.tex'
-    public_address = r'\address{Independent Researcher, Canada}'
-    full_address = ', '.join([contact['affiliation'], contact['street'], contact['city'],
-                              contact['state'], contact['postal_code'], contact['country']])
-    text = main.read_text()
-    if text.count(public_address) != 1 or any(c in full_address for c in '\\{}%$&#_'):
-        raise ValueError('Unexpected address template or unescaped TeX address')
-    main.write_text(text.replace(public_address, r'\address{' + full_address + '}'))
+    insert_private_contact(paper, contact)
     for name in ('main.tex', 'supplement.tex'):
         subprocess.run([str(engine), '--keep-logs', name], cwd=paper, check=True)
     for src, dst in [('main.pdf', 'manuscript.pdf'), ('supplement.pdf', 'supplement.pdf')]:
         shutil.copy2(paper / src, output / dst)
     for name in ('cover-letter.txt', 'highlights.txt'):
         shutil.copy2(original / name, output / name)
+    cover = output / 'cover-letter.txt'
+    cover.write_text(cover.read_text().rstrip() + '\n' + contact['email'] + '\n')
     source_zip = output / 'manuscript-source.zip'
     with zipfile.ZipFile(source_zip, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=6) as z:
         for p in paper.rglob('*'):
@@ -96,8 +115,10 @@ Additional complete-mode response checks and their portable driver are in
 research/drlab-publication/reviews/second-review-20261009/.
 
 The manuscript submitted for review is supplied separately. Committed source
-contains the public city/province affiliation; the full home contact address
-is used only in the separate private manuscript package and submission form.
+contains country-only affiliation; personal correspondence details are used
+only in the separate private manuscript package and submission form.
+Historical archives preserve original bytes and may contain former contact
+metadata. This submission package is private and is not a public release.
 No account credentials are included. Code is MIT-licensed; attributed
 Bentheimer derivatives retain CC BY 4.0 and third-party notices are preserved.
 '''

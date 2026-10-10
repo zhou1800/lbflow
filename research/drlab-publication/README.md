@@ -5,10 +5,6 @@ for the LBFlow solver. The maintained implementation and experiment
 scripts are `../../solver/` and `../../scripts/`; see the repository-root README
 for build instructions. The study contract is [SPEC.md](SPEC.md).
 
-The sole author is Yu Zhou, Independent Researcher, Canada, [private contact omitted].
-Code is licensed under MIT. The author confirms no specific funding and no
-competing interests. The article has not been submitted or accepted; author
-review, public repository access and an immutable release citation remain.
 
 ## Physical Research Extension
 
@@ -276,7 +272,6 @@ python3 scripts/make_front_mobility_figure.py --data results/mobility/front-mobi
 
 The collector recomputes diagnostics and reciprocal work from raw fields
 and audit logs, with inputs, geometry, executables and checkpoints checked.
-The original DRLab archive and historical C prototype remain unchanged.
 
 The subsequent `paper/data/phase-kinetics.json` records 67 LBM executions,
 ten independent Stokes/finite-volume runs and five shared-phase ablations.

@@ -9,3 +9,12 @@ __pycache__/
 *.vti
 *.rst
 *.rst.meta
+
+# Private contact, account files and locally generated archives.
+.env
+.env.*
+credentials.json
+author-contact.json
+submission/
+*.zip
+*.bundle

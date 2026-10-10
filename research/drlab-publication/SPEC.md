@@ -1,8 +1,14 @@
 # Publication Study Contract
 
-This study develops a defensible manuscript from the author's DRLab solver and geometric wetting implementation.
-The historical working copies remain unchanged.
-The imported solver, numerical experiments, equations, source comparisons and manuscript are separate reviewable artifacts.
+## Publication Privacy
+
+Manuscript affiliation contains only the independent affiliation and country.
+Correspondence email is added only to private manuscript copies. Residential
+postal contact and account credentials belong only in private journal
+administration, never in manuscripts or source packages. Public documentation
+describes models, usage and reproducible evidence. Administrative records and
+personal development narratives stay outside Git. Preserve source checksums,
+third-party attribution and the numerical scope supported by experiments.
 
 ## Source And Scope
 
@@ -45,7 +51,6 @@ Record negative results as well as improvements.
 ## Build And Validation Contract
 
 The repository-root CMake project builds the maintained C++11/MPI solver as `build/bin/LBFlow`.
-The incomplete C rewrite and its old tooling remain under `legacy/c-prototype/`.
 There is one maintained copy of the solver and of the experiment scripts.
 The supported build works out of tree without changing source files or downloading dependencies during configuration.
 The installation contains a working simulator with a documented generated small-volume example.

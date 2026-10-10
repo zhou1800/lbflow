@@ -25,5 +25,4 @@ velocity is `u(y) = F (y - 0.5) (8.5 - y) / (2 nu)` at fluid node centers.
 The small drop demonstrates input and output; quantitative capillary
 verification uses the larger cases in `scripts/benchmarks.py`.
 
-The old C prototype's JSON format is archived with that prototype. The
-maintained solver reads the line-oriented `.prm` format shown in these examples.
+The solver reads the line-oriented `.prm` format shown in these examples.

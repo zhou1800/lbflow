@@ -5,7 +5,6 @@ title: "LBFlow: an MPI lattice Boltzmann simulator for pore-scale flow"
 authors:
   - family-names: Zhou
     given-names: Yu
-    affiliation: Independent Researcher
-    email: [private contact omitted]
+    affiliation: "Independent Researcher, Canada"
 repository-code: "https://github.com/zhou1800/lbflow"
 license: MIT

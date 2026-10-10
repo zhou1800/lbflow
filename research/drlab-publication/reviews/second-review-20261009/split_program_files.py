@@ -1,7 +1,12 @@
 """Split the verified program into independently extractable bounded ZIPs."""
 from pathlib import Path
 import hashlib,json,shutil,zipfile
-base=Path('/home/user/zhou1800/lbflow/research/drlab-publication/submission/cpc-20261009')
+import argparse
+parser=argparse.ArgumentParser(description=__doc__)
+parser.add_argument('submission_directory',type=Path)
+base=parser.parse_args().submission_directory.resolve()
+repo=Path(__file__).resolve().parents[4]
+if base.is_relative_to(repo):raise ValueError('Private submission files must be outside the checkout')
 out=base/'program-parts';out.mkdir(exist_ok=False)
 limit=80*1024*1024;history='historical/pre-major-revision-reproducibility.zip'
 manifest={'input_program_sha256':hashlib.sha256((base/'LBFlow-program-and-data.zip').read_bytes()).hexdigest(),'history_sha256':'33f2b23888193c31bfacebcc4b965d14018fe4c0a380214a324aa213b52260c8','parts':[],'history_chunks':[]}

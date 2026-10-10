@@ -5,9 +5,7 @@ flow and immiscible two-phase color-gradient flow on D2Q9 and D3Q19 lattices,
 with SRT/MRT collision, voxel solids, geometric contact angles, VTI output and
 population checkpoints.
 
-The original C rewrite was an unfinished framework. It is preserved in
-[`legacy/c-prototype/`](legacy/c-prototype/) with its tools and examples.
-The runnable solver is now built from the repository root.
+Build the solver from the repository root.
 
 ## Build
 
@@ -85,10 +83,8 @@ The [Bentheimer example](examples/bentheimer48/README.md) includes small,
 checksum-pinned crops of a DOI-cited public sandstone image, with its separate
 CC BY 4.0 data license and full preparation manifest. Workflows measure
 single-phase permeability, phase-fraction-weighted advective Darcy flux,
-component mass, late field changes and MPI/restart agreement. The manuscript
-is being prepared for Computer Physics Communications around numerical
-interface kinetics and capillary resistance, with the rock flow retained
-as a supporting demonstration.
+component mass, late field changes and MPI/restart agreement. The study examines numerical interface kinetics and capillary resistance,
+with rock flow as a supporting demonstration.
 
 ```sh
 python3 scripts/porous_media.py bundle --solver build/bin/LBFlow --root results/pore-bundles
@@ -116,8 +112,7 @@ and run receipts, and reject overwritten cases. Long droplet equilibrations
 need the continuation procedures documented in the
 [study README](research/drlab-publication/README.md) and supplement.
 Recorded measurements and figure generation are available with the
-[paper sources](research/drlab-publication/paper/). The manuscript is a research
-draft and has not been submitted or accepted.
+[paper sources](research/drlab-publication/paper/).
 
 ## Input And Restart Conventions
 
@@ -219,7 +214,7 @@ pin one logical CPU per MPI rank, discard warm-ups and repeat fixed workloads.
 
 ## Author And License
 
-Yu Zhou, Independent Researcher. Correspondence: [private contact omitted].
+Yu Zhou, Independent Researcher, Canada.
 LBFlow code is licensed under the [MIT License](LICENSE). The Bentheimer data
 retain CC BY 4.0, and the archived cJSON source retains its upstream copyright
 and license notices. Use [CITATION.cff](CITATION.cff)

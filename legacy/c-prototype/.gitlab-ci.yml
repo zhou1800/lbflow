@@ -1,6 +1,0 @@
-test:lbflow:
-  stage: test
-  tags:
-    - lbflow
-  script:
-    - run/devtool test

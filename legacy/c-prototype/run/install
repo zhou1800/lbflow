@@ -1,5 +1,0 @@
-#!/bin/bash
-
-PROJ_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && cd .. && pwd)
-
-PROJ_DIR=$PROJ_DIR $PROJ_DIR/run/git-hooks/install-git-commit-hook

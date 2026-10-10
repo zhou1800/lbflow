@@ -1,6 +1,0 @@
-#!/bin/bash
-
-if [ -d ".git" ]; then
-    cp $PROJ_DIR/run/git-hooks/pre-commit $PROJ_DIR/.git/hooks/
-    chmod +x $PROJ_DIR/.git/hooks/pre-commit
-fi
