@@ -1,0 +1,58 @@
+{
+  "source_commit": "6edff07801b700143bb544f2c1c381e326259108",
+  "packages": [
+    {
+      "file": "paper/cpc-author-review.zip",
+      "bytes": 6567307,
+      "sha256": "970862a2d019e1dc1259f5fe6eda5e799224c364536f40e580a853b38598c490"
+    },
+    {
+      "file": "lbflow-cpc-reproducibility.zip",
+      "bytes": 768900347,
+      "sha256": "9582aa8af00cfcd32e29ca7ba161394dda2e1532797769d2eb76f6abdf795e3c"
+    }
+  ],
+  "raw_files": 3199,
+  "raw_bytes": 323723366,
+  "previous_archive_bytes": 508965804,
+  "previous_archive_sha256": "33f2b23888193c31bfacebcc4b965d14018fe4c0a380214a324aa213b52260c8",
+  "checks": "Every ZIP CRC, every committed source byte, every archived raw digest, both manuscript hashes and unchanged full previous archive verified.",
+  "source_scope": "This commit is the scientific source snapshot; a later receipt-only commit may record the completed archive verification.",
+  "zip_entry_counts": {
+    "paper/cpc-author-review.zip": 110,
+    "lbflow-cpc-reproducibility.zip": 3569
+  },
+  "manuscripts": {
+    "main.pdf": {
+      "pages": 15,
+      "bytes": 232860,
+      "sha256": "5af4e886397faef8680f90df9092063b4b283b8f03714cd8e10673db1f53d070",
+      "undefined_references": 0
+    },
+    "supplement.pdf": {
+      "pages": 45,
+      "bytes": 609325,
+      "sha256": "bb1d64491369f37d69135073aa7d61bcc16fd5144510f25d7832030f8e4880b4",
+      "undefined_references": 0
+    }
+  },
+  "figures": {
+    "main": 5,
+    "supplement": 15,
+    "available_pairs": 22,
+    "new_pngs_bitwise_regenerated": {
+      "major-sigma.png": "1aff6543bd5fbf88b148ecc935ae22668544b04cf53d3624beb49687eb94a126",
+      "major-intervention.png": "6f5daf430f64c402d59d839dfe40fc67d494dc1578e5a14272f0be42511f7cca",
+      "major-manufactured.png": "96f71229881ad64cc2b15da8c8bec33ab6a68e16c11adb76ae81889adb360fe1",
+      "major-localization.png": "5505e5a7b24d9b742d40d8733dad94cab6b315db582d2bdf5ddc4054f0fbbfef",
+      "major-spectrum.png": "4a5e0742815f38621c0c00ee4ec51e12a9f45d6875d2d21b8fb3b4070067455f"
+    }
+  },
+  "canonical_data_sha256": "12a7d88fe789203bd48f67964fa0a8ebd1dab66496c9dc6c920474333aba46ce",
+  "raw_manifest_sha256": "147f61b44cc3e33be53bb051d86ebdeb11482f1691c8323726e61fa5be481f31",
+  "relocated_canonical_reanalysis_verified": true,
+  "baseline_tag": "cpc-pre-major-revision-20261009",
+  "baseline_commit": "1ed179a9092819dff8a3b17e934dbdac7e99fe91",
+  "author_facts_confirmed": true,
+  "artifact_scope": "Local review/import/reproduction archives, pinned to the scientific source commit above. This receipt is recorded afterward without changing that scientific source."
+}
