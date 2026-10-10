@@ -9,6 +9,8 @@ administration, never in manuscripts or source packages. Public documentation
 describes models, usage and reproducible evidence. Administrative records and
 personal development narratives stay outside Git. Preserve source checksums,
 third-party attribution and the numerical scope supported by experiments.
+Raw manifests identify numerical inputs, outputs and reproducibility sources;
+administrative session records are excluded.
 
 ## Source And Scope
 

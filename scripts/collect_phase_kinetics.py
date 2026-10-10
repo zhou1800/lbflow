@@ -219,6 +219,7 @@ def collect(root):
     # CAMPAIGNS/REFERENCES above contribute to publication measurements.
     manifest=[dict(path=str(p.relative_to(root)),bytes=p.stat().st_size,sha256=sha(p))
         for p in sorted(root.rglob('*')) if p.is_file() and '__pycache__' not in p.parts
+        and not p.name.endswith('-review-state.json')
         and p.name not in ('phase-kinetics.json','reanalyzed-phase-kinetics.json','raw-manifest.json')
         and not p.name.endswith('.tex.build.log') and p.suffix!='.zip']
     data=dict(protocol='Fixed physical width and D; exact zero-flow phase spectrum, neutral periodic displacement with prescribed Navier slip, independent Stokes/FV reference and shared-phase kinetic ablation.',
