@@ -4,8 +4,6 @@ This directory contains the research draft, measured results and derivations
 for the LBFlow solver. The maintained implementation and experiment
 scripts are `../../solver/` and `../../scripts/`; see the repository-root README
 for build instructions. The study contract is [SPEC.md](SPEC.md).
-
-
 ## Physical Research Extension
 
 The study addresses predictive discrete interface kinetics and capillary resistance,
@@ -393,4 +391,5 @@ tectonic main.tex
 tectonic supplement.tex
 ```
 
-The figure PDFs are included for LaTeX compilation. The local LaTeX sources, bibliography, figure PDFs and data form the reproducible manuscript source.
+The figure PDFs are included for LaTeX compilation. The local LaTeX sources,
+bibliography, figure PDFs and data form the reproducible manuscript source.

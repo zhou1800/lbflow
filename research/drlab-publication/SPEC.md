@@ -12,7 +12,7 @@ third-party attribution and the numerical scope supported by experiments.
 
 ## Source And Scope
 
-- Baseline: recovered the reference solver, HEAD `1bef9bbe7047ca74280f5870f4787be4df12fe20`; file hashes are in `source-manifest.json`.
+- Reference source revision: `1bef9bbe7047ca74280f5870f4787be4df12fe20`; file hashes are in `source-manifest.json`.
 - Source of truth for initial results: the preserved `drlab-assessment` artifacts from 2026-10-07.
 - Maintained implementation: repository-root `solver/`; numerical changes are documented individually.
 - Published measurement summaries and figures: `paper/data/` and `paper/figures/`. Raw outputs are generated in user-selected result directories and kept outside version control.

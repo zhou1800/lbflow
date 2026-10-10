@@ -1,6 +1,7 @@
 # LBFlow
 
-LBFlow is an MPI lattice Boltzmann simulator for pore-scale flow. The maintained C++11 implementation supports single-phase
+LBFlow is an MPI lattice Boltzmann simulator for pore-scale flow.
+The C++11 implementation supports single-phase
 flow and immiscible two-phase color-gradient flow on D2Q9 and D3Q19 lattices,
 with SRT/MRT collision, voxel solids, geometric contact angles, VTI output and
 population checkpoints.
@@ -83,7 +84,8 @@ The [Bentheimer example](examples/bentheimer48/README.md) includes small,
 checksum-pinned crops of a DOI-cited public sandstone image, with its separate
 CC BY 4.0 data license and full preparation manifest. Workflows measure
 single-phase permeability, phase-fraction-weighted advective Darcy flux,
-component mass, late field changes and MPI/restart agreement. The study examines numerical interface kinetics and capillary resistance,
+component mass, late field changes and MPI/restart agreement.
+The study examines numerical interface kinetics and capillary resistance,
 with rock flow as a supporting demonstration.
 
 ```sh

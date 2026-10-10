@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Prepare local CPC files from committed source and verified frozen evidence.
 
-Private author contact is inserted only in the manuscript-source package.
+Correspondence email is inserted only in the private manuscript-source package.
+Postal contact is reserved for journal administration and is never packaged.
 This command does not register accounts, upload files, submit or pay.
 """
 import argparse
@@ -17,17 +18,16 @@ from package_publication import digest, stream_digest
 
 
 def insert_private_contact(paper, contact):
-    """Add contact to private copies, leaving public templates intact."""
+    """Add country-level affiliation and email; omit residential contact."""
     main = paper / 'main.tex'
     public_address = r'\address{Independent Researcher, Canada}'
-    full_address = ', '.join([contact['affiliation'], contact['street'], contact['city'],
-                              contact['state'], contact['postal_code'], contact['country']])
+    affiliation = ', '.join([contact['affiliation'], contact['country']])
     email = contact['email']
     text = main.read_text()
     if (text.count(public_address) != 1 or '@' not in email or
-            any(c in full_address + email for c in '\\{}%$&#_\r\n')):
+            any(c in affiliation + email for c in '\\{}%$&#_\r\n')):
         raise ValueError('Unexpected contact template or unescaped TeX contact')
-    main.write_text(text.replace(public_address, r'\address{' + full_address + '}\n' +
+    main.write_text(text.replace(public_address, r'\address{' + affiliation + '}\n' +
                                 r'\ead{' + email + '}'))
     supplement = paper / 'supplement.tex'
     author = r'\author{Yu Zhou\\Independent Researcher, Canada}'
@@ -115,8 +115,9 @@ Additional complete-mode response checks and their portable driver are in
 research/drlab-publication/reviews/second-review-20261009/.
 
 The manuscript submitted for review is supplied separately. Committed source
-contains country-only affiliation; personal correspondence details are used
-only in the separate private manuscript package and submission form.
+contains country-only affiliation. The separate private manuscript package
+includes correspondence email; postal contact belongs only in the private
+journal administration form.
 Historical archives preserve original bytes and may contain former contact
 metadata. This submission package is private and is not a public release.
 The account credentials file is not packaged. Preserved historical archives
@@ -172,7 +173,9 @@ Bentheimer derivatives retain CC BY 4.0 and third-party notices are preserved.
                   manuscripts={p.name:dict(bytes=p.stat().st_size, sha256=digest(p))
                                for p in (output/'manuscript.pdf', output/'supplement.pdf')},
                   raw_files=len(manifest['files']), original_archives_preserved=True,
-                  private_address_inserted=True, credentials_in_archives=True,
+                  private_address_inserted=False,
+                  manuscript_contact_scope='Independent affiliation, country and correspondence email only; no residential postal contact.',
+                  credentials_in_archives=True,
                   credentials_scope='Legacy runner literals in preserved historical archives; account credentials file not packaged.',
                   account_credentials_file_packaged=False,
                   historical_runner_literals_author_accepted='2026-10-10',
